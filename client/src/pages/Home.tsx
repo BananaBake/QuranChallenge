@@ -1,10 +1,8 @@
 import { Link } from "wouter";
-import { GameCard } from "@/components/ui/game-card";
 import { ArabesqueBorder } from "@/components/ui/arabesque-border";
-import { RecentGamesTable } from "@/components/ui/recent-games-table";
 import { StatsCard } from "@/components/ui/stats-card";
 import { useRecentGames, useGameStats } from "@/hooks/useGameStats";
-import { Play, BookOpen } from "lucide-react";
+import { BookOpen, Search, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Home() {
@@ -49,64 +47,39 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <StatsCard title="Total Games" value={stats.totalGames} />
             <StatsCard title="Best Streak" value={stats.bestStreak} />
-            <StatsCard title="Avg. Score" value={`${stats.averageScore}%`} />
-            <StatsCard title="Ayat Learned" value={stats.ayatLearned} />
-          </div>
-          
-          {/* Performance by Game Mode */}
-          <h4 className="text-lg font-semibold text-primary mb-3">Performance by Mode</h4>
-          
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <div className="mb-4">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Identify the Surah</span>
-                <span className="text-sm font-medium text-primary">{stats.modePerformance.identifySurah}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-primary h-2.5 rounded-full" 
-                  style={{ width: `${stats.modePerformance.identifySurah}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Surah Ordering</span>
-                <span className="text-sm font-medium text-primary">{stats.modePerformance.surahOrdering}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-primary h-2.5 rounded-full" 
-                  style={{ width: `${stats.modePerformance.surahOrdering}%` }}
-                ></div>
-              </div>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Game Modes */}
+      {/* Game Instructions */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
         <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
-          <span className="mr-2 text-secondary text-2xl">•</span> Game Modes
+          <span className="mr-2 text-secondary text-2xl">•</span> How to Play
         </h3>
         
-        <div className="space-y-4">
-          <GameCard 
-            title="Identify the Surah"
-            description="Identify which Surah contains a given Ayah - Endless Mode"
-            path="/identify-surah"
-            stats={identifySurahStats}
-          />
-          
-          <GameCard 
-            title="Surah Ordering"
-            description="Arrange Surahs in their correct sequential order - Endless Mode"
-            path="/surah-ordering"
-            stats={surahOrderingStats}
-          />
+        <div className="p-3 bg-gray-50 rounded-lg mb-3">
+          <p className="text-gray-700 mb-2">Select a game mode from the bottom navigation:</p>
+          <div className="flex items-center mb-2">
+            <div className="bg-primary/10 p-2 rounded-md mr-3">
+              <Search className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold">Identify</p>
+              <p className="text-sm text-gray-600">Identify which Surah contains a given Ayah</p>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <div className="bg-primary/10 p-2 rounded-md mr-3">
+              <ArrowUpDown className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold">Ordering</p>
+              <p className="text-sm text-gray-600">Arrange Surahs in their correct sequential order</p>
+            </div>
+          </div>
         </div>
+        
+        <p className="text-sm text-gray-600 px-2">Both games are in endless mode - continue playing until you make a mistake. Try to achieve the highest possible streak!</p>
       </div>
       
       {/* Recent Activity */}

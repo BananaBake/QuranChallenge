@@ -3,6 +3,7 @@ import { useRandomSurahsForGame } from "@/hooks/useQuranData";
 import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
 import { DraggableSurah } from "@/components/ui/draggable-surah";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Surah } from "@shared/schema";
@@ -86,29 +87,27 @@ export default function SurahOrdering() {
     if (isOrderCorrect) {
       setScore(prev => prev + 1);
     } else {
-      // Incorrect answer - game over in endless mode
-      setTimeout(() => {
-        setGameEnded(true);
-        
-        // Save game result
-        saveGameResult({
-          userId: 1, // Default user ID
-          gameType: "surah_ordering",
-          score,
-          maxScore: score, // In endless mode, max score is the score achieved
-          timeSpent
+      // Incorrect answer - game over immediately in endless mode
+      setGameEnded(true);
+      
+      // Save game result
+      saveGameResult({
+        userId: 1, // Default user ID
+        gameType: "surah_ordering",
+        score,
+        maxScore: score, // In endless mode, max score is the score achieved
+        timeSpent
+      });
+      
+      // Check if this is a new high score
+      if (score > previousHighScore) {
+        setIsNewHighScore(true);
+        toast({
+          title: "New High Score!",
+          description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
+          variant: "default",
         });
-        
-        // Check if this is a new high score
-        if (score > previousHighScore) {
-          setIsNewHighScore(true);
-          toast({
-            title: "New High Score!",
-            description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
-            variant: "default",
-          });
-        }
-      }, 1500);
+      }
     }
   };
   
@@ -161,7 +160,7 @@ export default function SurahOrdering() {
   };
   
   if (isLoading) {
-    return <div className="text-center p-8">Loading questions...</div>;
+    return <LoadingSpinner message="Loading surahs..." />;
   }
   
   if (gameEnded) {
@@ -257,6 +256,13 @@ export default function SurahOrdering() {
               onClick={handleCheckOrder}
             >
               <Check className="w-5 h-5 mr-2" /> Check Order
+            </Button>
+          ) : checked && !isCorrect ? (
+            <Button
+              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
+              onClick={() => setGameEnded(true)}
+            >
+              End Game
             </Button>
           ) : (
             isCorrect && !gameEnded && (

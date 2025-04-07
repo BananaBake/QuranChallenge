@@ -4,6 +4,7 @@ import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
@@ -147,29 +148,27 @@ export default function IdentifySurah() {
       // Correct answer
       setScore(prev => prev + 1);
     } else {
-      // Incorrect answer - game over
-      setTimeout(() => {
-        setGameEnded(true);
-        
-        // Save game result
-        saveGameResult({
-          userId: 1, // Default user ID
-          gameType: "identify_surah",
-          score,
-          maxScore: score, // In endless mode, max score is the score achieved
-          timeSpent
+      // Incorrect answer - game over immediately
+      setGameEnded(true);
+      
+      // Save game result
+      saveGameResult({
+        userId: 1, // Default user ID
+        gameType: "identify_surah",
+        score,
+        maxScore: score, // In endless mode, max score is the score achieved
+        timeSpent
+      });
+      
+      // Check if this is a new high score
+      if (score > previousHighScore) {
+        setIsNewHighScore(true);
+        toast({
+          title: "New High Score!",
+          description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
+          variant: "default",
         });
-        
-        // Check if this is a new high score
-        if (score > previousHighScore) {
-          setIsNewHighScore(true);
-          toast({
-            title: "New High Score!",
-            description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
-            variant: "default",
-          });
-        }
-      }, 1500);
+      }
     }
   };
   
@@ -202,14 +201,7 @@ export default function IdentifySurah() {
   };
   
   if (isLoading || isLoadingSurahs) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-center p-8">
-          <div className="mb-4">Loading...</div>
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading questions..." />;
   }
   
   if (gameEnded) {
@@ -300,6 +292,13 @@ export default function IdentifySurah() {
               disabled={selectedOption === null}
             >
               <Check className="w-5 h-5 mr-2" /> Confirm
+            </Button>
+          ) : selectedOption !== null && currentAyah && options[selectedOption].number !== currentAyah.surah.number ? (
+            <Button
+              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
+              onClick={() => setGameEnded(true)}
+            >
+              End Game
             </Button>
           ) : (
             <Button
