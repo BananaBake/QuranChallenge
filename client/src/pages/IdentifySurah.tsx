@@ -166,20 +166,22 @@ export default function IdentifySurah() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Update achievements based on the new score right now, not after
-      if (newScore === 5 || newScore === 10 || newScore === 7) {
-        // We're checking for specific score values that match our achievement thresholds
-        // Check for achievement progress immediately
-        const newAchievements = checkAchievementsProgress();
-        
-        // Show notifications for newly unlocked achievements immediately
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
+      // Update achievements based on the new score immediately
+      // Check for achievement progress immediately based on new score
+      const newAchievements = checkAchievementsProgress();
+      
+      // Show notifications for newly unlocked achievements immediately
+      if (newAchievements.length > 0) {
+        // Small delay to ensure user sees the achievement after understanding they got the answer right
+        setTimeout(() => {
+          newAchievements.forEach(achievement => {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `${achievement.title}: ${achievement.description}`,
+              variant: "default",
+            });
           });
-        });
+        }, 500);
       }
     } else {
       // Incorrect answer - but let the player see the correct answer before ending

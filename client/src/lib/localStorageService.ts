@@ -199,6 +199,10 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
   const achievements = getAchievements();
   const stats = getGameStats();
   const updatedAchievements = [...achievements];
+  
+  // Array to track newly unlocked achievements in this function call
+  const newlyUnlocked: Achievement[] = [];
+  
   let hasChanges = false;
   
   // First game achievement
@@ -207,6 +211,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
     firstGameAchievement.unlocked = true;
     firstGameAchievement.unlockedAt = new Date().toISOString();
     hasChanges = true;
+    newlyUnlocked.push({...firstGameAchievement});
   }
   
   // Games played achievement
@@ -217,6 +222,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
       gamesPlayedAchievement.unlocked = true;
       gamesPlayedAchievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...gamesPlayedAchievement});
     }
   }
   
@@ -228,6 +234,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
       streak5Achievement.unlocked = true;
       streak5Achievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...streak5Achievement});
     }
   }
   
@@ -238,6 +245,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
       streak10Achievement.unlocked = true;
       streak10Achievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...streak10Achievement});
     }
   }
   
@@ -250,6 +258,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
         identifyAchievement.unlocked = true;
         identifyAchievement.unlockedAt = new Date().toISOString();
         hasChanges = true;
+        newlyUnlocked.push({...identifyAchievement});
       }
     }
   } else if (newGame.gameType === 'surah_ordering') {
@@ -260,6 +269,7 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
         orderingAchievement.unlocked = true;
         orderingAchievement.unlockedAt = new Date().toISOString();
         hasChanges = true;
+        newlyUnlocked.push({...orderingAchievement});
       }
     }
   }
@@ -268,7 +278,8 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
     saveAchievements(updatedAchievements);
   }
   
-  return updatedAchievements;
+  // Return only the achievements unlocked during this specific function call
+  return newlyUnlocked;
 }
 
 // Get newly unlocked achievements (for showing notifications)
@@ -292,6 +303,10 @@ export function checkAchievementsProgress(): Achievement[] {
   const stats = getGameStats();
   const achievements = getAchievements();
   const updatedAchievements = [...achievements];
+  
+  // Array to track newly unlocked achievements in this function call
+  const newlyUnlocked: Achievement[] = [];
+  
   let hasChanges = false;
   
   // First game achievement
@@ -300,6 +315,7 @@ export function checkAchievementsProgress(): Achievement[] {
     firstGameAchievement.unlocked = true;
     firstGameAchievement.unlockedAt = new Date().toISOString();
     hasChanges = true;
+    newlyUnlocked.push({...firstGameAchievement});
   }
   
   // Games played achievement
@@ -310,6 +326,7 @@ export function checkAchievementsProgress(): Achievement[] {
       gamesPlayedAchievement.unlocked = true;
       gamesPlayedAchievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...gamesPlayedAchievement});
     }
   }
   
@@ -321,6 +338,7 @@ export function checkAchievementsProgress(): Achievement[] {
       streak5Achievement.unlocked = true;
       streak5Achievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...streak5Achievement});
     }
   }
   
@@ -331,6 +349,32 @@ export function checkAchievementsProgress(): Achievement[] {
       streak10Achievement.unlocked = true;
       streak10Achievement.unlockedAt = new Date().toISOString();
       hasChanges = true;
+      newlyUnlocked.push({...streak10Achievement});
+    }
+  }
+  
+  // Mode-specific achievements based on stats
+  const identifyAchievement = updatedAchievements.find(a => a.id === 'identify_master');
+  if (identifyAchievement) {
+    const maxIdentifyScore = Math.max(stats.modePerformance.identifySurah || 0, identifyAchievement.progress || 0);
+    identifyAchievement.progress = maxIdentifyScore;
+    if (maxIdentifyScore >= 7 && !identifyAchievement.unlocked) {
+      identifyAchievement.unlocked = true;
+      identifyAchievement.unlockedAt = new Date().toISOString();
+      hasChanges = true;
+      newlyUnlocked.push({...identifyAchievement});
+    }
+  }
+  
+  const orderingAchievement = updatedAchievements.find(a => a.id === 'ordering_master');
+  if (orderingAchievement) {
+    const maxOrderingScore = Math.max(stats.modePerformance.surahOrdering || 0, orderingAchievement.progress || 0);
+    orderingAchievement.progress = maxOrderingScore;
+    if (maxOrderingScore >= 7 && !orderingAchievement.unlocked) {
+      orderingAchievement.unlocked = true;
+      orderingAchievement.unlockedAt = new Date().toISOString();
+      hasChanges = true;
+      newlyUnlocked.push({...orderingAchievement});
     }
   }
   
@@ -338,5 +382,6 @@ export function checkAchievementsProgress(): Achievement[] {
     saveAchievements(updatedAchievements);
   }
   
-  return getNewlyUnlockedAchievements();
+  // Return only the achievements unlocked during this specific function call
+  return newlyUnlocked;
 }
