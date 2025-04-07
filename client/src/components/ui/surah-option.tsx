@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 interface SurahOptionProps {
   name: string;
   arabicName: string;
+  number?: number;
+  showNumber?: boolean;
   selected?: boolean;
   correct?: boolean;
   incorrect?: boolean;
@@ -11,7 +13,9 @@ interface SurahOptionProps {
 
 export function SurahOption({ 
   name, 
-  arabicName, 
+  arabicName,
+  number,
+  showNumber = false,
   selected = false, 
   correct = false, 
   incorrect = false,
@@ -21,7 +25,7 @@ export function SurahOption({
     <button 
       onClick={onClick}
       className={cn(
-        "border rounded-lg p-3 text-center transition duration-200 w-full",
+        "border-2 rounded-lg p-3 text-center transition duration-200 w-full",
         {
           "border-gray-300 hover:bg-secondary/10": !selected && !correct && !incorrect,
           "border-primary bg-primary/10": selected && !correct && !incorrect,
@@ -30,8 +34,11 @@ export function SurahOption({
         }
       )}
     >
-      <span className="font-bold">{name}</span>
-      <span className="block text-xs text-gray-500">{arabicName}</span>
+      <span className="font-bold text-sm">{name}</span>
+      <span className="block font-bold text-lg text-primary mt-1" dir="rtl">{arabicName}</span>
+      {showNumber && number && (
+        <span className="block text-xs text-gray-500 mt-1">Surah {number}</span>
+      )}
     </button>
   );
 }

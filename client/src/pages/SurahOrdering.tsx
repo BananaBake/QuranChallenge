@@ -140,25 +140,31 @@ export default function SurahOrdering() {
   
   return (
     <div>
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-5 mb-6">
+        <div className="flex justify-between items-center mb-5">
           <div>
-            <h2 className="text-xl font-bold text-primary">Surah Ordering</h2>
-            <p className="text-sm text-gray-600">Arrange the Surahs in correct order</p>
+            <h2 className="text-2xl font-bold text-primary">Surah Ordering</h2>
+            <p className="text-sm text-gray-600 mt-1">Arrange the Surahs in correct order</p>
           </div>
-          <div className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center">
+          <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
             <span>{currentQuestionIndex + 1}</span>/<span>{totalQuestions}</span>
           </div>
         </div>
         
-        <p className="text-sm text-center mb-4">
-          {checked 
-            ? isCorrect 
-              ? "Correct! The order is perfect."
-              : "Incorrect. The correct order is from lowest to highest surah number."
-            : "Drag and drop the Surahs in their correct order (from lowest to highest surah number)"
-          }
-        </p>
+        <div className={`p-3 text-center mb-6 rounded-lg ${
+          checked 
+            ? (isCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
+            : "bg-primary/10 text-primary"
+        }`}>
+          <p className="font-medium">
+            {checked 
+              ? isCorrect 
+                ? "✓ Correct! Your order is perfect."
+                : "✗ Incorrect. The correct order is from lowest to highest surah number."
+              : "Drag and drop the Surahs to arrange them in the correct Qur'anic order (from lowest to highest number)"
+            }
+          </p>
+        </div>
         
         <div className="space-y-2 mb-6">
           {surahs.map((surah, index) => (
@@ -169,6 +175,7 @@ export default function SurahOrdering() {
               number={surah.number}
               index={index}
               onMoveItem={handleMoveItem}
+              showNumber={checked}
             />
           ))}
         </div>

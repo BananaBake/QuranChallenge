@@ -47,29 +47,49 @@ export default function IdentifySurah() {
     return () => clearInterval(intervalId);
   }, [startTime, gameEnded]);
   
-  const generateOptions = (correct: Ayah): { name: string, arabicName: string, number: number }[] => {
-    if (!ayahs) return [];
-    
+  // Generate options for all questions once when ayahs are loaded
+  const [allOptionsForQuestions, setAllOptionsForQuestions] = useState<Array<{ name: string, arabicName: string, number: number }[]>>([]);
+  
+  // Generate options once when ayahs are loaded
+  useEffect(() => {
+    if (ayahs && ayahs.length > 0 && allOptionsForQuestions.length === 0) {
+      const generatedOptions = ayahs.map(ayah => generateOptionsForAyah(ayah, ayahs));
+      setAllOptionsForQuestions(generatedOptions);
+    }
+  }, [ayahs]);
+  
+  const generateOptionsForAyah = (correct: Ayah, allAyahs: Ayah[]): { name: string, arabicName: string, number: number }[] => {
     // Create a pool of surahs excluding the correct one
-    const surahPool = ayahs
-      .filter(ayah => ayah.surah.number !== correct.surah.number)
-      .map(ayah => ({
-        name: ayah.surah.englishName,
-        arabicName: ayah.surah.name,
-        number: ayah.surah.number
-      }));
+    const surahMap = new Map();
+    
+    // First add all unique surahs to a map
+    allAyahs.forEach(ayah => {
+      if (!surahMap.has(ayah.surah.number)) {
+        surahMap.set(ayah.surah.number, {
+          name: ayah.surah.englishName,
+          arabicName: ayah.surah.name,
+          number: ayah.surah.number
+        });
+      }
+    });
+    
+    // Remove the correct surah from the pool
+    surahMap.delete(correct.surah.number);
+    
+    // Convert map to array for random selection
+    const surahPool = Array.from(surahMap.values());
     
     // Randomly select 3 distinct surahs
     const randomOptions: { name: string, arabicName: string, number: number }[] = [];
-    while (randomOptions.length < 3 && surahPool.length > 0) {
+    const usedIndices = new Set();
+    
+    while (randomOptions.length < 3 && usedIndices.size < surahPool.length) {
       const randomIndex = Math.floor(Math.random() * surahPool.length);
-      const option = surahPool[randomIndex];
       
-      if (!randomOptions.some(o => o.number === option.number)) {
-        randomOptions.push(option);
+      if (!usedIndices.has(randomIndex)) {
+        randomOptions.push(surahPool[randomIndex]);
+        usedIndices.add(randomIndex);
       }
-      
-      surahPool.splice(randomIndex, 1);
     }
     
     // Add the correct option
@@ -86,7 +106,8 @@ export default function IdentifySurah() {
     return randomOptions;
   };
   
-  const options = currentQuestion ? generateOptions(currentQuestion) : [];
+  // Get options for the current question from our pre-generated options
+  const options = allOptionsForQuestions[currentQuestionIndex] || [];
   
   const handleOptionSelect = (index: number) => {
     if (revealAnswer) return;
@@ -147,6 +168,7 @@ export default function IdentifySurah() {
     setTimeSpent(0);
     setTimer("00:00");
     setRevealAnswer(false);
+    setAllOptionsForQuestions([]); // Clear options so they'll be regenerated
     refetch();
   };
   
@@ -176,13 +198,13 @@ export default function IdentifySurah() {
   
   return (
     <div>
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-5 mb-6">
+        <div className="flex justify-between items-center mb-5">
           <div>
-            <h2 className="text-xl font-bold text-primary">Identify the Surah</h2>
-            <p className="text-sm text-gray-600">Which Surah contains this Ayah?</p>
+            <h2 className="text-2xl font-bold text-primary">Identify the Surah</h2>
+            <p className="text-sm text-gray-600 mt-1">Which Surah contains this Ayah?</p>
           </div>
-          <div className="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center">
+          <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
             <span>{currentQuestionIndex + 1}</span>/<span>{totalQuestions}</span>
           </div>
         </div>
@@ -194,12 +216,14 @@ export default function IdentifySurah() {
           />
         )}
         
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           {options.map((option, index) => (
             <SurahOption
               key={index}
               name={option.name}
               arabicName={option.arabicName}
+              number={option.number}
+              showNumber={revealAnswer}
               selected={selectedOption === index}
               correct={revealAnswer && currentQuestion && option.number === currentQuestion.surah.number}
               incorrect={revealAnswer && selectedOption === index && currentQuestion && option.number !== currentQuestion.surah.number}
@@ -208,26 +232,26 @@ export default function IdentifySurah() {
           ))}
         </div>
         
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-8">
           {!revealAnswer ? (
             <>
               <Button 
-                className="bg-accent hover:bg-accent/90 text-white mr-3"
+                className="bg-accent hover:bg-accent/90 text-white mr-4 px-6 py-5 text-base shadow-md"
                 onClick={handleSkip}
               >
-                <SkipForward className="w-4 h-4 mr-1" /> Skip
+                <SkipForward className="w-5 h-5 mr-2" /> Skip
               </Button>
               <Button 
-                className="bg-primary hover:bg-primary/90 text-white"
+                className="bg-primary hover:bg-primary/90 text-white px-6 py-5 text-base shadow-md"
                 onClick={handleConfirm}
                 disabled={selectedOption === null}
               >
-                <Check className="w-4 h-4 mr-1" /> Confirm
+                <Check className="w-5 h-5 mr-2" /> Confirm
               </Button>
             </>
           ) : (
             <Button
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-5 text-base shadow-md"
               onClick={handleNext}
             >
               {currentQuestionIndex < totalQuestions - 1 ? 'Next Question' : 'Finish Game'}
