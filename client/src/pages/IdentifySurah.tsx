@@ -162,20 +162,25 @@ export default function IdentifySurah() {
     setRevealAnswer(true);
     
     if (currentAyah && options[selectedOption].number === currentAyah.surah.number) {
-      // Correct answer
-      setScore(prev => prev + 1);
+      // Correct answer - Increment score first
+      const newScore = score + 1;
+      setScore(newScore);
       
-      // Check for achievement progress immediately
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show notifications for newly unlocked achievements immediately
-      newAchievements.forEach(achievement => {
-        toast({
-          title: "🏆 Achievement Unlocked!",
-          description: `${achievement.title}: ${achievement.description}`,
-          variant: "default",
+      // Update achievements based on the new score right now, not after
+      if (newScore === 5 || newScore === 10 || newScore === 7) {
+        // We're checking for specific score values that match our achievement thresholds
+        // Check for achievement progress immediately
+        const newAchievements = checkAchievementsProgress();
+        
+        // Show notifications for newly unlocked achievements immediately
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
+          });
         });
-      });
+      }
     } else {
       // Incorrect answer - but let the player see the correct answer before ending
       // Game will end when they click the "End Game" button
@@ -233,7 +238,10 @@ export default function IdentifySurah() {
     setRevealAnswer(false);
     setIsNewHighScore(false);
     setCurrentAyah(null);
-    refetch(); // Get fresh set of ayahs to start with
+    
+    // Get a completely new random ayah instead of using refetch
+    // to ensure we don't get the same first question
+    getNextQuestion();
   };
   
   if (isLoading || isLoadingSurahs) {

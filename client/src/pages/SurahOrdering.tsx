@@ -87,19 +87,25 @@ export default function SurahOrdering() {
     setIsCorrect(isOrderCorrect);
     
     if (isOrderCorrect) {
-      setScore(prev => prev + 1);
+      // Increment score first
+      const newScore = score + 1;
+      setScore(newScore);
       
-      // Check for achievement progress immediately
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show notifications for newly unlocked achievements immediately
-      newAchievements.forEach(achievement => {
-        toast({
-          title: "🏆 Achievement Unlocked!",
-          description: `${achievement.title}: ${achievement.description}`,
-          variant: "default",
+      // Update achievements based on the new score right now, not after
+      if (newScore === 5 || newScore === 10 || newScore === 7) {
+        // We're checking for specific score values that match our achievement thresholds
+        // Check for achievement progress immediately
+        const newAchievements = checkAchievementsProgress();
+        
+        // Show notifications for newly unlocked achievements immediately
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
+          });
         });
-      });
+      }
     } else {
       // No need for a toast message - the user can already see from the UI that the order is incorrect
       // and the correct ordering is explained in the message at the top
@@ -137,18 +143,6 @@ export default function SurahOrdering() {
         // Shuffle the order for the game
         const shuffled = [...data].sort(() => Math.random() - 0.5);
         setSurahs(shuffled);
-        
-        // Check for achievement progress immediately
-        const newAchievements = checkAchievementsProgress();
-        
-        // Show notifications for newly unlocked achievements immediately
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
-        });
       }
     } catch (error) {
       console.error("Failed to fetch next question:", error);
@@ -160,7 +154,7 @@ export default function SurahOrdering() {
     } finally {
       setIsLoadingNextQuestion(false);
     }
-  }, [toast]);
+  }, []);
 
   const handleNext = () => {
     if (gameEnded) return;
@@ -184,8 +178,20 @@ export default function SurahOrdering() {
     setTimer("00:00");
     setChecked(false);
     setIsNewHighScore(false);
-    // Get completely fresh random surahs
-    getNextQuestion();
+    
+    // Fetch completely fresh random surahs with a randomization parameter
+    // to help prevent repeating the same first challenge
+    fetch('/api/quran/random-surahs?count=5&rand=' + Math.random())
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const shuffled = [...data].sort(() => Math.random() - 0.5);
+          setSurahs(shuffled);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch new surahs:", err);
+      });
   };
   
   if (isLoading) {
