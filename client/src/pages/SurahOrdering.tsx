@@ -91,21 +91,27 @@ export default function SurahOrdering() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Update achievements based on the new score immediately for any achievement
+      // IMPORTANT: Update localStorage first with the new score to ensure achievements check the latest data
+      saveGameResult({
+        userId: 1,
+        gameType: "surah_ordering",
+        score: newScore,
+        maxScore: newScore,
+        timeSpent
+      });
+      
+      // Now check for new achievements based on updated score data
       const newAchievements = checkAchievementsProgress();
       
-      // Show notifications for newly unlocked achievements immediately
+      // Show achievements immediately (no delay)
       if (newAchievements.length > 0) {
-        // Small delay to ensure user sees the achievement after understanding they got the answer right
-        setTimeout(() => {
-          newAchievements.forEach(achievement => {
-            toast({
-              title: "🏆 Achievement Unlocked!",
-              description: `${achievement.title}: ${achievement.description}`,
-              variant: "default",
-            });
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
           });
-        }, 500);
+        });
       }
     } else {
       // No need for a toast message - the user can already see from the UI that the order is incorrect
@@ -202,11 +208,15 @@ export default function SurahOrdering() {
   if (gameEnded) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 text-center">
-        <h2 className="text-2xl font-bold text-primary mb-2">{isNewHighScore ? '🏆 New High Score!' : 'Game Over!'}</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2">{isNewHighScore ? '🏆 New High Score!' : 'Great Effort!'}</h2>
         
-        {isNewHighScore && (
+        {isNewHighScore ? (
           <p className="text-accent font-bold mb-4">
             Congratulations! You've beaten your previous best score!
+          </p>
+        ) : (
+          <p className="text-primary font-medium mb-4">
+            You did well! Each attempt helps you learn more about the order of the Quran.
           </p>
         )}
         

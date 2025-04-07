@@ -299,7 +299,9 @@ export function getNewlyUnlockedAchievements(): Achievement[] {
 }
 
 // Check achievements at any time during gameplay to see if any have been newly unlocked
+// This is a critical function that should be called immediately after saving a game result
 export function checkAchievementsProgress(): Achievement[] {
+  // Force a fresh calculation of stats to ensure we have the latest data
   const stats = getGameStats();
   const achievements = getAchievements();
   const updatedAchievements = [...achievements];
