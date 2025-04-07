@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { GameStats, InsertGameHistory } from "@shared/schema";
+import { GameStats, InsertGameHistory, GameHistory } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export function useGameStats() {
@@ -10,7 +10,7 @@ export function useGameStats() {
 }
 
 export function useRecentGames(limit: number = 5) {
-  return useQuery({
+  return useQuery<any>({
     queryKey: ['/api/stats/recent', limit],
   });
 }

@@ -33,8 +33,8 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="islamic-pattern min-h-screen bg-background text-textColor font-english relative pb-16">
-        <div className="w-full relative min-h-screen pb-16">
+      <div className="islamic-pattern min-h-screen bg-background text-textColor font-english relative">
+        <div className="w-full relative min-h-screen pb-24">
           <Router />
           <Toaster />
         </div>

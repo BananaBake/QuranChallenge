@@ -16,31 +16,37 @@ interface GameCardProps {
 
 export function GameCard({ title, description, path, stats }: GameCardProps) {
   return (
-    <ArabesqueBorder className="mb-4">
+    <div className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-bold text-lg">{title}</h4>
-            <p className="text-sm text-gray-600">{description}</p>
+            <h4 className="font-bold text-lg text-primary">{title}</h4>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
           <Link href={path}>
-            <a className="bg-secondary hover:bg-secondary/90 text-white h-10 w-10 rounded-full flex items-center justify-center shadow">
-              <Play className="w-5 h-5" />
-            </a>
+            <div className="bg-secondary hover:bg-secondary/90 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-md transition-colors duration-300">
+              <Play className="w-6 h-6" />
+            </div>
           </Link>
         </div>
-        <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
-          <span>
-            <Trophy className="inline-block mr-1 w-3 h-3 text-secondary" /> Best: {stats.best}
-          </span>
-          <span>
-            <Clock className="inline-block mr-1 w-3 h-3 text-primary" /> Avg: {stats.avgTime}
-          </span>
-          <span>
-            <Star className="inline-block mr-1 w-3 h-3 text-secondary" /> Played: {stats.played}
-          </span>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+          <div className="flex flex-col items-center bg-gray-50 rounded-md p-2">
+            <Trophy className="w-4 h-4 text-secondary mb-1" /> 
+            <span className="font-bold">{stats.best}</span>
+            <span className="text-gray-500 text-xs">Best</span>
+          </div>
+          <div className="flex flex-col items-center bg-gray-50 rounded-md p-2">
+            <Clock className="w-4 h-4 text-primary mb-1" /> 
+            <span className="font-bold">{stats.avgTime}</span>
+            <span className="text-gray-500 text-xs">Avg Time</span>
+          </div>
+          <div className="flex flex-col items-center bg-gray-50 rounded-md p-2">
+            <Star className="w-4 h-4 text-secondary mb-1" /> 
+            <span className="font-bold">{stats.played}</span>
+            <span className="text-gray-500 text-xs">Played</span>
+          </div>
         </div>
       </div>
-    </ArabesqueBorder>
+    </div>
   );
 }
