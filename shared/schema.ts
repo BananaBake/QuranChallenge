@@ -53,6 +53,8 @@ export type Ayah = {
   number: number;
   text: string;
   translation: string;
+  audio?: string;
+  audioSecondary?: string[];
   surah: {
     number: number;
     name: string;

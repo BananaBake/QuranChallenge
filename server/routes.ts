@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First attempt to get one from each surah
       while (ayahs.length < count && usedSurahs.size < surahs.length) {
         // Pick a random surah that hasn't been used yet
-        const availableSurahs = surahs.filter(s => !usedSurahs.has(s.number));
+        const availableSurahs = surahs.filter((s: any) => !usedSurahs.has(s.number));
         const randomSurah = availableSurahs[Math.floor(Math.random() * availableSurahs.length)];
         
         // Pick a random ayah from this surah
@@ -53,16 +53,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const arabicAyah = ayahResponse.data.data[0];
             const translationAyah = ayahResponse.data.data[1];
             
-            ayahs.push({
-              number: arabicAyah.number,
-              text: arabicAyah.text,
-              translation: translationAyah.text,
-              surah: {
-                number: randomSurah.number,
-                name: randomSurah.name,
-                englishName: randomSurah.englishName
+            // Get audio for this ayah
+            try {
+              const audioResponse = await axios.get(
+                `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/ar.alafasy`
+              );
+              
+              if (audioResponse.data && audioResponse.data.data) {
+                const audioData = audioResponse.data.data;
+                
+                ayahs.push({
+                  number: arabicAyah.number,
+                  text: arabicAyah.text,
+                  translation: translationAyah.text,
+                  audio: audioData.audio,
+                  audioSecondary: audioData.audioSecondary,
+                  surah: {
+                    number: randomSurah.number,
+                    name: randomSurah.name,
+                    englishName: randomSurah.englishName
+                  }
+                });
+              } else {
+                // Fallback if audio couldn't be retrieved
+                ayahs.push({
+                  number: arabicAyah.number,
+                  text: arabicAyah.text,
+                  translation: translationAyah.text,
+                  surah: {
+                    number: randomSurah.number,
+                    name: randomSurah.name,
+                    englishName: randomSurah.englishName
+                  }
+                });
               }
-            });
+            } catch (error) {
+              // Fallback if there's an error fetching audio
+              console.error(`Error fetching audio for ayah ${randomSurah.number}:${ayahNumber}`, error);
+              ayahs.push({
+                number: arabicAyah.number,
+                text: arabicAyah.text,
+                translation: translationAyah.text,
+                surah: {
+                  number: randomSurah.number,
+                  name: randomSurah.name,
+                  englishName: randomSurah.englishName
+                }
+              });
+            }
             
             usedSurahs.add(randomSurah.number);
           }
@@ -90,16 +128,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const isDuplicate = ayahs.some(a => a.number === arabicAyah.number);
             
             if (!isDuplicate) {
-              ayahs.push({
-                number: arabicAyah.number,
-                text: arabicAyah.text,
-                translation: translationAyah.text,
-                surah: {
-                  number: randomSurah.number,
-                  name: randomSurah.name,
-                  englishName: randomSurah.englishName
+              // Get audio for this ayah
+              try {
+                const audioResponse = await axios.get(
+                  `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/ar.alafasy`
+                );
+                
+                if (audioResponse.data && audioResponse.data.data) {
+                  const audioData = audioResponse.data.data;
+                  
+                  ayahs.push({
+                    number: arabicAyah.number,
+                    text: arabicAyah.text,
+                    translation: translationAyah.text,
+                    audio: audioData.audio,
+                    audioSecondary: audioData.audioSecondary,
+                    surah: {
+                      number: randomSurah.number,
+                      name: randomSurah.name,
+                      englishName: randomSurah.englishName
+                    }
+                  });
+                } else {
+                  // Fallback if audio couldn't be retrieved
+                  ayahs.push({
+                    number: arabicAyah.number,
+                    text: arabicAyah.text,
+                    translation: translationAyah.text,
+                    surah: {
+                      number: randomSurah.number,
+                      name: randomSurah.name,
+                      englishName: randomSurah.englishName
+                    }
+                  });
                 }
-              });
+              } catch (error) {
+                // Fallback if there's an error fetching audio
+                console.error(`Error fetching audio for ayah ${randomSurah.number}:${ayahNumber}`, error);
+                ayahs.push({
+                  number: arabicAyah.number,
+                  text: arabicAyah.text,
+                  translation: translationAyah.text,
+                  surah: {
+                    number: randomSurah.number,
+                    name: randomSurah.name,
+                    englishName: randomSurah.englishName
+                  }
+                });
+              }
             }
           }
         } catch (error) {
@@ -262,14 +338,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 }
 
 // Helper function to calculate performance for a specific game mode
-function calculateModePerformance(gameHistory, mode) {
-  const modeGames = gameHistory.filter(g => g.gameType === mode);
+function calculateModePerformance(gameHistory: any[], mode: string): number {
+  const modeGames = gameHistory.filter((g: any) => g.gameType === mode);
   
   if (modeGames.length === 0) {
     return 0;
   }
   
-  const totalModeScorePercentage = modeGames.reduce((sum, game) => {
+  const totalModeScorePercentage = modeGames.reduce((sum: number, game: any) => {
     return sum + (game.score / game.maxScore) * 100;
   }, 0);
   
