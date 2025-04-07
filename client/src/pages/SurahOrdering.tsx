@@ -7,7 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements, checkAchievementsProgress } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements, checkAchievementsProgress, getAchievements, saveAchievements } from "@/lib/localStorageService";
 
 export default function SurahOrdering() {
   const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
@@ -91,26 +91,46 @@ export default function SurahOrdering() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // IMPORTANT: Update localStorage first with the new score to ensure achievements check the latest data
-      saveGameResult({
-        userId: 1,
-        gameType: "surah_ordering",
-        score: newScore,
-        maxScore: newScore,
-        timeSpent
-      });
+      // Only check for streak-based achievements during gameplay
+      // Don't save to game history until the game is over
+      const streakAchievements = ['streak_5', 'streak_10', 'identify_master', 'ordering_master'];
+      const currentAchievements = getAchievements();
+      const streakUpdates = currentAchievements
+        .filter(a => streakAchievements.includes(a.id) && !a.unlocked)
+        .map(a => {
+          if (a.id === 'ordering_master' && newScore >= 7) return a;
+          if ((a.id === 'streak_5' && newScore >= 5) || 
+              (a.id === 'streak_10' && newScore >= 10)) return a;
+          return null;
+        })
+        .filter(Boolean);
       
-      // Now check for new achievements based on updated score data
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show achievements immediately (no delay)
-      if (newAchievements.length > 0) {
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
+      if (streakUpdates.length > 0) {
+        // Update only the specific streak achievements without saving a full game
+        streakUpdates.forEach(achievement => {
+          if (achievement) {
+            // Mark this achievement as unlocked
+            const achievementToUpdate = currentAchievements.find(a => a.id === achievement.id);
+            if (achievementToUpdate) {
+              achievementToUpdate.unlocked = true;
+              achievementToUpdate.unlockedAt = new Date().toISOString();
+              achievementToUpdate.progress = newScore;
+            }
+          }
+        });
+        
+        // Save updated achievements
+        saveAchievements(currentAchievements);
+        
+        // Show notifications for newly unlocked achievements
+        streakUpdates.forEach(achievement => {
+          if (achievement) {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `${achievement.title}: ${achievement.description}`,
+              variant: "default",
+            });
+          }
         });
       }
     } else {

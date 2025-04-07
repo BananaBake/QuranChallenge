@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements, checkAchievementsProgress } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements, checkAchievementsProgress, getAchievements, saveAchievements } from "@/lib/localStorageService";
 
 export default function IdentifySurah() {
   const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
@@ -166,26 +166,46 @@ export default function IdentifySurah() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // IMPORTANT: Update localStorage first with the new score to ensure achievements check the latest data
-      saveGameResult({
-        userId: 1,
-        gameType: "identify_surah",
-        score: newScore,
-        maxScore: newScore,
-        timeSpent
-      });
+      // Only check for streak-based achievements during gameplay
+      // Don't save to game history until the game is over
+      const streakAchievements = ['streak_5', 'streak_10', 'identify_master', 'ordering_master'];
+      const currentAchievements = getAchievements();
+      const streakUpdates = currentAchievements
+        .filter(a => streakAchievements.includes(a.id) && !a.unlocked)
+        .map(a => {
+          if (a.id === 'identify_master' && newScore >= 7) return a;
+          if ((a.id === 'streak_5' && newScore >= 5) || 
+              (a.id === 'streak_10' && newScore >= 10)) return a;
+          return null;
+        })
+        .filter(Boolean);
       
-      // Now check for new achievements based on updated score data
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show achievements immediately (no delay)
-      if (newAchievements.length > 0) {
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
+      if (streakUpdates.length > 0) {
+        // Update only the specific streak achievements without saving a full game
+        streakUpdates.forEach(achievement => {
+          if (achievement) {
+            // Mark this achievement as unlocked
+            const achievementToUpdate = currentAchievements.find(a => a.id === achievement.id);
+            if (achievementToUpdate) {
+              achievementToUpdate.unlocked = true;
+              achievementToUpdate.unlockedAt = new Date().toISOString();
+              achievementToUpdate.progress = newScore;
+            }
+          }
+        });
+        
+        // Save updated achievements
+        saveAchievements(currentAchievements);
+        
+        // Show notifications for newly unlocked achievements
+        streakUpdates.forEach(achievement => {
+          if (achievement) {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `${achievement.title}: ${achievement.description}`,
+              variant: "default",
+            });
+          }
         });
       }
     } else {
@@ -236,6 +256,33 @@ export default function IdentifySurah() {
   // Skip function removed for endless mode
   
   const handleStartNewGame = () => {
+    // First save completed game - for those achievements requiring total games played
+    if (score > 0) {
+      // Save the game result once, when the game is actually complete
+      saveGameResult({
+        userId: 1,
+        gameType: "identify_surah",
+        score: score,
+        maxScore: score,
+        timeSpent
+      });
+
+      // Check for game played achievements
+      const playedAchievements = checkAchievementsProgress();
+      
+      // Show notifications for achievements unlocked at end of game
+      playedAchievements
+        .filter(a => a.id === 'first_game' || a.id === 'games_10')
+        .forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
+          });
+        });
+    }
+    
+    // Reset game state
     setSelectedOption(null);
     setScore(0);
     setGameEnded(false);
