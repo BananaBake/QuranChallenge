@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap');
+
+@font-face {
+  font-family: 'Uthmanic';
+  src: url('https://cdn.jsdelivr.net/gh/mustaphaturokman/UthmanicHafs@main/UthmanicHafs1Ver18.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
