@@ -4,7 +4,7 @@ import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
-import { Check, SkipForward, Trophy, Clock } from "lucide-react";
+import { Check, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
 
@@ -185,22 +185,7 @@ export default function IdentifySurah() {
     }
   };
   
-  const handleSkip = () => {
-    // Skipping counts as a wrong answer in endless mode
-    setRevealAnswer(true);
-    setTimeout(() => {
-      setGameEnded(true);
-      
-      // Save game result
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "identify_surah",
-        score,
-        maxScore: score, // In endless mode, max score is the score achieved
-        timeSpent
-      });
-    }, 1500);
-  };
+  // Skip function removed for endless mode
   
   const handleStartNewGame = () => {
     setSelectedOption(null);
@@ -299,8 +284,8 @@ export default function IdentifySurah() {
               number={option.number}
               showNumber={revealAnswer}
               selected={selectedOption === index}
-              correct={revealAnswer && currentAyah && option.number === currentAyah.surah.number}
-              incorrect={revealAnswer && selectedOption === index && currentAyah && option.number !== currentAyah.surah.number}
+              correct={Boolean(revealAnswer && currentAyah && option.number === currentAyah.surah.number)}
+              incorrect={Boolean(revealAnswer && selectedOption === index && currentAyah && option.number !== currentAyah.surah.number)}
               onClick={() => handleOptionSelect(index)}
             />
           ))}
@@ -308,21 +293,13 @@ export default function IdentifySurah() {
         
         <div className="flex justify-center mt-6">
           {!revealAnswer ? (
-            <>
-              <Button 
-                className="bg-accent hover:bg-accent/90 text-white mr-4 px-6 py-4 text-base shadow-md"
-                onClick={handleSkip}
-              >
-                <SkipForward className="w-5 h-5 mr-2" /> Skip
-              </Button>
-              <Button 
-                className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
-                onClick={handleConfirm}
-                disabled={selectedOption === null}
-              >
-                <Check className="w-5 h-5 mr-2" /> Confirm
-              </Button>
-            </>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
+              onClick={handleConfirm}
+              disabled={selectedOption === null}
+            >
+              <Check className="w-5 h-5 mr-2" /> Confirm
+            </Button>
           ) : (
             <Button
               className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"

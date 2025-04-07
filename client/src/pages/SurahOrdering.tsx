@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useRandomSurahsForGame } from "@/hooks/useQuranData";
-import { useSaveGameResult } from "@/hooks/useGameStats";
+import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
 import { DraggableSurah } from "@/components/ui/draggable-surah";
-import { Check } from "lucide-react";
+import { Check, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Surah } from "@shared/schema";
 
 export default function SurahOrdering() {
   const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
+  const { data: stats } = useGameStats();
   const { mutate: saveGameResult } = useSaveGameResult();
   const { toast } = useToast();
   
@@ -21,8 +22,17 @@ export default function SurahOrdering() {
   const [timer, setTimer] = useState("00:00");
   const [checked, setChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [previousHighScore, setPreviousHighScore] = useState(0);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
   
-  const totalQuestions = 5; // Each game consists of 5 ordering questions
+  // Endless mode - no fixed number of questions
+  
+  // Get the best previous score for this mode
+  useEffect(() => {
+    if (stats && stats.modePerformance) {
+      setPreviousHighScore(stats.modePerformance.surahOrdering || 0);
+    }
+  }, [stats]);
   
   useEffect(() => {
     if (originalSurahs && originalSurahs.length > 0) {
@@ -75,31 +85,42 @@ export default function SurahOrdering() {
     
     if (isOrderCorrect) {
       setScore(prev => prev + 1);
+    } else {
+      // Incorrect answer - game over in endless mode
+      setTimeout(() => {
+        setGameEnded(true);
+        
+        // Save game result
+        saveGameResult({
+          userId: 1, // Default user ID
+          gameType: "surah_ordering",
+          score,
+          maxScore: score, // In endless mode, max score is the score achieved
+          timeSpent
+        });
+        
+        // Check if this is a new high score
+        if (score > previousHighScore) {
+          setIsNewHighScore(true);
+          toast({
+            title: "New High Score!",
+            description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
+            variant: "default",
+          });
+        }
+      }, 1500);
     }
   };
   
   const handleNext = () => {
+    if (gameEnded) return;
+    
     setChecked(false);
     
-    // Load next question or end game
-    if (currentQuestionIndex < totalQuestions - 1) {
+    // Only continue if the answer was correct
+    if (isCorrect) {
       setCurrentQuestionIndex(prev => prev + 1);
       refetch();
-    } else {
-      setGameEnded(true);
-      
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "surah_ordering",
-        score,
-        maxScore: totalQuestions,
-        timeSpent
-      });
-      
-      toast({
-        title: "Game Completed!",
-        description: `You scored ${score} out of ${totalQuestions}`,
-      });
     }
   };
   
@@ -121,15 +142,39 @@ export default function SurahOrdering() {
   if (gameEnded) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 text-center">
-        <h2 className="text-2xl font-bold text-primary mb-4">Game Completed!</h2>
-        <p className="text-lg mb-6">
-          Your Score: <span className="font-bold text-primary">{score}</span> / {totalQuestions}
+        <h2 className="text-2xl font-bold text-primary mb-2">{isNewHighScore ? '🏆 New High Score!' : 'Game Over!'}</h2>
+        
+        {isNewHighScore && (
+          <p className="text-accent font-bold mb-4">
+            Congratulations! You've beaten your previous best score!
+          </p>
+        )}
+        
+        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center">
+              <Trophy className="w-5 h-5 text-secondary mr-2" />
+              <span className="text-gray-600">Score:</span>
+            </div>
+            <span className="font-bold text-xl text-primary">{score}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Clock className="w-5 h-5 text-primary mr-2" />
+              <span className="text-gray-600">Time:</span>
+            </div>
+            <span className="font-bold text-xl text-accent">{timer}</span>
+          </div>
+        </div>
+        
+        <p className="text-sm text-gray-600 mb-6">
+          You correctly ordered {score} {score === 1 ? 'round' : 'rounds'} of Surahs.
+          {isNewHighScore && ' Keep going to improve your knowledge!'}
         </p>
-        <p className="text-md mb-6">
-          Time Taken: <span className="font-bold text-accent">{timer}</span>
-        </p>
+        
         <Button 
-          className="bg-primary hover:bg-primary/90 text-white"
+          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
           onClick={handleStartNewGame}
         >
           Play Again
