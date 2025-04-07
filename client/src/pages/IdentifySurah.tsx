@@ -226,15 +226,7 @@ export default function IdentifySurah() {
       );
       
       // Removed toast notification on incorrect answer - visual cues are enough
-      
-      // Save game result
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "identify_surah",
-        score,
-        maxScore: score, // In endless mode, max score is the score achieved
-        timeSpent
-      });
+      // We'll save the game result when user clicks "See Results"
       
       // Check if this is a new high score
       if (score > previousHighScore) {
@@ -264,31 +256,7 @@ export default function IdentifySurah() {
   // Skip function removed for endless mode
   
   const handleStartNewGame = () => {
-    // First save completed game - for those achievements requiring total games played
-    if (score > 0) {
-      // Save the game result once, when the game is actually complete
-      saveGameResult({
-        userId: 1,
-        gameType: "identify_surah",
-        score: score,
-        maxScore: score,
-        timeSpent
-      });
-
-      // Check for game played achievements
-      const playedAchievements = checkAchievementsProgress();
-      
-      // Show notifications for achievements unlocked at end of game
-      playedAchievements
-        .filter(a => a.id === 'first_game' || a.id === 'games_10')
-        .forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
-        });
-    }
+    // Don't save the game when Play Again is clicked - we already saved at the fail point
     
     // Reset game state
     setSelectedOption(null);
@@ -412,7 +380,30 @@ export default function IdentifySurah() {
           ) : selectedOption !== null && currentAyah && options[selectedOption].number !== currentAyah.surah.number ? (
             <Button
               className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
-              onClick={() => setGameEnded(true)}
+              onClick={() => {
+                // Save game result and check for game-played achievements when ending the game
+                saveGameResult({
+                  userId: 1,
+                  gameType: "identify_surah",
+                  score,
+                  maxScore: score,
+                  timeSpent
+                });
+                
+                // Check for game completion achievements (like first_game and games_10)
+                const playedAchievements = checkAchievementsProgress();
+                playedAchievements
+                  .filter(a => a.id === 'first_game' || a.id === 'games_10')
+                  .forEach(achievement => {
+                    toast({
+                      title: "🏆 Achievement Unlocked!",
+                      description: `${achievement.title}: ${achievement.description}`,
+                      variant: "default",
+                    });
+                  });
+                
+                setGameEnded(true);
+              }}
               disabled={isLoadingNextQuestion}
             >
               See Results

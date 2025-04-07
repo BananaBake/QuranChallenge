@@ -144,15 +144,7 @@ export default function SurahOrdering() {
     } else {
       // No need for a toast message - the user can already see from the UI that the order is incorrect
       // and the correct ordering is explained in the message at the top
-      
-      // Save game result
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "surah_ordering",
-        score,
-        maxScore: score, // In endless mode, max score is the score achieved
-        timeSpent
-      });
+      // We'll save the game result when the user clicks "See Results"
       
       // Check if this is a new high score
       if (score > previousHighScore) {
@@ -205,6 +197,8 @@ export default function SurahOrdering() {
   };
   
   const handleStartNewGame = () => {
+    // Don't save the game when Play Again is clicked - we already saved at the fail point
+    
     setCurrentQuestionIndex(0);
     setScore(0);
     setGameEnded(false);
@@ -342,7 +336,30 @@ export default function SurahOrdering() {
           ) : checked && !isCorrect ? (
             <Button
               className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
-              onClick={() => setGameEnded(true)}
+              onClick={() => {
+                // Save game result and check for game-played achievements when the game is actually ending
+                saveGameResult({
+                  userId: 1,
+                  gameType: "surah_ordering",
+                  score,
+                  maxScore: score,
+                  timeSpent
+                });
+                
+                // Check for game completion achievements (like first_game and games_10)
+                const playedAchievements = checkAchievementsProgress();
+                playedAchievements
+                  .filter(a => a.id === 'first_game' || a.id === 'games_10')
+                  .forEach(achievement => {
+                    toast({
+                      title: "🏆 Achievement Unlocked!",
+                      description: `${achievement.title}: ${achievement.description}`,
+                      variant: "default",
+                    });
+                  });
+                
+                setGameEnded(true);
+              }}
               disabled={isLoadingNextQuestion}
             >
               See Results
