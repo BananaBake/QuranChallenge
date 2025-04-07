@@ -96,9 +96,12 @@ export default function Home() {
           <div className="space-y-3">
             {recentGames.map((game) => {
               const gameType = game.gameType === "identify_surah" ? "Identify Surah" : "Surah Ordering";
-              const scoreText = `${game.score}/${game.maxScore}`;
+              const scoreText = `${game.score}`;
               const timeText = `${Math.floor(game.timeSpent / 60)}:${(game.timeSpent % 60).toString().padStart(2, '0')}`;
               const timeAgo = formatDistanceToNow(new Date(game.completedAt), { addSuffix: true });
+              
+              // Check if this game unlocked any achievements
+              const isNewHighScore = game.score > (stats?.modePerformance?.[game.gameType === "identify_surah" ? "identifySurah" : "surahOrdering"] || 0) - 1;
               
               return (
                 <div key={game.id} className="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
@@ -114,6 +117,11 @@ export default function Home() {
                     <span className="text-lg font-bold text-accent">{timeText}</span>
                     <p className="text-xs text-gray-500">Time</p>
                   </div>
+                  {isNewHighScore && (
+                    <div className="text-center ml-2">
+                      <span className="text-lg font-bold text-yellow-500">🏆</span>
+                    </div>
+                  )}
                 </div>
               );
             })}

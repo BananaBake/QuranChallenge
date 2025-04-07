@@ -185,14 +185,7 @@ export default function IdentifySurah() {
         currentAyah && option.number === currentAyah.surah.number
       );
       
-      if (correctSurahOption) {
-        // Add a message to show the correct answer in a toast
-        toast({
-          title: "Incorrect Answer",
-          description: `The correct answer was ${correctSurahOption.name} (${correctSurahOption.arabicName})`,
-          variant: "destructive",
-        });
-      }
+      // Removed toast notification on incorrect answer - visual cues are enough
       
       // Save game result
       saveGameResult({
@@ -307,7 +300,6 @@ export default function IdentifySurah() {
         {currentAyah && (
           <QuranText 
             arabicText={currentAyah.text}
-            showTranslation={false}
           />
         )}
         

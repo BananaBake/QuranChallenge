@@ -2,14 +2,10 @@ import { ArabesqueBorder } from "./arabesque-border";
 
 interface QuranTextProps {
   arabicText: string;
-  translationText?: string;
-  showTranslation?: boolean;
 }
 
 export function QuranText({ 
-  arabicText, 
-  translationText, 
-  showTranslation = false 
+  arabicText
 }: QuranTextProps) {
   return (
     <ArabesqueBorder className="mb-6">

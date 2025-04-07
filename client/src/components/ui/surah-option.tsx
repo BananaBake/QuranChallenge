@@ -35,16 +35,6 @@ export function SurahOption({
       )}
     >
       <span className="font-bold text-md">{name}</span>
-      <div 
-        className="text-xl text-primary mt-1" 
-        style={{ 
-          fontFamily: "'Uthmanic', 'Scheherazade New', serif",
-          fontWeight: 700
-        }}
-        dir="rtl"
-      >
-        {arabicName}
-      </div>
       {showNumber && number && (
         <span className="block text-xs text-gray-500 mt-1">Surah {number}</span>
       )}
