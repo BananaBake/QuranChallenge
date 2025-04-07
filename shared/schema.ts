@@ -55,6 +55,7 @@ export type Ayah = {
   translation: string;
   audio?: string;
   audioSecondary?: string[];
+  ayahRef?: string; // Format: surah:ayah (e.g., "1:1")
   surah: {
     number: number;
     name: string;

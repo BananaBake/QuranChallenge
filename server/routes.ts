@@ -53,54 +53,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const arabicAyah = ayahResponse.data.data[0];
             const translationAyah = ayahResponse.data.data[1];
             
-            // Get audio for this ayah
-            try {
-              const audioResponse = await axios.get(
-                `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/ar.alafasy`
-              );
-              
-              if (audioResponse.data && audioResponse.data.data) {
-                const audioData = audioResponse.data.data;
-                
-                ayahs.push({
-                  number: arabicAyah.number,
-                  text: arabicAyah.text,
-                  translation: translationAyah.text,
-                  audio: audioData.audio,
-                  audioSecondary: audioData.audioSecondary,
-                  surah: {
-                    number: randomSurah.number,
-                    name: randomSurah.name,
-                    englishName: randomSurah.englishName
-                  }
-                });
-              } else {
-                // Fallback if audio couldn't be retrieved
-                ayahs.push({
-                  number: arabicAyah.number,
-                  text: arabicAyah.text,
-                  translation: translationAyah.text,
-                  surah: {
-                    number: randomSurah.number,
-                    name: randomSurah.name,
-                    englishName: randomSurah.englishName
-                  }
-                });
+            // Add the ayah without audio to improve load time
+            ayahs.push({
+              number: arabicAyah.number,
+              text: arabicAyah.text,
+              translation: translationAyah.text,
+              // Save reference for later audio fetching
+              ayahRef: `${randomSurah.number}:${ayahNumber}`,
+              surah: {
+                number: randomSurah.number,
+                name: randomSurah.name,
+                englishName: randomSurah.englishName
               }
-            } catch (error) {
-              // Fallback if there's an error fetching audio
-              console.error(`Error fetching audio for ayah ${randomSurah.number}:${ayahNumber}`, error);
-              ayahs.push({
-                number: arabicAyah.number,
-                text: arabicAyah.text,
-                translation: translationAyah.text,
-                surah: {
-                  number: randomSurah.number,
-                  name: randomSurah.name,
-                  englishName: randomSurah.englishName
-                }
-              });
-            }
+            });
             
             usedSurahs.add(randomSurah.number);
           }
@@ -330,6 +295,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to save game result" });
       }
+    }
+  });
+
+  // Get audio for a specific ayah
+  app.get("/api/quran/audio/:ayahRef", async (req, res) => {
+    try {
+      const { ayahRef } = req.params;
+      
+      if (!ayahRef || !ayahRef.includes(':')) {
+        return res.status(400).json({ message: "Invalid ayah reference format. Expected 'surah:ayah'" });
+      }
+      
+      // Get audio for this ayah
+      const audioResponse = await axios.get(
+        `${QURAN_API_BASE_URL}/ayah/${ayahRef}/ar.alafasy`
+      );
+      
+      if (audioResponse.data && audioResponse.data.data) {
+        const audioData = audioResponse.data.data;
+        res.json({
+          audio: audioData.audio,
+          audioSecondary: audioData.audioSecondary
+        });
+      } else {
+        res.status(404).json({ message: "Audio not found for this ayah" });
+      }
+    } catch (error) {
+      console.error(`Error fetching audio for ayah ${req.params.ayahRef}:`, error);
+      res.status(500).json({ message: "Failed to fetch audio" });
     }
   });
 

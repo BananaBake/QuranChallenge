@@ -1,28 +1,36 @@
 import { useState, useRef, useEffect } from "react";
 import { ArabesqueBorder } from "./arabesque-border";
-import { Play, Pause, Volume2 } from "lucide-react";
+import { Play, Pause, Volume2, Loader2 } from "lucide-react";
 import { Button } from "./button";
+import axios from "axios";
 
 interface QuranTextProps {
   arabicText: string;
   audioUrl?: string;
+  ayahRef?: string;  // New prop for delayed audio loading
 }
 
 export function QuranText({ 
   arabicText,
-  audioUrl
+  audioUrl,
+  ayahRef
 }: QuranTextProps) {
-  console.log("QuranText rendered with audioUrl:", audioUrl); // Debug log
-  
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadedAudioUrl, setLoadedAudioUrl] = useState<string | undefined>(audioUrl);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Create audio element when component mounts
+  // Create/update audio element when component mounts or audioUrl changes
   useEffect(() => {
-    console.log("QuranText useEffect triggered with audioUrl:", audioUrl); // Debug log
+    // If there's an existing audio element playing, pause it
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
     
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
+    if (loadedAudioUrl) {
+      const audio = new Audio(loadedAudioUrl);
       audioRef.current = audio;
       
       // Add event listeners
@@ -42,12 +50,59 @@ export function QuranText({
         audio.removeEventListener('play', handlePlay);
       };
     }
-  }, [audioUrl]);
+  }, [loadedAudioUrl]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  const loadAudio = async () => {
+    // Only fetch if we have an ayahRef and no loaded audio yet
+    if (ayahRef && !loadedAudioUrl) {
+      setIsLoading(true);
+      
+      // Cancel any previous requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Create new abort controller
+      abortControllerRef.current = new AbortController();
+      
+      try {
+        const response = await axios.get(`/api/quran/audio/${ayahRef}`, {
+          signal: abortControllerRef.current.signal
+        });
+        
+        if (response.data && response.data.audio) {
+          setLoadedAudioUrl(response.data.audio);
+        }
+      } catch (error) {
+        if (!axios.isCancel(error)) {
+          console.error("Error loading audio:", error);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   const togglePlayPause = () => {
-    console.log("Toggle play/pause clicked, audioRef:", audioRef.current); // Debug log
+    if (!loadedAudioUrl && !isLoading) {
+      // Load audio if not loaded yet
+      loadAudio();
+      return;
+    }
     
-    if (audioRef.current) {
+    if (audioRef.current && loadedAudioUrl) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
@@ -74,16 +129,20 @@ export function QuranText({
           {arabicText}
         </p>
         
-        {/* Forced display of audio button for debugging */}
         <div className="mt-4 flex justify-center">
           <Button
             variant="outline"
             size="sm"
             className="flex items-center gap-2 text-primary hover:text-primary-dark"
             onClick={togglePlayPause}
-            disabled={!audioUrl}
+            disabled={!ayahRef && !audioUrl}
           >
-            {isPlaying ? (
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading</span>
+              </>
+            ) : isPlaying ? (
               <>
                 <Pause className="h-4 w-4" />
                 <span>Pause</span>

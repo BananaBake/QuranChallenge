@@ -342,7 +342,7 @@ export default function IdentifySurah() {
         {currentAyah && (
           <QuranText 
             arabicText={currentAyah.text}
-            audioUrl={currentAyah.audio}
+            ayahRef={currentAyah.ayahRef}
           />
         )}
         
