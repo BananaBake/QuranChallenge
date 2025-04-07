@@ -166,48 +166,56 @@ export default function IdentifySurah() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Only check for streak-based achievements during gameplay
-      // Don't save to game history until the game is over
-      const streakAchievements = ['streak_5', 'streak_10', 'identify_master', 'ordering_master'];
-      const currentAchievements = getAchievements();
-      const streakUpdates = currentAchievements
-        .filter(a => streakAchievements.includes(a.id) && !a.unlocked)
-        .map(a => {
-          if (a.id === 'identify_master' && newScore >= 7) return a;
-          if ((a.id === 'streak_5' && newScore >= 5) || 
-              (a.id === 'streak_10' && newScore >= 10)) return a;
-          return null;
-        })
-        .filter(Boolean);
+      // Update a temporary game result in memory to check for achievements
+      // But don't save it to history yet (we'll do that at game end)
+      const tempGameData = {
+        userId: 1,
+        gameType: "identify_surah",
+        score: newScore,
+        maxScore: newScore,
+        completedAt: new Date()
+      };
       
-      if (streakUpdates.length > 0) {
-        // Update only the specific streak achievements without saving a full game
-        streakUpdates.forEach(achievement => {
-          if (achievement) {
-            // Mark this achievement as unlocked
-            const achievementToUpdate = currentAchievements.find(a => a.id === achievement.id);
-            if (achievementToUpdate) {
-              achievementToUpdate.unlocked = true;
-              achievementToUpdate.unlockedAt = new Date().toISOString();
-              achievementToUpdate.progress = newScore;
-            }
+      // First, check specifically for streak achievements
+      const streakAchievements = ['streak_5', 'streak_10', 'identify_master'];
+      const currentAchievements = getAchievements();
+      
+      // Update streak-based achievements without adding to game history
+      streakAchievements.forEach(achievementId => {
+        const achievement = currentAchievements.find(a => a.id === achievementId);
+        if (achievement && !achievement.unlocked) {
+          let shouldUnlock = false;
+          
+          // Check unlock conditions
+          if (achievementId === 'identify_master' && newScore >= 7) {
+            shouldUnlock = true;
+          } else if (achievementId === 'streak_5' && newScore >= 5) {
+            shouldUnlock = true;
+          } else if (achievementId === 'streak_10' && newScore >= 10) {
+            shouldUnlock = true;
           }
-        });
-        
-        // Save updated achievements
-        saveAchievements(currentAchievements);
-        
-        // Show notifications for newly unlocked achievements
-        streakUpdates.forEach(achievement => {
-          if (achievement) {
+          
+          // Unlock if conditions met
+          if (shouldUnlock) {
+            achievement.unlocked = true;
+            achievement.unlockedAt = new Date().toISOString();
+            achievement.progress = newScore;
+            
+            // Show achievement toast right away
             toast({
               title: "🏆 Achievement Unlocked!",
               description: `${achievement.title}: ${achievement.description}`,
               variant: "default",
             });
+          } else {
+            // Just update progress
+            achievement.progress = Math.max(achievement.progress || 0, newScore);
           }
-        });
-      }
+        }
+      });
+      
+      // Save updated achievements
+      saveAchievements(currentAchievements);
     } else {
       // Incorrect answer - but let the player see the correct answer before ending
       // Game will end when they click the "End Game" button
