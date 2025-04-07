@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { Play } from "lucide-react";
-import { ArabesqueBorder } from "./arabesque-border";
 import { Trophy, Clock, Star } from "lucide-react";
 
 interface GameCardProps {
@@ -19,12 +18,12 @@ export function GameCard({ title, description, path, stats }: GameCardProps) {
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="p-4">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <h4 className="font-bold text-lg text-primary">{title}</h4>
             <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
           <Link href={path}>
-            <div className="bg-secondary hover:bg-secondary/90 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-md transition-colors duration-300">
+            <div className="bg-secondary hover:bg-secondary/90 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-md transition-colors duration-300 ml-4">
               <Play className="w-6 h-6" />
             </div>
           </Link>

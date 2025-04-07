@@ -103,8 +103,7 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
           <GripVertical className="w-5 h-5" />
         </div>
         <div>
-          <span className="font-english font-bold text-sm">{name}</span>
-          <span className="block font-arabic text-lg text-primary mt-1" dir="rtl">{arabicName}</span>
+          <span className="font-english font-bold text-md">{name}</span>
         </div>
       </div>
       {showNumber && (

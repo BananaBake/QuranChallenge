@@ -21,12 +21,6 @@ export function QuranText({
         >
           {arabicText}
         </p>
-        
-        {showTranslation && translationText && (
-          <p className="mt-4 text-md text-gray-700 italic px-4">
-            {translationText}
-          </p>
-        )}
       </div>
     </ArabesqueBorder>
   );

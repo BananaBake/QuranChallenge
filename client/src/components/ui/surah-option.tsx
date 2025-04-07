@@ -34,8 +34,7 @@ export function SurahOption({
         }
       )}
     >
-      <span className="font-bold text-sm">{name}</span>
-      <span className="block font-bold text-lg text-primary mt-1" dir="rtl">{arabicName}</span>
+      <span className="font-bold text-md">{name}</span>
       {showNumber && number && (
         <span className="block text-xs text-gray-500 mt-1">Surah {number}</span>
       )}
