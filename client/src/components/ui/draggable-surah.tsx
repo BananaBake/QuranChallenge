@@ -52,12 +52,8 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
           <span className="block font-arabic text-lg text-primary mt-1" dir="rtl">{arabicName}</span>
         </div>
       </div>
-      {showNumber ? (
+      {showNumber && (
         <span className="font-bold text-xl bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center">{number}</span>
-      ) : (
-        <span className="w-10 h-10 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center">
-          <span className="text-primary/20 text-xs">?</span>
-        </span>
       )}
     </div>
   );
