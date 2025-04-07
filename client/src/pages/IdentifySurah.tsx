@@ -80,22 +80,13 @@ export default function IdentifySurah() {
     const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
     const usedIndices = new Set<number>();
     
-    // Only handle special case for Bismillah which appears in multiple surahs
-    // If the ayah text is Bismillah, we may need to exclude certain surahs to avoid ambiguity
-    const isBismillah = ayah.text.startsWith("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ");
-    
-    let attemptsCount = 0;
-    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length && attemptsCount < 100) {
-      attemptsCount++;
+    // Maximum attempts to avoid infinite loops
+    let attempts = 0;
+    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length && attempts < 100) {
+      attempts++;
       const randomIndex = Math.floor(Math.random() * availableSurahs.length);
       
       if (!usedIndices.has(randomIndex)) {
-        // Skip Al-Fatiha and other common surahs if the ayah is Bismillah to avoid ambiguity
-        if (isBismillah && (availableSurahs[randomIndex].number === 1 || 
-                           availableSurahs[randomIndex].number === 9)) {
-          continue; // Skip this surah
-        }
-        
         incorrectOptions.push({
           name: availableSurahs[randomIndex].englishName,
           arabicName: availableSurahs[randomIndex].name,

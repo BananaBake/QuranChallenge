@@ -151,16 +151,8 @@ export default function SurahOrdering() {
       const data = await response.json();
       
       if (data && data.length > 0) {
-        // Before shuffling, ensure we have distinct surahs that are easier to differentiate
-        // For example, avoid having Surah 1, 2, 3 together as they're a sequential pattern
-        // or avoid having multiple consecutive surahs like 55, 56, 57 together
-        
-        // Pre-process the data to ensure the surahs are dissimilar enough
-        // Let's try to avoid having surahs with adjacent numbers
-        const nonAdjacentSurahs = ensureNonAdjacentSurahs(data);
-        
         // Shuffle the order for the game
-        const shuffled = [...nonAdjacentSurahs].sort(() => Math.random() - 0.5);
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
         setSurahs(shuffled);
         
         // Check for achievements progress during gameplay
@@ -186,36 +178,6 @@ export default function SurahOrdering() {
       setIsLoadingNextQuestion(false);
     }
   }, [toast]);
-  
-  // Helper function to ensure we don't have adjacent surah numbers in our quiz
-  const ensureNonAdjacentSurahs = (surahs: Surah[]): Surah[] => {
-    // If we have less than 5 surahs, return as is
-    if (surahs.length < 5) return surahs;
-    
-    // For now, we'll use the surahs as they come from the API
-    // In a more complete implementation, we could replace or request additional surahs
-    // if we detect surahs with adjacent numbers
-    
-    // Sort by number first to check for adjacency
-    const sortedSurahs = [...surahs].sort((a, b) => a.number - b.number);
-    
-    // Check if any surahs have adjacent numbers
-    let hasAdjacentSurahs = false;
-    for (let i = 0; i < sortedSurahs.length - 1; i++) {
-      if (sortedSurahs[i + 1].number - sortedSurahs[i].number === 1) {
-        hasAdjacentSurahs = true;
-        break;
-      }
-    }
-    
-    // If we have adjacent surahs, attempt to fix by shuffling (simple approach)
-    // A more complete solution would request new surahs from the API
-    if (hasAdjacentSurahs) {
-      console.log("Detected adjacent surahs, returning original list");
-    }
-    
-    return surahs;
-  };
 
   const handleNext = () => {
     if (gameEnded) return;
