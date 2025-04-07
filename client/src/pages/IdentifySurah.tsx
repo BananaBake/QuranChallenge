@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Check, Trophy, Clock } from "lucide-react";
+import { Check, Trophy, Clock, ArrowRight, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
 
