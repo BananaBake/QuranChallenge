@@ -33,7 +33,7 @@ export function GameCard({ title, description, path, stats }: GameCardProps) {
           <div className="flex flex-col items-center bg-gray-50 rounded-md p-2">
             <Trophy className="w-4 h-4 text-secondary mb-1" /> 
             <span className="font-bold">{stats.best}</span>
-            <span className="text-gray-500 text-xs">Best</span>
+            <span className="text-gray-500 text-xs">High Score</span>
           </div>
           <div className="flex flex-col items-center bg-gray-50 rounded-md p-2">
             <Clock className="w-4 h-4 text-primary mb-1" /> 

@@ -11,16 +11,16 @@ export default function Home() {
   const { data: stats, isLoading: isLoadingStats } = useGameStats();
   
   const identifySurahStats = !isLoadingStats && stats ? {
-    best: `${stats.modePerformance.identifySurah}%`,
-    avgTime: "45s",
+    best: `${stats.modePerformance.identifySurah || 0}`,
+    avgTime: "~40s",
     played: Math.floor(stats.totalGames / 2)
-  } : { best: "0%", avgTime: "0s", played: 0 };
+  } : { best: "0", avgTime: "0s", played: 0 };
   
   const surahOrderingStats = !isLoadingStats && stats ? {
-    best: `${stats.modePerformance.surahOrdering}%`,
-    avgTime: "38s",
+    best: `${stats.modePerformance.surahOrdering || 0}`,
+    avgTime: "~35s",
     played: Math.ceil(stats.totalGames / 2)
-  } : { best: "0%", avgTime: "0s", played: 0 };
+  } : { best: "0", avgTime: "0s", played: 0 };
 
   return (
     <div className="pb-4">
@@ -62,14 +62,14 @@ export default function Home() {
         <div className="space-y-4">
           <GameCard 
             title="Identify the Surah"
-            description="Identify which Surah contains a given Ayah"
+            description="Identify which Surah contains a given Ayah - Endless Mode"
             path="/identify-surah"
             stats={identifySurahStats}
           />
           
           <GameCard 
             title="Surah Ordering"
-            description="Arrange Surahs in their correct sequential order"
+            description="Arrange Surahs in their correct sequential order - Endless Mode"
             path="/surah-ordering"
             stats={surahOrderingStats}
           />

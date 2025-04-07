@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRandomSurahsForGame } from "@/hooks/useQuranData";
 import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
@@ -112,6 +112,28 @@ export default function SurahOrdering() {
     }
   };
   
+  // Function to get the next question with completely random surahs
+  const getNextQuestion = useCallback(async () => {
+    try {
+      // Fetch new random surahs directly 
+      const response = await fetch('/api/quran/random-surahs?count=5');
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        // Shuffle the order for the game
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        setSurahs(shuffled);
+      }
+    } catch (error) {
+      console.error("Failed to fetch next question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch the next question. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
   const handleNext = () => {
     if (gameEnded) return;
     
@@ -120,7 +142,8 @@ export default function SurahOrdering() {
     // Only continue if the answer was correct
     if (isCorrect) {
       setCurrentQuestionIndex(prev => prev + 1);
-      refetch();
+      // Use our direct fetch method instead of refetch to ensure complete randomness
+      getNextQuestion();
     }
   };
   
@@ -132,7 +155,9 @@ export default function SurahOrdering() {
     setTimeSpent(0);
     setTimer("00:00");
     setChecked(false);
-    refetch();
+    setIsNewHighScore(false);
+    // Get completely fresh random surahs
+    getNextQuestion();
   };
   
   if (isLoading) {

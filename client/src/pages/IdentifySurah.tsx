@@ -104,7 +104,7 @@ export default function IdentifySurah() {
     setOptions(incorrectOptions);
   }, []);
   
-  // Function to get the next question
+  // Function to get the next question with completely random options
   const getNextQuestion = useCallback(async () => {
     try {
       // Fetch a new random ayah
@@ -113,6 +113,7 @@ export default function IdentifySurah() {
       
       if (data && data.length > 0) {
         setCurrentAyah(data[0]);
+        // Generate completely new random options for this ayah
         generateOptionsForCurrentAyah(data[0], allSurahs || []);
       }
     } catch (error) {
@@ -271,7 +272,7 @@ export default function IdentifySurah() {
         {currentAyah && (
           <QuranText 
             arabicText={currentAyah.text}
-            translationText={currentAyah.translation || ''} // We're not displaying this
+            showTranslation={false}
           />
         )}
         
