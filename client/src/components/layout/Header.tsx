@@ -5,8 +5,9 @@ export default function Header() {
   const [darkMode, setDarkMode] = useState(false);
   
   return (
-    <header className="bg-primary text-white py-4 px-4 text-center relative">
-      <h1 className="text-2xl font-bold">
+    <header className="bg-primary text-white py-4 px-4 text-center relative shadow-md">
+      <div className="absolute inset-0 opacity-10 islamic-pattern"></div>
+      <h1 className="text-2xl font-bold relative z-10">
         <span className="font-english">Quran Learning Game</span>
       </h1>
       <div className="absolute top-1/2 left-4 transform -translate-y-1/2">

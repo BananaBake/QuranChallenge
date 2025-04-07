@@ -16,7 +16,7 @@ function Router() {
   return (
     <>
       <Header />
-      <main className="p-4 pb-20 max-w-md mx-auto">
+      <main className="p-4 pb-20 w-full">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/identify-surah" component={IdentifySurah} />
@@ -34,7 +34,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="islamic-pattern min-h-screen bg-background text-textColor font-english relative pb-16">
-        <div className="max-w-md mx-auto relative min-h-screen pb-16">
+        <div className="w-full relative min-h-screen pb-16">
           <Router />
           <Toaster />
         </div>
