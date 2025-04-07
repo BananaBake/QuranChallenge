@@ -73,17 +73,14 @@ export default function IdentifySurah() {
   const generateOptionsForCurrentAyah = useCallback((ayah: Ayah, surahs: Surah[]) => {
     if (!ayah || surahs.length === 0) return;
     
-    // Exclude the correct surah from options
+    // Get all available surahs excluding the correct one
     const availableSurahs = surahs.filter(s => s.number !== ayah.surah.number);
     
     // Get 3 random incorrect options
     const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
     const usedIndices = new Set<number>();
     
-    // Maximum attempts to avoid infinite loops
-    let attempts = 0;
-    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length && attempts < 100) {
-      attempts++;
+    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length) {
       const randomIndex = Math.floor(Math.random() * availableSurahs.length);
       
       if (!usedIndices.has(randomIndex)) {
@@ -114,9 +111,8 @@ export default function IdentifySurah() {
   const getNextQuestion = useCallback(async () => {
     setIsLoadingNextQuestion(true);
     try {
-      // Fetch a new random ayah - add randomization parameter to prevent repetitive questions
-      const randomParam = Math.random();
-      const response = await fetch(`/api/quran/random-ayahs?count=1&rand=${randomParam}`);
+      // Fetch a new random ayah
+      const response = await fetch('/api/quran/random-ayahs?count=1');
       const data = await response.json();
       
       if (data && data.length > 0) {
@@ -170,31 +166,20 @@ export default function IdentifySurah() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Save game result whenever a correct answer is given
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "identify_surah",
-        score: newScore,
-        maxScore: newScore, // In endless mode, max score is the score achieved
-        timeSpent
-      });
-      
       // Update achievements based on the new score right now, not after
-      // Check for achievement progress immediately
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show notifications for newly unlocked achievements immediately
-      if (newAchievements.length > 0) {
-        // Use setTimeout to ensure the toast appears after the UI updates
-        setTimeout(() => {
-          newAchievements.forEach(achievement => {
-            toast({
-              title: "🏆 Achievement Unlocked!",
-              description: `${achievement.title}: ${achievement.description}`,
-              variant: "default",
-            });
+      if (newScore === 5 || newScore === 10 || newScore === 7) {
+        // We're checking for specific score values that match our achievement thresholds
+        // Check for achievement progress immediately
+        const newAchievements = checkAchievementsProgress();
+        
+        // Show notifications for newly unlocked achievements immediately
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
           });
-        }, 300);
+        });
       }
     } else {
       // Incorrect answer - but let the player see the correct answer before ending

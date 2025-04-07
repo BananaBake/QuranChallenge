@@ -91,30 +91,20 @@ export default function SurahOrdering() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Save game result with each correct answer
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "surah_ordering",
-        score: newScore,
-        maxScore: newScore, // In endless mode, max score is the score achieved
-        timeSpent
-      });
-      
-      // Check for achievement progress immediately
-      const newAchievements = checkAchievementsProgress();
-      
-      // Show notifications for newly unlocked achievements immediately
-      if (newAchievements.length > 0) {
-        // Use setTimeout to ensure the toast appears after the UI updates
-        setTimeout(() => {
-          newAchievements.forEach(achievement => {
-            toast({
-              title: "🏆 Achievement Unlocked!",
-              description: `${achievement.title}: ${achievement.description}`,
-              variant: "default",
-            });
+      // Update achievements based on the new score right now, not after
+      if (newScore === 5 || newScore === 10 || newScore === 7) {
+        // We're checking for specific score values that match our achievement thresholds
+        // Check for achievement progress immediately
+        const newAchievements = checkAchievementsProgress();
+        
+        // Show notifications for newly unlocked achievements immediately
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
           });
-        }, 300);
+        });
       }
     } else {
       // No need for a toast message - the user can already see from the UI that the order is incorrect
@@ -145,27 +135,14 @@ export default function SurahOrdering() {
   const getNextQuestion = useCallback(async () => {
     setIsLoadingNextQuestion(true);
     try {
-      // Add randomization parameter to prevent repetitive questions
-      const randomParam = Math.random();
-      const response = await fetch(`/api/quran/random-surahs?count=5&rand=${randomParam}`);
+      // Fetch new random surahs directly 
+      const response = await fetch('/api/quran/random-surahs?count=5');
       const data = await response.json();
       
       if (data && data.length > 0) {
         // Shuffle the order for the game
         const shuffled = [...data].sort(() => Math.random() - 0.5);
         setSurahs(shuffled);
-        
-        // Check for achievements progress during gameplay
-        const newAchievements = checkAchievementsProgress();
-        
-        // Show notifications for newly unlocked achievements immediately
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
-        });
       }
     } catch (error) {
       console.error("Failed to fetch next question:", error);
@@ -177,7 +154,7 @@ export default function SurahOrdering() {
     } finally {
       setIsLoadingNextQuestion(false);
     }
-  }, [toast]);
+  }, []);
 
   const handleNext = () => {
     if (gameEnded) return;

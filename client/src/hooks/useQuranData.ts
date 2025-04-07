@@ -9,28 +9,12 @@ export function useSurahs() {
 
 export function useRandomAyahsForGame(count: number = 10) {
   return useQuery<Ayah[]>({
-    queryKey: ['/api/quran/random-ayahs', count, Math.random().toString()],
-    refetchOnWindowFocus: false,
-    queryFn: async ({ queryKey }) => {
-      const response = await fetch(`/api/quran/random-ayahs?count=${count}&rand=${queryKey[2]}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch random ayahs');
-      }
-      return response.json();
-    }
+    queryKey: ['/api/quran/random-ayahs', count],
   });
 }
 
 export function useRandomSurahsForGame(count: number = 5) {
   return useQuery<Surah[]>({
-    queryKey: ['/api/quran/random-surahs', count, Math.random().toString()],
-    refetchOnWindowFocus: false,
-    queryFn: async ({ queryKey }) => {
-      const response = await fetch(`/api/quran/random-surahs?count=${count}&rand=${queryKey[2]}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch random surahs');
-      }
-      return response.json();
-    }
+    queryKey: ['/api/quran/random-surahs', count],
   });
 }
