@@ -71,7 +71,7 @@
   }
   
   .font-arabic {
-    font-family: 'Amiri', 'Scheherazade New', serif;
+    font-family: 'Uthmanic', 'Scheherazade New', 'Amiri', serif;
     direction: rtl;
     font-weight: 700;
   }

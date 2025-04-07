@@ -17,7 +17,11 @@ export function QuranText({
         <p 
           className="font-arabic text-center text-3xl leading-relaxed text-primary" 
           dir="rtl"
-          style={{ fontWeight: 700, lineHeight: 1.8 }}
+          style={{ 
+            fontWeight: 700, 
+            lineHeight: 1.8,
+            fontFamily: "'Uthmanic', 'Scheherazade New', serif"
+          }}
         >
           {arabicText}
         </p>
