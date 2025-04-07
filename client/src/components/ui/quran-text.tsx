@@ -57,27 +57,25 @@ export function QuranText({
   }, []);
 
   const loadAndPlayAudio = async () => {
-    // Don't do anything if we're already playing
-    if (isPlaying) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
+    // Toggle pause/play if audio is already loaded
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
+    
+    // If audio is already loaded but not playing, play it
+    if (audioRef.current) {
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing audio:", error);
       }
       return;
     }
     
-    // If we already have an audio element, just play it
-    if (audioRef.current) {
-      audioRef.current.play()
-        .catch(error => {
-          console.error("Error playing audio:", error);
-        });
-      return;
-    }
-    
     // Otherwise, load the audio and play it
-    
-    // Set loading state
     setIsLoading(true);
     
     // Cancel any previous requests
@@ -122,16 +120,36 @@ export function QuranText({
   
   // Helper function to set up audio event listeners
   const setupAudioEvents = (audio: HTMLAudioElement) => {
-    const handleEnded = () => setIsPlaying(false);
-    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      // Clean up references when audio finishes
+      if (audioRef.current === audio) {
+        audioRef.current = null;
+      }
+    };
+    
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+    
+    const handleError = (e: Event) => {
+      console.error("Audio playback error:", e);
+      setIsPlaying(false);
+      // Clean up references on error
+      if (audioRef.current === audio) {
+        audioRef.current = null;
+      }
+    };
     
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
     
     // Add cleanup to the audio element itself
     audio.addEventListener('ended', () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('error', handleError);
     }, { once: true });
   };
 
