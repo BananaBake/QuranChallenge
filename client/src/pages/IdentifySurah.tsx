@@ -1,19 +1,21 @@
-import { useState, useEffect } from "react";
-import { useRandomAyahsForGame } from "@/hooks/useQuranData";
-import { useSaveGameResult } from "@/hooks/useGameStats";
+import { useState, useEffect, useCallback } from "react";
+import { useRandomAyahsForGame, useSurahs } from "@/hooks/useQuranData";
+import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
 import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
-import { Check, SkipForward } from "lucide-react";
+import { Check, SkipForward, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Ayah } from "@shared/schema";
+import { Ayah, Surah } from "@shared/schema";
 
 export default function IdentifySurah() {
-  const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(10);
+  const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
+  const { data: allSurahs, isLoading: isLoadingSurahs } = useSurahs();
+  const { data: stats } = useGameStats();
   const { mutate: saveGameResult } = useSaveGameResult();
   const { toast } = useToast();
   
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [gameEnded, setGameEnded] = useState(false);
@@ -21,16 +23,25 @@ export default function IdentifySurah() {
   const [timeSpent, setTimeSpent] = useState(0);
   const [timer, setTimer] = useState("00:00");
   const [revealAnswer, setRevealAnswer] = useState(false);
+  const [options, setOptions] = useState<Array<{ name: string, arabicName: string, number: number }>>([]);
+  const [previousHighScore, setPreviousHighScore] = useState(0);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
   
-  const currentQuestion = ayahs?.[currentQuestionIndex];
-  const totalQuestions = ayahs?.length || 0;
-  
+  // Get the best previous score for this mode
   useEffect(() => {
-    if (ayahs && ayahs.length > 0 && !startTime) {
+    if (stats && stats.modePerformance) {
+      setPreviousHighScore(stats.modePerformance.identifySurah || 0);
+    }
+  }, [stats]);
+  
+  // Start timer when the game starts
+  useEffect(() => {
+    if (!startTime && !gameEnded) {
       setStartTime(new Date());
     }
-  }, [ayahs, startTime]);
+  }, [startTime, gameEnded]);
   
+  // Timer logic
   useEffect(() => {
     if (!startTime || gameEnded) return;
     
@@ -47,67 +58,72 @@ export default function IdentifySurah() {
     return () => clearInterval(intervalId);
   }, [startTime, gameEnded]);
   
-  // Generate options for all questions once when ayahs are loaded
-  const [allOptionsForQuestions, setAllOptionsForQuestions] = useState<Array<{ name: string, arabicName: string, number: number }[]>>([]);
-  
-  // Generate options once when ayahs are loaded
+  // Initialize the first question when data is loaded
   useEffect(() => {
-    if (ayahs && ayahs.length > 0 && allOptionsForQuestions.length === 0) {
-      const generatedOptions = ayahs.map(ayah => generateOptionsForAyah(ayah, ayahs));
-      setAllOptionsForQuestions(generatedOptions);
+    if (ayahs && ayahs.length > 0 && !currentAyah) {
+      setCurrentAyah(ayahs[0]);
+      generateOptionsForCurrentAyah(ayahs[0], allSurahs || []);
     }
-  }, [ayahs]);
+  }, [ayahs, allSurahs, currentAyah]);
   
-  const generateOptionsForAyah = (correct: Ayah, allAyahs: Ayah[]): { name: string, arabicName: string, number: number }[] => {
-    // Create a pool of surahs excluding the correct one
-    const surahMap = new Map();
+  // Function to generate random options for a given ayah
+  const generateOptionsForCurrentAyah = useCallback((ayah: Ayah, surahs: Surah[]) => {
+    if (!ayah || surahs.length === 0) return;
     
-    // First add all unique surahs to a map
-    allAyahs.forEach(ayah => {
-      if (!surahMap.has(ayah.surah.number)) {
-        surahMap.set(ayah.surah.number, {
-          name: ayah.surah.englishName,
-          arabicName: ayah.surah.name,
-          number: ayah.surah.number
-        });
-      }
-    });
+    // Get all available surahs excluding the correct one
+    const availableSurahs = surahs.filter(s => s.number !== ayah.surah.number);
     
-    // Remove the correct surah from the pool
-    surahMap.delete(correct.surah.number);
+    // Get 3 random incorrect options
+    const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
+    const usedIndices = new Set<number>();
     
-    // Convert map to array for random selection
-    const surahPool = Array.from(surahMap.values());
-    
-    // Randomly select 3 distinct surahs
-    const randomOptions: { name: string, arabicName: string, number: number }[] = [];
-    const usedIndices = new Set();
-    
-    while (randomOptions.length < 3 && usedIndices.size < surahPool.length) {
-      const randomIndex = Math.floor(Math.random() * surahPool.length);
+    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length) {
+      const randomIndex = Math.floor(Math.random() * availableSurahs.length);
       
       if (!usedIndices.has(randomIndex)) {
-        randomOptions.push(surahPool[randomIndex]);
+        incorrectOptions.push({
+          name: availableSurahs[randomIndex].englishName,
+          arabicName: availableSurahs[randomIndex].name,
+          number: availableSurahs[randomIndex].number
+        });
         usedIndices.add(randomIndex);
       }
     }
     
     // Add the correct option
     const correctOption = {
-      name: correct.surah.englishName,
-      arabicName: correct.surah.name,
-      number: correct.surah.number
+      name: ayah.surah.englishName,
+      arabicName: ayah.surah.name,
+      number: ayah.surah.number
     };
     
     // Insert the correct option at a random position
     const position = Math.floor(Math.random() * 4);
-    randomOptions.splice(position, 0, correctOption);
+    incorrectOptions.splice(position, 0, correctOption);
     
-    return randomOptions;
-  };
+    setOptions(incorrectOptions);
+  }, []);
   
-  // Get options for the current question from our pre-generated options
-  const options = allOptionsForQuestions[currentQuestionIndex] || [];
+  // Function to get the next question
+  const getNextQuestion = useCallback(async () => {
+    try {
+      // Fetch a new random ayah
+      const response = await fetch('/api/quran/random-ayahs?count=1');
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        setCurrentAyah(data[0]);
+        generateOptionsForCurrentAyah(data[0], allSurahs || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch next question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch the next question. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [allSurahs, generateOptionsForCurrentAyah, toast]);
   
   const handleOptionSelect = (index: number) => {
     if (revealAnswer) return;
@@ -126,41 +142,67 @@ export default function IdentifySurah() {
     
     setRevealAnswer(true);
     
-    if (currentQuestion && options[selectedOption].number === currentQuestion.surah.number) {
+    if (currentAyah && options[selectedOption].number === currentAyah.surah.number) {
+      // Correct answer
       setScore(prev => prev + 1);
+    } else {
+      // Incorrect answer - game over
+      setTimeout(() => {
+        setGameEnded(true);
+        
+        // Save game result
+        saveGameResult({
+          userId: 1, // Default user ID
+          gameType: "identify_surah",
+          score,
+          maxScore: score, // In endless mode, max score is the score achieved
+          timeSpent
+        });
+        
+        // Check if this is a new high score
+        if (score > previousHighScore) {
+          setIsNewHighScore(true);
+          toast({
+            title: "New High Score!",
+            description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
+            variant: "default",
+          });
+        }
+      }, 1500);
     }
   };
   
   const handleNext = () => {
+    if (gameEnded) return;
+    
     setSelectedOption(null);
     setRevealAnswer(false);
     
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      setGameEnded(true);
-      
-      saveGameResult({
-        userId: 1, // Default user ID
-        gameType: "identify_surah",
-        score,
-        maxScore: totalQuestions,
-        timeSpent
-      });
-      
-      toast({
-        title: "Game Completed!",
-        description: `You scored ${score} out of ${totalQuestions}`,
-      });
+    if (currentAyah && options.some(option => option.number === currentAyah.surah.number) && 
+        selectedOption !== null && options[selectedOption].number === currentAyah.surah.number) {
+      // If answer was correct, get the next question
+      getNextQuestion();
     }
   };
   
   const handleSkip = () => {
+    // Skipping counts as a wrong answer in endless mode
     setRevealAnswer(true);
+    setTimeout(() => {
+      setGameEnded(true);
+      
+      // Save game result
+      saveGameResult({
+        userId: 1, // Default user ID
+        gameType: "identify_surah",
+        score,
+        maxScore: score, // In endless mode, max score is the score achieved
+        timeSpent
+      });
+    }, 1500);
   };
   
   const handleStartNewGame = () => {
-    setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setScore(0);
     setGameEnded(false);
@@ -168,26 +210,58 @@ export default function IdentifySurah() {
     setTimeSpent(0);
     setTimer("00:00");
     setRevealAnswer(false);
-    setAllOptionsForQuestions([]); // Clear options so they'll be regenerated
-    refetch();
+    setIsNewHighScore(false);
+    setCurrentAyah(null);
+    refetch(); // Get fresh set of ayahs to start with
   };
   
-  if (isLoading) {
-    return <div className="text-center p-8">Loading questions...</div>;
+  if (isLoading || isLoadingSurahs) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center p-8">
+          <div className="mb-4">Loading...</div>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
   }
   
   if (gameEnded) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 text-center">
-        <h2 className="text-2xl font-bold text-primary mb-4">Game Completed!</h2>
-        <p className="text-lg mb-6">
-          Your Score: <span className="font-bold text-primary">{score}</span> / {totalQuestions}
+        <h2 className="text-2xl font-bold text-primary mb-2">{isNewHighScore ? '🏆 New High Score!' : 'Game Over!'}</h2>
+        
+        {isNewHighScore && (
+          <p className="text-accent font-bold mb-4">
+            Congratulations! You've beaten your previous best score!
+          </p>
+        )}
+        
+        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center">
+              <Trophy className="w-5 h-5 text-secondary mr-2" />
+              <span className="text-gray-600">Score:</span>
+            </div>
+            <span className="font-bold text-xl text-primary">{score}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Clock className="w-5 h-5 text-primary mr-2" />
+              <span className="text-gray-600">Time:</span>
+            </div>
+            <span className="font-bold text-xl text-accent">{timer}</span>
+          </div>
+        </div>
+        
+        <p className="text-sm text-gray-600 mb-6">
+          You correctly identified {score} {score === 1 ? 'Surah' : 'Surahs'}.
+          {isNewHighScore && ' Keep going to improve your knowledge!'}
         </p>
-        <p className="text-md mb-6">
-          Time Taken: <span className="font-bold text-accent">{timer}</span>
-        </p>
+        
         <Button 
-          className="bg-primary hover:bg-primary/90 text-white"
+          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
           onClick={handleStartNewGame}
         >
           Play Again
@@ -198,25 +272,25 @@ export default function IdentifySurah() {
   
   return (
     <div>
-      <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-5 mb-6">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-5 mb-4">
         <div className="flex justify-between items-center mb-5">
           <div>
             <h2 className="text-2xl font-bold text-primary">Identify the Surah</h2>
             <p className="text-sm text-gray-600 mt-1">Which Surah contains this Ayah?</p>
           </div>
-          <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-            <span>{currentQuestionIndex + 1}</span>/<span>{totalQuestions}</span>
+          <div className="bg-primary text-white rounded-full h-10 px-4 flex items-center justify-center font-bold">
+            Score: {score}
           </div>
         </div>
         
-        {currentQuestion && (
+        {currentAyah && (
           <QuranText 
-            arabicText={currentQuestion.text}
-            translationText={currentQuestion.translation || 'Translation not available'}
+            arabicText={currentAyah.text}
+            translationText={currentAyah.translation || ''} // We're not displaying this
           />
         )}
         
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           {options.map((option, index) => (
             <SurahOption
               key={index}
@@ -225,24 +299,24 @@ export default function IdentifySurah() {
               number={option.number}
               showNumber={revealAnswer}
               selected={selectedOption === index}
-              correct={revealAnswer && currentQuestion && option.number === currentQuestion.surah.number}
-              incorrect={revealAnswer && selectedOption === index && currentQuestion && option.number !== currentQuestion.surah.number}
+              correct={revealAnswer && currentAyah && option.number === currentAyah.surah.number}
+              incorrect={revealAnswer && selectedOption === index && currentAyah && option.number !== currentAyah.surah.number}
               onClick={() => handleOptionSelect(index)}
             />
           ))}
         </div>
         
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-6">
           {!revealAnswer ? (
             <>
               <Button 
-                className="bg-accent hover:bg-accent/90 text-white mr-4 px-6 py-5 text-base shadow-md"
+                className="bg-accent hover:bg-accent/90 text-white mr-4 px-6 py-4 text-base shadow-md"
                 onClick={handleSkip}
               >
                 <SkipForward className="w-5 h-5 mr-2" /> Skip
               </Button>
               <Button 
-                className="bg-primary hover:bg-primary/90 text-white px-6 py-5 text-base shadow-md"
+                className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
                 onClick={handleConfirm}
                 disabled={selectedOption === null}
               >
@@ -251,23 +325,24 @@ export default function IdentifySurah() {
             </>
           ) : (
             <Button
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-5 text-base shadow-md"
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
               onClick={handleNext}
+              disabled={gameEnded}
             >
-              {currentQuestionIndex < totalQuestions - 1 ? 'Next Question' : 'Finish Game'}
+              Next Question
             </Button>
           )}
         </div>
       </div>
       
-      <div className="flex justify-between items-center mt-4 text-sm">
-        <div>
-          <span className="text-primary font-bold">Score: </span>
-          <span>{score}</span>/<span>{totalQuestions}</span>
+      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+        <div className="flex items-center">
+          <Trophy className="w-4 h-4 text-secondary mr-1" />
+          <span className="text-sm">Best: {previousHighScore > score ? previousHighScore : score}</span>
         </div>
-        <div>
-          <span className="text-accent font-bold">Time: </span>
-          <span>{timer}</span>
+        <div className="flex items-center">
+          <Clock className="w-4 h-4 text-primary mr-1" />
+          <span className="text-sm">Time: {timer}</span>
         </div>
       </div>
     </div>

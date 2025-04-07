@@ -34,7 +34,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="islamic-pattern min-h-screen bg-background text-textColor font-english relative">
-        <div className="w-full relative min-h-screen pb-24">
+        <div className="w-full relative min-h-screen pb-16">
           <Router />
           <Toaster />
         </div>
