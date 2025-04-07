@@ -277,11 +277,66 @@ export function getNewlyUnlockedAchievements(): Achievement[] {
   const newlyUnlocked = achievements.filter(a => {
     if (!a.unlocked || !a.unlockedAt) return false;
     
-    // Consider "newly unlocked" if it was unlocked in the last 30 seconds
+    // Consider "newly unlocked" if it was unlocked in the last 5 seconds
+    // Using a shorter time window to ensure the notification appears immediately
     const unlockTime = new Date(a.unlockedAt).getTime();
     const now = Date.now();
-    return (now - unlockTime) < 30000; // 30 seconds
+    return (now - unlockTime) < 5000; // 5 seconds
   });
   
   return newlyUnlocked;
+}
+
+// Check achievements at any time during gameplay to see if any have been newly unlocked
+export function checkAchievementsProgress(): Achievement[] {
+  const stats = getGameStats();
+  const achievements = getAchievements();
+  const updatedAchievements = [...achievements];
+  let hasChanges = false;
+  
+  // First game achievement
+  const firstGameAchievement = updatedAchievements.find(a => a.id === 'first_game');
+  if (firstGameAchievement && !firstGameAchievement.unlocked && stats.totalGames > 0) {
+    firstGameAchievement.unlocked = true;
+    firstGameAchievement.unlockedAt = new Date().toISOString();
+    hasChanges = true;
+  }
+  
+  // Games played achievement
+  const gamesPlayedAchievement = updatedAchievements.find(a => a.id === 'games_10');
+  if (gamesPlayedAchievement) {
+    gamesPlayedAchievement.progress = stats.totalGames;
+    if (stats.totalGames >= (gamesPlayedAchievement.goal || 10) && !gamesPlayedAchievement.unlocked) {
+      gamesPlayedAchievement.unlocked = true;
+      gamesPlayedAchievement.unlockedAt = new Date().toISOString();
+      hasChanges = true;
+    }
+  }
+  
+  // Streak achievements
+  const streak5Achievement = updatedAchievements.find(a => a.id === 'streak_5');
+  if (streak5Achievement) {
+    streak5Achievement.progress = stats.bestStreak;
+    if (stats.bestStreak >= 5 && !streak5Achievement.unlocked) {
+      streak5Achievement.unlocked = true;
+      streak5Achievement.unlockedAt = new Date().toISOString();
+      hasChanges = true;
+    }
+  }
+  
+  const streak10Achievement = updatedAchievements.find(a => a.id === 'streak_10');
+  if (streak10Achievement) {
+    streak10Achievement.progress = stats.bestStreak;
+    if (stats.bestStreak >= 10 && !streak10Achievement.unlocked) {
+      streak10Achievement.unlocked = true;
+      streak10Achievement.unlockedAt = new Date().toISOString();
+      hasChanges = true;
+    }
+  }
+  
+  if (hasChanges) {
+    saveAchievements(updatedAchievements);
+  }
+  
+  return getNewlyUnlockedAchievements();
 }

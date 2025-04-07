@@ -7,7 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements, checkAchievementsProgress } from "@/lib/localStorageService";
 
 export default function SurahOrdering() {
   const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
@@ -89,10 +89,10 @@ export default function SurahOrdering() {
     if (isOrderCorrect) {
       setScore(prev => prev + 1);
       
-      // Check for newly unlocked achievements during gameplay
-      const newAchievements = getNewlyUnlockedAchievements();
+      // Check for achievement progress immediately
+      const newAchievements = checkAchievementsProgress();
       
-      // Show notifications for newly unlocked achievements during gameplay
+      // Show notifications for newly unlocked achievements immediately
       newAchievements.forEach(achievement => {
         toast({
           title: "🏆 Achievement Unlocked!",
@@ -101,15 +101,8 @@ export default function SurahOrdering() {
         });
       });
     } else {
-      // Show a helpful message about the correct order
-      // Show the correct ordered Surahs by their numbers
-      const correctSurahsOrder = [...surahs].sort((a, b) => a.number - b.number);
-      
-      toast({
-        title: "Incorrect Order",
-        description: "The correct order should be from the lowest to highest Surah number in the Quran.",
-        variant: "destructive",
-      });
+      // No need for a toast message - the user can already see from the UI that the order is incorrect
+      // and the correct ordering is explained in the message at the top
       
       // Save game result
       saveGameResult({
@@ -145,10 +138,10 @@ export default function SurahOrdering() {
         const shuffled = [...data].sort(() => Math.random() - 0.5);
         setSurahs(shuffled);
         
-        // Check for newly unlocked achievements during gameplay
-        const newAchievements = getNewlyUnlockedAchievements();
+        // Check for achievement progress immediately
+        const newAchievements = checkAchievementsProgress();
         
-        // Show notifications for newly unlocked achievements during gameplay
+        // Show notifications for newly unlocked achievements immediately
         newAchievements.forEach(achievement => {
           toast({
             title: "🏆 Achievement Unlocked!",

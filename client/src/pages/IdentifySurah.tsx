@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements, checkAchievementsProgress } from "@/lib/localStorageService";
 
 export default function IdentifySurah() {
   const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
@@ -120,10 +120,10 @@ export default function IdentifySurah() {
         // Generate completely new random options for this ayah
         generateOptionsForCurrentAyah(data[0], allSurahs || []);
         
-        // Check for newly unlocked achievements during gameplay
-        const newAchievements = getNewlyUnlockedAchievements();
+        // Check for achievements progress during gameplay
+        const newAchievements = checkAchievementsProgress();
         
-        // Show notifications for newly unlocked achievements during gameplay
+        // Show notifications for newly unlocked achievements immediately
         newAchievements.forEach(achievement => {
           toast({
             title: "🏆 Achievement Unlocked!",
@@ -165,10 +165,10 @@ export default function IdentifySurah() {
       // Correct answer
       setScore(prev => prev + 1);
       
-      // Check for newly unlocked achievements during gameplay
-      const newAchievements = getNewlyUnlockedAchievements();
+      // Check for achievement progress immediately
+      const newAchievements = checkAchievementsProgress();
       
-      // Show notifications for newly unlocked achievements during gameplay
+      // Show notifications for newly unlocked achievements immediately
       newAchievements.forEach(achievement => {
         toast({
           title: "🏆 Achievement Unlocked!",
