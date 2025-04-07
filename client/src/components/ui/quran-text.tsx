@@ -7,7 +7,7 @@ import axios from "axios";
 interface QuranTextProps {
   arabicText: string;
   audioUrl?: string;
-  ayahRef?: string;  // New prop for delayed audio loading
+  ayahRef?: string;  // For delayed audio loading
 }
 
 export function QuranText({ 
@@ -17,46 +17,38 @@ export function QuranText({
 }: QuranTextProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadedAudioUrl, setLoadedAudioUrl] = useState<string | undefined>(audioUrl);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentAyahRef = useRef<string | undefined>(ayahRef);
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  // Create/update audio element when component mounts or audioUrl changes
+  
+  // Track when ayahRef changes to reset audio state
   useEffect(() => {
-    // If there's an existing audio element playing, pause it
-    if (audioRef.current) {
-      audioRef.current.pause();
+    // If ayahRef changed, reset everything
+    if (ayahRef !== currentAyahRef.current) {
+      // Stop any playing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      
+      // Cancel any pending requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Reset state
       setIsPlaying(false);
+      setIsLoading(false);
+      currentAyahRef.current = ayahRef;
     }
-    
-    if (loadedAudioUrl) {
-      const audio = new Audio(loadedAudioUrl);
-      audioRef.current = audio;
-      
-      // Add event listeners
-      const handleEnded = () => setIsPlaying(false);
-      const handlePause = () => setIsPlaying(false);
-      const handlePlay = () => setIsPlaying(true);
-      
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('pause', handlePause);
-      audio.addEventListener('play', handlePlay);
-      
-      // Clean up
-      return () => {
-        audio.pause();
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('pause', handlePause);
-        audio.removeEventListener('play', handlePlay);
-      };
-    }
-  }, [loadedAudioUrl]);
+  }, [ayahRef]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
       }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -64,54 +56,83 @@ export function QuranText({
     };
   }, []);
 
-  const loadAudio = async () => {
-    // Only fetch if we have an ayahRef and no loaded audio yet
-    if (ayahRef && !loadedAudioUrl) {
-      setIsLoading(true);
-      
-      // Cancel any previous requests
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+  const loadAndPlayAudio = async () => {
+    // Don't do anything if we're already playing
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
       }
-      
-      // Create new abort controller
-      abortControllerRef.current = new AbortController();
-      
-      try {
+      return;
+    }
+    
+    // If we already have an audio element, just play it
+    if (audioRef.current) {
+      audioRef.current.play()
+        .catch(error => {
+          console.error("Error playing audio:", error);
+        });
+      return;
+    }
+    
+    // Otherwise, load the audio and play it
+    
+    // Set loading state
+    setIsLoading(true);
+    
+    // Cancel any previous requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
+    
+    try {
+      // Use direct audio URL if available
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        setupAudioEvents(audio);
+        audioRef.current = audio;
+        await audio.play();
+        setIsPlaying(true);
+      } 
+      // Otherwise fetch from API
+      else if (ayahRef) {
         const response = await axios.get(`/api/quran/audio/${ayahRef}`, {
           signal: abortControllerRef.current.signal
         });
         
         if (response.data && response.data.audio) {
-          setLoadedAudioUrl(response.data.audio);
+          const audio = new Audio(response.data.audio);
+          setupAudioEvents(audio);
+          audioRef.current = audio;
+          await audio.play();
+          setIsPlaying(true);
         }
-      } catch (error) {
-        if (!axios.isCancel(error)) {
-          console.error("Error loading audio:", error);
-        }
-      } finally {
-        setIsLoading(false);
       }
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error("Error loading or playing audio:", error);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const togglePlayPause = () => {
-    if (!loadedAudioUrl && !isLoading) {
-      // Load audio if not loaded yet
-      loadAudio();
-      return;
-    }
+  
+  // Helper function to set up audio event listeners
+  const setupAudioEvents = (audio: HTMLAudioElement) => {
+    const handleEnded = () => setIsPlaying(false);
+    const handlePause = () => setIsPlaying(false);
     
-    if (audioRef.current && loadedAudioUrl) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play()
-          .catch(error => {
-            console.error("Error playing audio:", error);
-          });
-      }
-    }
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    
+    // Add cleanup to the audio element itself
+    audio.addEventListener('ended', () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+    }, { once: true });
   };
 
   return (
@@ -133,8 +154,8 @@ export function QuranText({
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center gap-2 text-primary hover:text-primary-dark"
-            onClick={togglePlayPause}
+            className="flex items-center gap-2 text-primary hover:bg-primary/10"
+            onClick={loadAndPlayAudio}
             disabled={!ayahRef && !audioUrl}
           >
             {isLoading ? (
