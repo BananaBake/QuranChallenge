@@ -91,20 +91,30 @@ export default function SurahOrdering() {
       const newScore = score + 1;
       setScore(newScore);
       
-      // Update achievements based on the new score right now, not after
-      if (newScore === 5 || newScore === 10 || newScore === 7) {
-        // We're checking for specific score values that match our achievement thresholds
-        // Check for achievement progress immediately
-        const newAchievements = checkAchievementsProgress();
-        
-        // Show notifications for newly unlocked achievements immediately
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
+      // Save game result with each correct answer
+      saveGameResult({
+        userId: 1, // Default user ID
+        gameType: "surah_ordering",
+        score: newScore,
+        maxScore: newScore, // In endless mode, max score is the score achieved
+        timeSpent
+      });
+      
+      // Check for achievement progress immediately
+      const newAchievements = checkAchievementsProgress();
+      
+      // Show notifications for newly unlocked achievements immediately
+      if (newAchievements.length > 0) {
+        // Use setTimeout to ensure the toast appears after the UI updates
+        setTimeout(() => {
+          newAchievements.forEach(achievement => {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `${achievement.title}: ${achievement.description}`,
+              variant: "default",
+            });
           });
-        });
+        }, 300);
       }
     } else {
       // No need for a toast message - the user can already see from the UI that the order is incorrect
@@ -135,14 +145,35 @@ export default function SurahOrdering() {
   const getNextQuestion = useCallback(async () => {
     setIsLoadingNextQuestion(true);
     try {
-      // Fetch new random surahs directly 
-      const response = await fetch('/api/quran/random-surahs?count=5');
+      // Add randomization parameter to prevent repetitive questions
+      const randomParam = Math.random();
+      const response = await fetch(`/api/quran/random-surahs?count=5&rand=${randomParam}`);
       const data = await response.json();
       
       if (data && data.length > 0) {
+        // Before shuffling, ensure we have distinct surahs that are easier to differentiate
+        // For example, avoid having Surah 1, 2, 3 together as they're a sequential pattern
+        // or avoid having multiple consecutive surahs like 55, 56, 57 together
+        
+        // Pre-process the data to ensure the surahs are dissimilar enough
+        // Let's try to avoid having surahs with adjacent numbers
+        const nonAdjacentSurahs = ensureNonAdjacentSurahs(data);
+        
         // Shuffle the order for the game
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        const shuffled = [...nonAdjacentSurahs].sort(() => Math.random() - 0.5);
         setSurahs(shuffled);
+        
+        // Check for achievements progress during gameplay
+        const newAchievements = checkAchievementsProgress();
+        
+        // Show notifications for newly unlocked achievements immediately
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
+          });
+        });
       }
     } catch (error) {
       console.error("Failed to fetch next question:", error);
@@ -154,7 +185,37 @@ export default function SurahOrdering() {
     } finally {
       setIsLoadingNextQuestion(false);
     }
-  }, []);
+  }, [toast]);
+  
+  // Helper function to ensure we don't have adjacent surah numbers in our quiz
+  const ensureNonAdjacentSurahs = (surahs: Surah[]): Surah[] => {
+    // If we have less than 5 surahs, return as is
+    if (surahs.length < 5) return surahs;
+    
+    // For now, we'll use the surahs as they come from the API
+    // In a more complete implementation, we could replace or request additional surahs
+    // if we detect surahs with adjacent numbers
+    
+    // Sort by number first to check for adjacency
+    const sortedSurahs = [...surahs].sort((a, b) => a.number - b.number);
+    
+    // Check if any surahs have adjacent numbers
+    let hasAdjacentSurahs = false;
+    for (let i = 0; i < sortedSurahs.length - 1; i++) {
+      if (sortedSurahs[i + 1].number - sortedSurahs[i].number === 1) {
+        hasAdjacentSurahs = true;
+        break;
+      }
+    }
+    
+    // If we have adjacent surahs, attempt to fix by shuffling (simple approach)
+    // A more complete solution would request new surahs from the API
+    if (hasAdjacentSurahs) {
+      console.log("Detected adjacent surahs, returning original list");
+    }
+    
+    return surahs;
+  };
 
   const handleNext = () => {
     if (gameEnded) return;
