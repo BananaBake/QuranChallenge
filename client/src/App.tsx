@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import IdentifySurah from "@/pages/IdentifySurah";
 import SurahOrdering from "@/pages/SurahOrdering";
+import Achievements from "@/pages/Achievements";
 import Header from "@/components/layout/Header";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 
@@ -20,6 +21,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/identify-surah" component={IdentifySurah} />
           <Route path="/surah-ordering" component={SurahOrdering} />
+          <Route path="/achievements" component={Achievements} />
           <Route component={NotFound} />
         </Switch>
       </main>

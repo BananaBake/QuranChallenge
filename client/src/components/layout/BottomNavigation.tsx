@@ -2,7 +2,8 @@ import { Link } from "wouter";
 import { 
   Home, 
   Search, 
-  ArrowUpDown 
+  ArrowUpDown,
+  Trophy
 } from "lucide-react";
 
 interface BottomNavigationProps {
@@ -15,7 +16,7 @@ export default function BottomNavigation({ currentPath }: BottomNavigationProps)
       <div className="w-full px-2">
         <div className="flex justify-around items-center h-16">
           <Link href="/">
-            <div className={`flex flex-col items-center justify-center py-2 w-1/3 ${
+            <div className={`flex flex-col items-center justify-center py-2 w-1/4 ${
               currentPath === "/" ? "text-primary" : "text-gray-500"
             }`}>
               <Home className="w-5 h-5" />
@@ -24,7 +25,7 @@ export default function BottomNavigation({ currentPath }: BottomNavigationProps)
           </Link>
           
           <Link href="/identify-surah">
-            <div className={`flex flex-col items-center justify-center py-2 w-1/3 ${
+            <div className={`flex flex-col items-center justify-center py-2 w-1/4 ${
               currentPath === "/identify-surah" ? "text-primary" : "text-gray-500"
             }`}>
               <Search className="w-5 h-5" />
@@ -33,11 +34,20 @@ export default function BottomNavigation({ currentPath }: BottomNavigationProps)
           </Link>
           
           <Link href="/surah-ordering">
-            <div className={`flex flex-col items-center justify-center py-2 w-1/3 ${
+            <div className={`flex flex-col items-center justify-center py-2 w-1/4 ${
               currentPath === "/surah-ordering" ? "text-primary" : "text-gray-500"
             }`}>
               <ArrowUpDown className="w-5 h-5" />
               <span className="text-xs mt-1">Ordering</span>
+            </div>
+          </Link>
+          
+          <Link href="/achievements">
+            <div className={`flex flex-col items-center justify-center py-2 w-1/4 ${
+              currentPath === "/achievements" ? "text-primary" : "text-gray-500"
+            }`}>
+              <Trophy className="w-5 h-5" />
+              <span className="text-xs mt-1">Trophies</span>
             </div>
           </Link>
         </div>
