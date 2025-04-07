@@ -60,17 +60,8 @@ export function useSaveGameResult() {
       // Save to localStorage
       const savedGame = saveGameHistory(gameData);
       
-      // Check for newly unlocked achievements
-      const newAchievements = getNewlyUnlockedAchievements();
-      
-      // Show notifications for newly unlocked achievements
-      newAchievements.forEach(achievement => {
-        toast({
-          title: "🏆 Achievement Unlocked!",
-          description: `${achievement.title}: ${achievement.description}`,
-          variant: "default",
-        });
-      });
+      // No longer showing toast notifications here - we'll check for newly unlocked achievements in the game components
+      // This way we can show the notifications during gameplay rather than all at the end
       
       return savedGame;
     } catch (error) {

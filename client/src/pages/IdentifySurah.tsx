@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Check, Trophy, Clock, ArrowRight, RefreshCw } from "lucide-react";
+import { Check, Trophy, Clock, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
+import { getNewlyUnlockedAchievements } from "@/lib/localStorageService";
 
 export default function IdentifySurah() {
   const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
@@ -27,6 +28,7 @@ export default function IdentifySurah() {
   const [options, setOptions] = useState<Array<{ name: string, arabicName: string, number: number }>>([]);
   const [previousHighScore, setPreviousHighScore] = useState(0);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [isLoadingNextQuestion, setIsLoadingNextQuestion] = useState(false);
   
   // Get the best previous score for this mode
   useEffect(() => {
@@ -107,6 +109,7 @@ export default function IdentifySurah() {
   
   // Function to get the next question with completely random options
   const getNextQuestion = useCallback(async () => {
+    setIsLoadingNextQuestion(true);
     try {
       // Fetch a new random ayah
       const response = await fetch('/api/quran/random-ayahs?count=1');
@@ -116,6 +119,18 @@ export default function IdentifySurah() {
         setCurrentAyah(data[0]);
         // Generate completely new random options for this ayah
         generateOptionsForCurrentAyah(data[0], allSurahs || []);
+        
+        // Check for newly unlocked achievements during gameplay
+        const newAchievements = getNewlyUnlockedAchievements();
+        
+        // Show notifications for newly unlocked achievements during gameplay
+        newAchievements.forEach(achievement => {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `${achievement.title}: ${achievement.description}`,
+            variant: "default",
+          });
+        });
       }
     } catch (error) {
       console.error("Failed to fetch next question:", error);
@@ -124,6 +139,8 @@ export default function IdentifySurah() {
         description: "Failed to fetch the next question. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoadingNextQuestion(false);
     }
   }, [allSurahs, generateOptionsForCurrentAyah, toast]);
   
@@ -147,9 +164,35 @@ export default function IdentifySurah() {
     if (currentAyah && options[selectedOption].number === currentAyah.surah.number) {
       // Correct answer
       setScore(prev => prev + 1);
+      
+      // Check for newly unlocked achievements during gameplay
+      const newAchievements = getNewlyUnlockedAchievements();
+      
+      // Show notifications for newly unlocked achievements during gameplay
+      newAchievements.forEach(achievement => {
+        toast({
+          title: "🏆 Achievement Unlocked!",
+          description: `${achievement.title}: ${achievement.description}`,
+          variant: "default",
+        });
+      });
     } else {
-      // Incorrect answer - game over immediately
-      setGameEnded(true);
+      // Incorrect answer - but let the player see the correct answer before ending
+      // Game will end when they click the "End Game" button
+      
+      // Find the correct option to highlight it
+      const correctSurahOption = options.find(option => 
+        currentAyah && option.number === currentAyah.surah.number
+      );
+      
+      if (correctSurahOption) {
+        // Add a message to show the correct answer in a toast
+        toast({
+          title: "Incorrect Answer",
+          description: `The correct answer was ${correctSurahOption.name} (${correctSurahOption.arabicName})`,
+          variant: "destructive",
+        });
+      }
       
       // Save game result
       saveGameResult({
@@ -284,12 +327,19 @@ export default function IdentifySurah() {
           ))}
         </div>
         
+        {isLoadingNextQuestion && (
+          <div className="flex items-center justify-center p-4 mt-4 bg-primary/10 text-primary rounded-lg">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            <span>Loading next challenge...</span>
+          </div>
+        )}
+        
         <div className="flex justify-center mt-6">
           {!revealAnswer ? (
             <Button 
               className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
               onClick={handleConfirm}
-              disabled={selectedOption === null}
+              disabled={selectedOption === null || isLoadingNextQuestion}
             >
               <Check className="w-5 h-5 mr-2" /> Confirm
             </Button>
@@ -297,16 +347,24 @@ export default function IdentifySurah() {
             <Button
               className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
               onClick={() => setGameEnded(true)}
+              disabled={isLoadingNextQuestion}
             >
-              End Game
+              See Results
             </Button>
           ) : (
             <Button
               className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
               onClick={handleNext}
-              disabled={gameEnded}
+              disabled={gameEnded || isLoadingNextQuestion}
             >
-              Next Question
+              {isLoadingNextQuestion ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Loading...
+                </>
+              ) : (
+                'Next Question'
+              )}
             </Button>
           )}
         </div>
