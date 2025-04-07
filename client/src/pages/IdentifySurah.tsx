@@ -73,75 +73,35 @@ export default function IdentifySurah() {
   const generateOptionsForCurrentAyah = useCallback((ayah: Ayah, surahs: Surah[]) => {
     if (!ayah || surahs.length === 0) return;
     
-    // This set will track surahs we want to exclude to prevent ambiguous options
-    const ambiguousSurahs = new Set<number>();
-    ambiguousSurahs.add(ayah.surah.number); // Add the correct surah to exclude duplicates
-    
-    // Identify potentially ambiguous surahs (ayahs that might appear in multiple surahs)
-    // For example, Bismillah appears in many surahs
-    // If the ayah starts with common phrases like "Bismillah" or specific Quranic openings
-    const ayahText = ayah.text.trim().toLowerCase();
-    
-    // Add similar numbered surahs to the ambiguous list
-    // e.g., if the correct answer is Surah 2, exclude surahs 20-29 as options to avoid confusion
-    const correctNumber = ayah.surah.number;
-    surahs.forEach(surah => {
-      // Exclude surahs with similar numbers (e.g., if correct is 2, exclude 20, 21, etc.)
-      if (surah.number.toString().startsWith(correctNumber.toString()) && 
-          surah.number !== correctNumber) {
-        ambiguousSurahs.add(surah.number);
-      }
-      
-      // Exclude surahs where the correct surah is a prefix of them
-      // (e.g., if correct is 10, exclude 100, 101, etc.)
-      if (surah.number.toString().startsWith(correctNumber.toString()) && 
-          surah.number !== correctNumber) {
-        ambiguousSurahs.add(surah.number);
-      }
-      
-      // Also exclude special cases like Surah Al-Fatiha, which is widely known
-      if (correctNumber === 1 || surah.number === 1) {
-        ambiguousSurahs.add(surah.number);
-      }
-    });
-    
-    // Get available surahs excluding the ambiguous ones
-    const availableSurahs = surahs.filter(s => !ambiguousSurahs.has(s.number));
+    // Exclude the correct surah from options
+    const availableSurahs = surahs.filter(s => s.number !== ayah.surah.number);
     
     // Get 3 random incorrect options
     const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
     const usedIndices = new Set<number>();
     
-    // Make sure we have enough surahs to pick from
-    if (availableSurahs.length < 3) {
-      // If we don't have enough non-ambiguous surahs, revert to using all except the correct one
-      const fallbackSurahs = surahs.filter(s => s.number !== ayah.surah.number);
+    // Only handle special case for Bismillah which appears in multiple surahs
+    // If the ayah text is Bismillah, we may need to exclude certain surahs to avoid ambiguity
+    const isBismillah = ayah.text.startsWith("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ");
+    
+    let attemptsCount = 0;
+    while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length && attemptsCount < 100) {
+      attemptsCount++;
+      const randomIndex = Math.floor(Math.random() * availableSurahs.length);
       
-      while (incorrectOptions.length < 3 && incorrectOptions.length < fallbackSurahs.length) {
-        const randomIndex = Math.floor(Math.random() * fallbackSurahs.length);
-        
-        if (!usedIndices.has(randomIndex)) {
-          incorrectOptions.push({
-            name: fallbackSurahs[randomIndex].englishName,
-            arabicName: fallbackSurahs[randomIndex].name,
-            number: fallbackSurahs[randomIndex].number
-          });
-          usedIndices.add(randomIndex);
+      if (!usedIndices.has(randomIndex)) {
+        // Skip Al-Fatiha and other common surahs if the ayah is Bismillah to avoid ambiguity
+        if (isBismillah && (availableSurahs[randomIndex].number === 1 || 
+                           availableSurahs[randomIndex].number === 9)) {
+          continue; // Skip this surah
         }
-      }
-    } else {
-      // Use our filtered non-ambiguous list
-      while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length) {
-        const randomIndex = Math.floor(Math.random() * availableSurahs.length);
         
-        if (!usedIndices.has(randomIndex)) {
-          incorrectOptions.push({
-            name: availableSurahs[randomIndex].englishName,
-            arabicName: availableSurahs[randomIndex].name,
-            number: availableSurahs[randomIndex].number
-          });
-          usedIndices.add(randomIndex);
-        }
+        incorrectOptions.push({
+          name: availableSurahs[randomIndex].englishName,
+          arabicName: availableSurahs[randomIndex].name,
+          number: availableSurahs[randomIndex].number
+        });
+        usedIndices.add(randomIndex);
       }
     }
     
