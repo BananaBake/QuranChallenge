@@ -191,8 +191,8 @@ export default function SurahOrdering() {
             <h2 className="text-2xl font-bold text-primary">Surah Ordering</h2>
             <p className="text-sm text-gray-600 mt-1">Arrange the Surahs in correct order</p>
           </div>
-          <div className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-            <span>{currentQuestionIndex + 1}</span>/<span>{totalQuestions}</span>
+          <div className="bg-primary text-white rounded-full h-10 px-4 flex items-center justify-center font-bold">
+            Score: {score}
           </div>
         </div>
         
@@ -228,30 +228,32 @@ export default function SurahOrdering() {
         <div className="flex justify-center mt-6">
           {!checked ? (
             <Button 
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
               onClick={handleCheckOrder}
             >
-              <Check className="w-4 h-4 mr-1" /> Check Order
+              <Check className="w-5 h-5 mr-2" /> Check Order
             </Button>
           ) : (
-            <Button
-              className="bg-primary hover:bg-primary/90 text-white"
-              onClick={handleNext}
-            >
-              {currentQuestionIndex < totalQuestions - 1 ? 'Next Question' : 'Finish Game'}
-            </Button>
+            isCorrect && !gameEnded && (
+              <Button
+                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
+                onClick={handleNext}
+              >
+                Next Question
+              </Button>
+            )
           )}
         </div>
       </div>
       
-      <div className="flex justify-between items-center mt-4 text-sm">
-        <div>
-          <span className="text-primary font-bold">Score: </span>
-          <span>{score}</span>/<span>{totalQuestions}</span>
+      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+        <div className="flex items-center">
+          <Trophy className="w-4 h-4 text-secondary mr-1" />
+          <span className="text-sm">Best: {previousHighScore > score ? previousHighScore : score}</span>
         </div>
-        <div>
-          <span className="text-accent font-bold">Time: </span>
-          <span>{timer}</span>
+        <div className="flex items-center">
+          <Clock className="w-4 h-4 text-primary mr-1" />
+          <span className="text-sm">Time: {timer}</span>
         </div>
       </div>
     </div>
