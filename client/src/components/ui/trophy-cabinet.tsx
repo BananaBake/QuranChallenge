@@ -22,7 +22,7 @@ export function Trophy({ achievement, highlighted = false }: TrophyProps) {
     >
       <div className={cn(
         "text-3xl mb-1",
-        !achievement.unlocked && "grayscale"
+        !achievement.unlocked && "grayscale opacity-50"
       )}>
         {achievement.icon}
       </div>
@@ -100,8 +100,8 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
     >
       <div className="flex items-center mb-4">
         <div className={cn(
-          "w-16 h-16 rounded-full flex items-center justify-center text-3xl mr-4",
-          achievement.unlocked ? "bg-secondary/20" : "bg-gray-100"
+          "w-16 h-16 rounded-full flex items-center justify-center text-4xl mr-4",
+          achievement.unlocked ? "bg-secondary/20" : "bg-gray-100 opacity-70"
         )}>
           {achievement.icon}
         </div>

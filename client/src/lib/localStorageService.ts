@@ -351,9 +351,25 @@ export function getAchievements(): Achievement[] {
   }
   
   try {
-    return JSON.parse(achievementsString);
+    const savedAchievements = JSON.parse(achievementsString);
+    
+    // Check if there are new achievements in initialAchievements that aren't in savedAchievements
+    // This is crucial when we add new achievements to the app and users already have existing data
+    const savedIds = savedAchievements.map((a: Achievement) => a.id);
+    const newAchievements = initialAchievements.filter(a => !savedIds.includes(a.id));
+    
+    if (newAchievements.length > 0) {
+      // We found new achievements! Add them to the saved list
+      const updatedAchievements = [...savedAchievements, ...newAchievements];
+      // Save the updated list
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(updatedAchievements));
+      return updatedAchievements;
+    }
+    
+    return savedAchievements;
   } catch (error) {
     console.error('Error parsing achievements from localStorage', error);
+    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(initialAchievements));
     return initialAchievements;
   }
 }

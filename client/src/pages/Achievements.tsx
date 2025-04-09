@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { useAchievements } from '@/hooks/useLocalStorage';
+import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { TrophyCabinet, TrophyDetails } from '@/components/ui/trophy-cabinet';
 import { AchievementsList } from '@/components/ui/achievement-display';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, Trophy, Medal } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Award, Trophy, Medal, RefreshCw } from 'lucide-react';
 import { Achievement } from '@/lib/localStorageService';
 
 export default function Achievements() {
-  const { data: achievements, isLoading } = useAchievements();
+  const { data: achievements, isLoading, refresh } = useAchievements();
+  const { toast } = useToast();
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Force a refresh of the achievement data when the page loads
+  useEffect(() => {
+    refresh();
+  }, [refresh, refreshKey]);
   
   if (isLoading) {
     return <LoadingSpinner message="Loading achievements..." />;
@@ -47,16 +57,42 @@ export default function Achievements() {
       >
         <h2 className="text-2xl font-bold text-primary mb-4">Achievements</h2>
         
-        <div className="bg-primary/5 rounded-lg p-4 mb-6 flex items-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-            <Award className="w-8 h-8 text-primary" />
+        <div className="bg-primary/5 rounded-lg p-4 mb-6 flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-4">
+              <Award className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-primary">Your Progress</h3>
+              <p className="text-gray-600">
+                You've unlocked {unlockedCount} of {totalCount} achievements ({percentComplete}%)
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-primary">Your Progress</h3>
-            <p className="text-gray-600">
-              You've unlocked {unlockedCount} of {totalCount} achievements ({percentComplete}%)
-            </p>
-          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1" 
+            onClick={() => {
+              // Reset the achievements in local storage
+              localStorage.removeItem('quran_challenge_achievements');
+              localStorage.setItem('quran_challenge_highscore_beats', '0');
+              
+              // Force a refresh of the achievements
+              setRefreshKey(prev => prev + 1);
+              
+              // Show a notification to the user
+              toast({
+                title: "Achievements Reset",
+                description: "Your trophies have been reset to show all possible achievements.",
+                variant: "default",
+              });
+            }}
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Reset</span>
+          </Button>
         </div>
         
         <Tabs defaultValue="trophies" className="w-full">
