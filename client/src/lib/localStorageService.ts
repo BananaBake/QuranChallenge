@@ -26,11 +26,13 @@ const initialStats: GameStats = {
     identifySurah: 0,
     surahOrdering: 0
   },
+  highScoreBeatenCount: 0,
   recentGames: []
 };
 
 // Initial achievements
 export const initialAchievements: Achievement[] = [
+  // Game completion achievements
   {
     id: 'first_game',
     title: 'First Steps',
@@ -38,6 +40,53 @@ export const initialAchievements: Achievement[] = [
     icon: '🎮',
     unlocked: false
   },
+  {
+    id: 'games_5',
+    title: 'Getting Started',
+    description: 'Play 5 games',
+    icon: '📖',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  {
+    id: 'games_10',
+    title: 'Dedicated Student',
+    description: 'Play 10 games',
+    icon: '📚',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  {
+    id: 'games_25',
+    title: 'Regular Learner',
+    description: 'Play 25 games',
+    icon: '📝',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'games_50',
+    title: 'Knowledge Seeker',
+    description: 'Play 50 games',
+    icon: '🔖',
+    unlocked: false,
+    progress: 0,
+    goal: 50
+  },
+  {
+    id: 'games_100',
+    title: 'Scholar',
+    description: 'Play 100 games',
+    icon: '🧠',
+    unlocked: false,
+    progress: 0,
+    goal: 100
+  },
+  
+  // Streak achievements for any mode
   {
     id: 'streak_5',
     title: 'Getting Good',
@@ -57,14 +106,34 @@ export const initialAchievements: Achievement[] = [
     goal: 10
   },
   {
-    id: 'games_10',
-    title: 'Dedicated Student',
-    description: 'Play 10 games',
-    icon: '📚',
+    id: 'streak_25',
+    title: 'Expert',
+    description: 'Reach a streak of 25 in any game mode',
+    icon: '💫',
     unlocked: false,
     progress: 0,
-    goal: 10
+    goal: 25
   },
+  {
+    id: 'streak_50',
+    title: 'Champion',
+    description: 'Reach a streak of 50 in any game mode',
+    icon: '🌟',
+    unlocked: false,
+    progress: 0,
+    goal: 50
+  },
+  {
+    id: 'streak_100',
+    title: 'Legendary',
+    description: 'Reach a streak of 100 in any game mode',
+    icon: '👑',
+    unlocked: false,
+    progress: 0,
+    goal: 100
+  },
+  
+  // Identify Surah mode achievements
   {
     id: 'identify_master',
     title: 'Surah Identifier',
@@ -75,6 +144,26 @@ export const initialAchievements: Achievement[] = [
     goal: 7
   },
   {
+    id: 'identify_streak_25',
+    title: 'Ayah Expert',
+    description: 'Reach a streak of 25 in Identify Surah mode',
+    icon: '📜',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'identify_streak_50',
+    title: 'Quran Navigator',
+    description: 'Reach a streak of 50 in Identify Surah mode',
+    icon: '🧭',
+    unlocked: false,
+    progress: 0,
+    goal: 50
+  },
+  
+  // Surah Ordering mode achievements
+  {
     id: 'ordering_master',
     title: 'Order Master',
     description: 'Reach a streak of 7 in Surah Ordering mode',
@@ -82,6 +171,80 @@ export const initialAchievements: Achievement[] = [
     unlocked: false,
     progress: 0,
     goal: 7
+  },
+  {
+    id: 'ordering_streak_25',
+    title: 'Sequencing Expert',
+    description: 'Reach a streak of 25 in Surah Ordering mode',
+    icon: '📋',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'ordering_streak_50',
+    title: 'Arrangement Guru',
+    description: 'Reach a streak of 50 in Surah Ordering mode',
+    icon: '🔄',
+    unlocked: false,
+    progress: 0,
+    goal: 50
+  },
+  
+  // High score achievements
+  {
+    id: 'highscore_1',
+    title: 'Record Breaker',
+    description: 'Beat your high score for the first time',
+    icon: '📈',
+    unlocked: false,
+    progress: 0,
+    goal: 1
+  },
+  {
+    id: 'highscore_5',
+    title: 'Consistent Improver',
+    description: 'Beat your high score 5 times',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  {
+    id: 'highscore_10',
+    title: 'Growth Mindset',
+    description: 'Beat your high score 10 times',
+    icon: '🚀',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  {
+    id: 'highscore_25',
+    title: 'Continuous Learner',
+    description: 'Beat your high score 25 times',
+    icon: '📱',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'highscore_50',
+    title: 'Excellence Pursuer',
+    description: 'Beat your high score 50 times',
+    icon: '🏅',
+    unlocked: false,
+    progress: 0,
+    goal: 50
+  },
+  {
+    id: 'highscore_100',
+    title: 'Mastery Achieved',
+    description: 'Beat your high score 100 times',
+    icon: '🎯',
+    unlocked: false,
+    progress: 0,
+    goal: 100
   }
 ];
 
@@ -161,6 +324,9 @@ export function getGameStats(): GameStats {
   // Roughly estimate ayat learned (one per game plus bonus for streaks)
   const ayatLearned = totalGames + Math.floor(bestStreak / 2);
   
+  // Get high score beaten count from localStorage or initialize to 0
+  const highScoreBeatenCount = parseInt(localStorage.getItem('quran_challenge_highscore_beats') || '0');
+  
   return {
     totalGames,
     averageScore,
@@ -170,6 +336,7 @@ export function getGameStats(): GameStats {
       identifySurah: identifySurahBest,
       surahOrdering: surahOrderingBest
     },
+    highScoreBeatenCount,
     recentGames: getRecentGameHistory()
   };
 }
@@ -214,65 +381,116 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
     newlyUnlocked.push({...firstGameAchievement});
   }
   
-  // Games played achievement
-  const gamesPlayedAchievement = updatedAchievements.find(a => a.id === 'games_10');
-  if (gamesPlayedAchievement) {
-    gamesPlayedAchievement.progress = stats.totalGames;
-    if (stats.totalGames >= (gamesPlayedAchievement.goal || 10) && !gamesPlayedAchievement.unlocked) {
-      gamesPlayedAchievement.unlocked = true;
-      gamesPlayedAchievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...gamesPlayedAchievement});
-    }
-  }
+  // Games played achievements
+  const gameAchievements = [
+    { id: 'games_5', goal: 5 },
+    { id: 'games_10', goal: 10 },
+    { id: 'games_25', goal: 25 },
+    { id: 'games_50', goal: 50 },
+    { id: 'games_100', goal: 100 }
+  ];
   
-  // Streak achievements
-  const streak5Achievement = updatedAchievements.find(a => a.id === 'streak_5');
-  if (streak5Achievement) {
-    streak5Achievement.progress = stats.bestStreak;
-    if (stats.bestStreak >= 5 && !streak5Achievement.unlocked) {
-      streak5Achievement.unlocked = true;
-      streak5Achievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...streak5Achievement});
+  gameAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.totalGames;
+      if (stats.totalGames >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
     }
-  }
+  });
   
-  const streak10Achievement = updatedAchievements.find(a => a.id === 'streak_10');
-  if (streak10Achievement) {
-    streak10Achievement.progress = stats.bestStreak;
-    if (stats.bestStreak >= 10 && !streak10Achievement.unlocked) {
-      streak10Achievement.unlocked = true;
-      streak10Achievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...streak10Achievement});
+  // Streak achievements for any mode
+  const streakAchievements = [
+    { id: 'streak_5', goal: 5 },
+    { id: 'streak_10', goal: 10 },
+    { id: 'streak_25', goal: 25 },
+    { id: 'streak_50', goal: 50 },
+    { id: 'streak_100', goal: 100 }
+  ];
+  
+  streakAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.bestStreak;
+      if (stats.bestStreak >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
     }
-  }
+  });
   
   // Mode-specific achievements
   if (newGame.gameType === 'identify_surah') {
-    const identifyAchievement = updatedAchievements.find(a => a.id === 'identify_master');
-    if (identifyAchievement) {
-      identifyAchievement.progress = Math.max(identifyAchievement.progress || 0, newGame.score);
-      if (newGame.score >= 7 && !identifyAchievement.unlocked) {
-        identifyAchievement.unlocked = true;
-        identifyAchievement.unlockedAt = new Date().toISOString();
-        hasChanges = true;
-        newlyUnlocked.push({...identifyAchievement});
+    const identifyStreakAchievements = [
+      { id: 'identify_master', goal: 7 },
+      { id: 'identify_streak_25', goal: 25 },
+      { id: 'identify_streak_50', goal: 50 }
+    ];
+    
+    identifyStreakAchievements.forEach(({ id, goal }) => {
+      const achievement = updatedAchievements.find(a => a.id === id);
+      if (achievement) {
+        const currentProgress = Math.max(achievement.progress || 0, newGame.score);
+        achievement.progress = currentProgress;
+        if (currentProgress >= goal && !achievement.unlocked) {
+          achievement.unlocked = true;
+          achievement.unlockedAt = new Date().toISOString();
+          hasChanges = true;
+          newlyUnlocked.push({...achievement});
+        }
       }
-    }
-  } else if (newGame.gameType === 'surah_ordering') {
-    const orderingAchievement = updatedAchievements.find(a => a.id === 'ordering_master');
-    if (orderingAchievement) {
-      orderingAchievement.progress = Math.max(orderingAchievement.progress || 0, newGame.score);
-      if (newGame.score >= 7 && !orderingAchievement.unlocked) {
-        orderingAchievement.unlocked = true;
-        orderingAchievement.unlockedAt = new Date().toISOString();
-        hasChanges = true;
-        newlyUnlocked.push({...orderingAchievement});
+    });
+  } 
+  else if (newGame.gameType === 'surah_ordering') {
+    const orderingStreakAchievements = [
+      { id: 'ordering_master', goal: 7 },
+      { id: 'ordering_streak_25', goal: 25 },
+      { id: 'ordering_streak_50', goal: 50 }
+    ];
+    
+    orderingStreakAchievements.forEach(({ id, goal }) => {
+      const achievement = updatedAchievements.find(a => a.id === id);
+      if (achievement) {
+        const currentProgress = Math.max(achievement.progress || 0, newGame.score);
+        achievement.progress = currentProgress;
+        if (currentProgress >= goal && !achievement.unlocked) {
+          achievement.unlocked = true;
+          achievement.unlockedAt = new Date().toISOString();
+          hasChanges = true;
+          newlyUnlocked.push({...achievement});
+        }
       }
-    }
+    });
   }
+  
+  // High score beaten achievements
+  const highScoreAchievements = [
+    { id: 'highscore_1', goal: 1 },
+    { id: 'highscore_5', goal: 5 },
+    { id: 'highscore_10', goal: 10 },
+    { id: 'highscore_25', goal: 25 },
+    { id: 'highscore_50', goal: 50 },
+    { id: 'highscore_100', goal: 100 }
+  ];
+  
+  highScoreAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.highScoreBeatenCount;
+      if (stats.highScoreBeatenCount >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
+    }
+  });
   
   if (hasChanges) {
     saveAchievements(updatedAchievements);
@@ -298,6 +516,14 @@ export function getNewlyUnlockedAchievements(): Achievement[] {
   return newlyUnlocked;
 }
 
+// Function to increment the high score beaten count
+export function incrementHighScoreBeatenCount(): number {
+  const currentCount = parseInt(localStorage.getItem('quran_challenge_highscore_beats') || '0');
+  const newCount = currentCount + 1;
+  localStorage.setItem('quran_challenge_highscore_beats', newCount.toString());
+  return newCount;
+}
+
 // Check achievements at any time during gameplay to see if any have been newly unlocked
 // This is a critical function that should be called immediately after saving a game result
 export function checkAchievementsProgress(): Achievement[] {
@@ -320,65 +546,114 @@ export function checkAchievementsProgress(): Achievement[] {
     newlyUnlocked.push({...firstGameAchievement});
   }
   
-  // Games played achievement
-  const gamesPlayedAchievement = updatedAchievements.find(a => a.id === 'games_10');
-  if (gamesPlayedAchievement) {
-    gamesPlayedAchievement.progress = stats.totalGames;
-    if (stats.totalGames >= (gamesPlayedAchievement.goal || 10) && !gamesPlayedAchievement.unlocked) {
-      gamesPlayedAchievement.unlocked = true;
-      gamesPlayedAchievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...gamesPlayedAchievement});
-    }
-  }
+  // Games played achievements
+  const gameAchievements = [
+    { id: 'games_5', goal: 5 },
+    { id: 'games_10', goal: 10 },
+    { id: 'games_25', goal: 25 },
+    { id: 'games_50', goal: 50 },
+    { id: 'games_100', goal: 100 }
+  ];
   
-  // Streak achievements
-  const streak5Achievement = updatedAchievements.find(a => a.id === 'streak_5');
-  if (streak5Achievement) {
-    streak5Achievement.progress = stats.bestStreak;
-    if (stats.bestStreak >= 5 && !streak5Achievement.unlocked) {
-      streak5Achievement.unlocked = true;
-      streak5Achievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...streak5Achievement});
+  gameAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.totalGames;
+      if (stats.totalGames >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
     }
-  }
+  });
   
-  const streak10Achievement = updatedAchievements.find(a => a.id === 'streak_10');
-  if (streak10Achievement) {
-    streak10Achievement.progress = stats.bestStreak;
-    if (stats.bestStreak >= 10 && !streak10Achievement.unlocked) {
-      streak10Achievement.unlocked = true;
-      streak10Achievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...streak10Achievement});
-    }
-  }
+  // Streak achievements for any mode
+  const streakAchievements = [
+    { id: 'streak_5', goal: 5 },
+    { id: 'streak_10', goal: 10 },
+    { id: 'streak_25', goal: 25 },
+    { id: 'streak_50', goal: 50 },
+    { id: 'streak_100', goal: 100 }
+  ];
   
-  // Mode-specific achievements based on stats
-  const identifyAchievement = updatedAchievements.find(a => a.id === 'identify_master');
-  if (identifyAchievement) {
-    const maxIdentifyScore = Math.max(stats.modePerformance.identifySurah || 0, identifyAchievement.progress || 0);
-    identifyAchievement.progress = maxIdentifyScore;
-    if (maxIdentifyScore >= 7 && !identifyAchievement.unlocked) {
-      identifyAchievement.unlocked = true;
-      identifyAchievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...identifyAchievement});
+  streakAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.bestStreak;
+      if (stats.bestStreak >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
     }
-  }
+  });
   
-  const orderingAchievement = updatedAchievements.find(a => a.id === 'ordering_master');
-  if (orderingAchievement) {
-    const maxOrderingScore = Math.max(stats.modePerformance.surahOrdering || 0, orderingAchievement.progress || 0);
-    orderingAchievement.progress = maxOrderingScore;
-    if (maxOrderingScore >= 7 && !orderingAchievement.unlocked) {
-      orderingAchievement.unlocked = true;
-      orderingAchievement.unlockedAt = new Date().toISOString();
-      hasChanges = true;
-      newlyUnlocked.push({...orderingAchievement});
+  // Identify Surah streak achievements
+  const identifyStreakAchievements = [
+    { id: 'identify_master', goal: 7 },
+    { id: 'identify_streak_25', goal: 25 },
+    { id: 'identify_streak_50', goal: 50 }
+  ];
+  
+  identifyStreakAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      const maxIdentifyScore = Math.max(stats.modePerformance.identifySurah || 0, achievement.progress || 0);
+      achievement.progress = maxIdentifyScore;
+      if (maxIdentifyScore >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
     }
-  }
+  });
+  
+  // Surah Ordering streak achievements
+  const orderingStreakAchievements = [
+    { id: 'ordering_master', goal: 7 },
+    { id: 'ordering_streak_25', goal: 25 },
+    { id: 'ordering_streak_50', goal: 50 }
+  ];
+  
+  orderingStreakAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      const maxOrderingScore = Math.max(stats.modePerformance.surahOrdering || 0, achievement.progress || 0);
+      achievement.progress = maxOrderingScore;
+      if (maxOrderingScore >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
+    }
+  });
+  
+  // High score beaten achievements
+  const highScoreAchievements = [
+    { id: 'highscore_1', goal: 1 },
+    { id: 'highscore_5', goal: 5 },
+    { id: 'highscore_10', goal: 10 },
+    { id: 'highscore_25', goal: 25 },
+    { id: 'highscore_50', goal: 50 },
+    { id: 'highscore_100', goal: 100 }
+  ];
+  
+  highScoreAchievements.forEach(({ id, goal }) => {
+    const achievement = updatedAchievements.find(a => a.id === id);
+    if (achievement) {
+      achievement.progress = stats.highScoreBeatenCount;
+      if (stats.highScoreBeatenCount >= goal && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.unlockedAt = new Date().toISOString();
+        hasChanges = true;
+        newlyUnlocked.push({...achievement});
+      }
+    }
+  });
   
   if (hasChanges) {
     saveAchievements(updatedAchievements);

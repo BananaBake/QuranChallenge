@@ -73,5 +73,6 @@ export type GameStats = {
     identifySurah: number;
     surahOrdering: number;
   };
+  highScoreBeatenCount: number;
   recentGames: GameHistory[];
 };

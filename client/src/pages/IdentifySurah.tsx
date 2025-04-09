@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Ayah, Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements, checkAchievementsProgress, getAchievements, saveAchievements } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements, checkAchievementsProgress, getAchievements, saveAchievements, incrementHighScoreBeatenCount } from "@/lib/localStorageService";
 
 export default function IdentifySurah() {
   const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
@@ -231,11 +231,29 @@ export default function IdentifySurah() {
       // Check if this is a new high score
       if (score > previousHighScore) {
         setIsNewHighScore(true);
+        
+        // Increment the high score beaten count for achievements
+        const newCount = incrementHighScoreBeatenCount();
+        
+        // Check for new high score achievements
+        const highScoreAchievements = checkAchievementsProgress();
+        
         toast({
           title: "New High Score!",
           description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
           variant: "default",
         });
+        
+        // Show notifications for any newly unlocked high score achievements
+        highScoreAchievements
+          .filter(a => a.id.startsWith('highscore_'))
+          .forEach(achievement => {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `${achievement.title}: ${achievement.description}`,
+              variant: "default",
+            });
+          });
       }
     }
   };

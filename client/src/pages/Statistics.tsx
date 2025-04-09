@@ -26,9 +26,10 @@ export default function Statistics() {
       
       <div className="grid grid-cols-2 gap-4 mb-6">
         <StatsCard title="Total Games" value={stats.totalGames} />
-        <StatsCard title="Avg. Score" value={`${stats.averageScore}%`} />
+        <StatsCard title="Avg. Score" value={`${stats.averageScore.toFixed(1)}%`} />
         <StatsCard title="Best Streak" value={stats.bestStreak} />
         <StatsCard title="Ayat Learned" value={stats.ayatLearned} />
+        <StatsCard title="Records Broken" value={stats.highScoreBeatenCount} />
       </div>
       
       {/* Performance by Game Mode */}
