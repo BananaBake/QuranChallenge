@@ -1,6 +1,9 @@
 import { Link } from "wouter";
-import { ArabesqueBorder } from "@/components/ui/arabesque-border";
-import { StatsCard } from "@/components/ui/stats-card";
+import { 
+  ArabesqueBorder, 
+  StatsCard, 
+  PageContainer
+} from "@/components";
 import { useRecentGames, useGameStats } from "@/hooks/useGameStats";
 import { BookOpen, Search, ArrowUpDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -22,7 +25,7 @@ export default function Home() {
   } : { best: "0", avgTime: "0s", played: 0 };
 
   return (
-    <div className="pb-4">
+    <PageContainer className="pb-4">
       <div className="relative overflow-hidden mb-8 rounded-lg bg-primary/5">
         <div className="absolute inset-0 opacity-10 islamic-pattern"></div>
         <div className="relative p-6 z-10">
@@ -132,6 +135,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }
