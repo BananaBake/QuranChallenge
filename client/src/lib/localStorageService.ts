@@ -135,13 +135,22 @@ export const initialAchievements: Achievement[] = [
   
   // Identify Surah mode achievements
   {
-    id: 'identify_master',
-    title: 'Surah Identifier',
-    description: 'Reach a streak of 7 in Identify Surah mode',
+    id: 'identify_master_5',
+    title: 'Surah Novice',
+    description: 'Reach a streak of 5 in Identify Surah mode',
     icon: '🔍',
     unlocked: false,
     progress: 0,
-    goal: 7
+    goal: 5
+  },
+  {
+    id: 'identify_master_10',
+    title: 'Surah Master',
+    description: 'Reach a streak of 10 in Identify Surah mode',
+    icon: '🎯',
+    unlocked: false,
+    progress: 0,
+    goal: 10
   },
   {
     id: 'identify_streak_25',
@@ -164,13 +173,22 @@ export const initialAchievements: Achievement[] = [
   
   // Surah Ordering mode achievements
   {
-    id: 'ordering_master',
-    title: 'Order Master',
-    description: 'Reach a streak of 7 in Surah Ordering mode',
+    id: 'ordering_master_5',
+    title: 'Order Novice',
+    description: 'Reach a streak of 5 in Surah Ordering mode',
     icon: '⚖️',
     unlocked: false,
     progress: 0,
-    goal: 7
+    goal: 5
+  },
+  {
+    id: 'ordering_master_10',
+    title: 'Order Master',
+    description: 'Reach a streak of 10 in Surah Ordering mode',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 10
   },
   {
     id: 'ordering_streak_25',
@@ -444,7 +462,8 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
   // Mode-specific achievements
   if (newGame.gameType === 'identify_surah') {
     const identifyStreakAchievements = [
-      { id: 'identify_master', goal: 7 },
+      { id: 'identify_master_5', goal: 5 },
+      { id: 'identify_master_10', goal: 10 },
       { id: 'identify_streak_25', goal: 25 },
       { id: 'identify_streak_50', goal: 50 }
     ];
@@ -465,7 +484,8 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
   } 
   else if (newGame.gameType === 'surah_ordering') {
     const orderingStreakAchievements = [
-      { id: 'ordering_master', goal: 7 },
+      { id: 'ordering_master_5', goal: 5 },
+      { id: 'ordering_master_10', goal: 10 },
       { id: 'ordering_streak_25', goal: 25 },
       { id: 'ordering_streak_50', goal: 50 }
     ];
@@ -608,7 +628,8 @@ export function checkAchievementsProgress(): Achievement[] {
   
   // Identify Surah streak achievements
   const identifyStreakAchievements = [
-    { id: 'identify_master', goal: 7 },
+    { id: 'identify_master_5', goal: 5 },
+    { id: 'identify_master_10', goal: 10 },
     { id: 'identify_streak_25', goal: 25 },
     { id: 'identify_streak_50', goal: 50 }
   ];
@@ -629,7 +650,8 @@ export function checkAchievementsProgress(): Achievement[] {
   
   // Surah Ordering streak achievements
   const orderingStreakAchievements = [
-    { id: 'ordering_master', goal: 7 },
+    { id: 'ordering_master_5', goal: 5 },
+    { id: 'ordering_master_10', goal: 10 },
     { id: 'ordering_streak_25', goal: 25 },
     { id: 'ordering_streak_50', goal: 50 }
   ];
