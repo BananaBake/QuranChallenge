@@ -30,9 +30,13 @@ const initialStats: GameStats = {
   recentGames: []
 };
 
-// Initial achievements
+// Initial achievements - ORDERED BY DIFFICULTY
 export const initialAchievements: Achievement[] = [
-  // Game completion achievements
+  // -----------------------------------------------
+  // ONE-TIME ACHIEVEMENTS (goal: 1)
+  // -----------------------------------------------
+  
+  // First game achievement
   {
     id: 'first_game',
     title: 'First Steps',
@@ -40,6 +44,23 @@ export const initialAchievements: Achievement[] = [
     icon: '🎮',
     unlocked: false
   },
+  
+  // First high score beaten
+  {
+    id: 'highscore_1',
+    title: 'Record Breaker',
+    description: 'Beat your high score for the first time',
+    icon: '📈',
+    unlocked: false,
+    progress: 0,
+    goal: 1
+  },
+  
+  // -----------------------------------------------
+  // GOAL: 5 ACHIEVEMENTS
+  // -----------------------------------------------
+  
+  // Games played: 5
   {
     id: 'games_5',
     title: 'Getting Started',
@@ -49,44 +70,8 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 5
   },
-  {
-    id: 'games_10',
-    title: 'Dedicated Student',
-    description: 'Play 10 games',
-    icon: '📚',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  {
-    id: 'games_25',
-    title: 'Regular Learner',
-    description: 'Play 25 games',
-    icon: '📝',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
-  {
-    id: 'games_50',
-    title: 'Knowledge Seeker',
-    description: 'Play 50 games',
-    icon: '🔖',
-    unlocked: false,
-    progress: 0,
-    goal: 50
-  },
-  {
-    id: 'games_100',
-    title: 'Scholar',
-    description: 'Play 100 games',
-    icon: '🧠',
-    unlocked: false,
-    progress: 0,
-    goal: 100
-  },
   
-  // Trophy collection achievements
+  // Unlock 5 trophies
   {
     id: 'trophies_5',
     title: 'Trophy Collector',
@@ -96,6 +81,56 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 5
   },
+  
+  // Identify Surah streak: 5
+  {
+    id: 'identify_master_5',
+    title: 'Surah Novice',
+    description: 'Reach a streak of 5 in Identify Surah mode',
+    icon: '🔍',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  
+  // Surah Ordering streak: 5
+  {
+    id: 'ordering_master_5',
+    title: 'Order Novice',
+    description: 'Reach a streak of 5 in Surah Ordering mode',
+    icon: '⚖️',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  
+  // High score beaten: 5 times
+  {
+    id: 'highscore_5',
+    title: 'Consistent Improver',
+    description: 'Beat your high score 5 times',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  
+  // -----------------------------------------------
+  // GOAL: 10 ACHIEVEMENTS
+  // -----------------------------------------------
+  
+  // Games played: 10
+  {
+    id: 'games_10',
+    title: 'Dedicated Student',
+    description: 'Play 10 games',
+    icon: '📚',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  
+  // Unlock 10 trophies
   {
     id: 'trophies_10',
     title: 'Trophy Master',
@@ -105,6 +140,45 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 10
   },
+  
+  // Identify Surah streak: 10
+  {
+    id: 'identify_master_10',
+    title: 'Surah Master',
+    description: 'Reach a streak of 10 in Identify Surah mode',
+    icon: '🎯',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  
+  // Surah Ordering streak: 10
+  {
+    id: 'ordering_master_10',
+    title: 'Order Master',
+    description: 'Reach a streak of 10 in Surah Ordering mode',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  
+  // High score beaten: 10 times
+  {
+    id: 'highscore_10',
+    title: 'Growth Mindset',
+    description: 'Beat your high score 10 times',
+    icon: '🚀',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  
+  // -----------------------------------------------
+  // GOAL: 15+ ACHIEVEMENTS
+  // -----------------------------------------------
+  
+  // Unlock 15 trophies
   {
     id: 'trophies_15',
     title: 'Trophy Expert',
@@ -114,6 +188,52 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 15
   },
+  
+  // Games played: 25
+  {
+    id: 'games_25',
+    title: 'Regular Learner',
+    description: 'Play 25 games',
+    icon: '📝',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  
+  // Identify Surah streak: 25
+  {
+    id: 'identify_streak_25',
+    title: 'Ayah Expert',
+    description: 'Reach a streak of 25 in Identify Surah mode',
+    icon: '📜',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  
+  // Surah Ordering streak: 25
+  {
+    id: 'ordering_streak_25',
+    title: 'Sequencing Expert',
+    description: 'Reach a streak of 25 in Surah Ordering mode',
+    icon: '📋',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  
+  // High score beaten: 25 times
+  {
+    id: 'highscore_25',
+    title: 'Continuous Learner',
+    description: 'Beat your high score 25 times',
+    icon: '📱',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  
+  // Unlock 20 trophies
   {
     id: 'trophies_20',
     title: 'Trophy Champion',
@@ -123,6 +243,8 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 20
   },
+  
+  // Unlock 25 trophies
   {
     id: 'trophies_25',
     title: 'Trophy Legend',
@@ -133,34 +255,18 @@ export const initialAchievements: Achievement[] = [
     goal: 25
   },
   
-  // Identify Surah mode achievements
+  // Games played: 50
   {
-    id: 'identify_master_5',
-    title: 'Surah Novice',
-    description: 'Reach a streak of 5 in Identify Surah mode',
-    icon: '🔍',
+    id: 'games_50',
+    title: 'Knowledge Seeker',
+    description: 'Play 50 games',
+    icon: '🔖',
     unlocked: false,
     progress: 0,
-    goal: 5
+    goal: 50
   },
-  {
-    id: 'identify_master_10',
-    title: 'Surah Master',
-    description: 'Reach a streak of 10 in Identify Surah mode',
-    icon: '🎯',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  {
-    id: 'identify_streak_25',
-    title: 'Ayah Expert',
-    description: 'Reach a streak of 25 in Identify Surah mode',
-    icon: '📜',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
+  
+  // Identify Surah streak: 50
   {
     id: 'identify_streak_50',
     title: 'Quran Navigator',
@@ -171,34 +277,7 @@ export const initialAchievements: Achievement[] = [
     goal: 50
   },
   
-  // Surah Ordering mode achievements
-  {
-    id: 'ordering_master_5',
-    title: 'Order Novice',
-    description: 'Reach a streak of 5 in Surah Ordering mode',
-    icon: '⚖️',
-    unlocked: false,
-    progress: 0,
-    goal: 5
-  },
-  {
-    id: 'ordering_master_10',
-    title: 'Order Master',
-    description: 'Reach a streak of 10 in Surah Ordering mode',
-    icon: '📊',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  {
-    id: 'ordering_streak_25',
-    title: 'Sequencing Expert',
-    description: 'Reach a streak of 25 in Surah Ordering mode',
-    icon: '📋',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
+  // Surah Ordering streak: 50
   {
     id: 'ordering_streak_50',
     title: 'Arrangement Guru',
@@ -209,43 +288,7 @@ export const initialAchievements: Achievement[] = [
     goal: 50
   },
   
-  // High score achievements
-  {
-    id: 'highscore_1',
-    title: 'Record Breaker',
-    description: 'Beat your high score for the first time',
-    icon: '📈',
-    unlocked: false,
-    progress: 0,
-    goal: 1
-  },
-  {
-    id: 'highscore_5',
-    title: 'Consistent Improver',
-    description: 'Beat your high score 5 times',
-    icon: '📊',
-    unlocked: false,
-    progress: 0,
-    goal: 5
-  },
-  {
-    id: 'highscore_10',
-    title: 'Growth Mindset',
-    description: 'Beat your high score 10 times',
-    icon: '🚀',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  {
-    id: 'highscore_25',
-    title: 'Continuous Learner',
-    description: 'Beat your high score 25 times',
-    icon: '📱',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
+  // High score beaten: 50 times
   {
     id: 'highscore_50',
     title: 'Excellence Pursuer',
@@ -255,6 +298,19 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 50
   },
+  
+  // Games played: 100
+  {
+    id: 'games_100',
+    title: 'Scholar',
+    description: 'Play 100 games',
+    icon: '🧠',
+    unlocked: false,
+    progress: 0,
+    goal: 100
+  },
+  
+  // High score beaten: 100 times
   {
     id: 'highscore_100',
     title: 'Mastery Achieved',
@@ -437,20 +493,30 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
     }
   });
   
-  // Streak achievements for any mode
-  const streakAchievements = [
-    { id: 'streak_5', goal: 5 },
-    { id: 'streak_10', goal: 10 },
-    { id: 'streak_25', goal: 25 },
-    { id: 'streak_50', goal: 50 },
-    { id: 'streak_100', goal: 100 }
+  // Trophy collection achievements
+  // Count how many trophies are already unlocked (excluding the ones we just unlocked)
+  const unlockedCount = updatedAchievements.filter(a => 
+    a.unlocked && !newlyUnlocked.some(nu => nu.id === a.id)
+  ).length;
+  
+  const trophyAchievements = [
+    { id: 'trophies_5', goal: 5 },
+    { id: 'trophies_10', goal: 10 },
+    { id: 'trophies_15', goal: 15 },
+    { id: 'trophies_20', goal: 20 },
+    { id: 'trophies_25', goal: 25 }
   ];
   
-  streakAchievements.forEach(({ id, goal }) => {
+  // We need to process these in order of smallest goal to largest
+  trophyAchievements.forEach(({ id, goal }) => {
     const achievement = updatedAchievements.find(a => a.id === id);
+    
     if (achievement) {
-      achievement.progress = stats.bestStreak;
-      if (stats.bestStreak >= goal && !achievement.unlocked) {
+      // Add the newly unlocked achievements to the count for the next tier
+      const totalUnlocked = unlockedCount + newlyUnlocked.length;
+      achievement.progress = totalUnlocked;
+      
+      if (totalUnlocked >= goal && !achievement.unlocked) {
         achievement.unlocked = true;
         achievement.unlockedAt = new Date().toISOString();
         hasChanges = true;
@@ -561,7 +627,6 @@ export function incrementHighScoreBeatenCount(): number {
 }
 
 // Check achievements at any time during gameplay to see if any have been newly unlocked
-// This is a critical function that should be called immediately after saving a game result
 export function checkAchievementsProgress(): Achievement[] {
   // Force a fresh calculation of stats to ensure we have the latest data
   const stats = getGameStats();
@@ -604,20 +669,30 @@ export function checkAchievementsProgress(): Achievement[] {
     }
   });
   
-  // Streak achievements for any mode
-  const streakAchievements = [
-    { id: 'streak_5', goal: 5 },
-    { id: 'streak_10', goal: 10 },
-    { id: 'streak_25', goal: 25 },
-    { id: 'streak_50', goal: 50 },
-    { id: 'streak_100', goal: 100 }
+  // Trophy collection achievements
+  // Count how many trophies are already unlocked (excluding the ones we just unlocked)
+  const unlockedCount = updatedAchievements.filter(a => 
+    a.unlocked && !newlyUnlocked.some(nu => nu.id === a.id)
+  ).length;
+  
+  const trophyAchievements = [
+    { id: 'trophies_5', goal: 5 },
+    { id: 'trophies_10', goal: 10 },
+    { id: 'trophies_15', goal: 15 },
+    { id: 'trophies_20', goal: 20 },
+    { id: 'trophies_25', goal: 25 }
   ];
   
-  streakAchievements.forEach(({ id, goal }) => {
+  // We need to process these in order of smallest goal to largest
+  trophyAchievements.forEach(({ id, goal }) => {
     const achievement = updatedAchievements.find(a => a.id === id);
+    
     if (achievement) {
-      achievement.progress = stats.bestStreak;
-      if (stats.bestStreak >= goal && !achievement.unlocked) {
+      // Add the newly unlocked achievements to the count for the next tier
+      const totalUnlocked = unlockedCount + newlyUnlocked.length;
+      achievement.progress = totalUnlocked;
+      
+      if (totalUnlocked >= goal && !achievement.unlocked) {
         achievement.unlocked = true;
         achievement.unlockedAt = new Date().toISOString();
         hasChanges = true;

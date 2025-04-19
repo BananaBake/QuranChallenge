@@ -111,7 +111,25 @@ interface AchievementNotificationsContainerProps {
 }
 
 export function AchievementNotificationsContainer({ achievements }: AchievementNotificationsContainerProps) {
-  const [visibleAchievements, setVisibleAchievements] = React.useState<Achievement[]>(achievements);
+  const [visibleAchievements, setVisibleAchievements] = React.useState<Achievement[]>([]);
+  const [queue, setQueue] = React.useState<Achievement[]>([]);
+  
+  React.useEffect(() => {
+    // If we have new achievements, add them to the queue
+    if (achievements.length > 0) {
+      setQueue(prev => [...prev, ...achievements]);
+    }
+  }, [achievements]);
+  
+  React.useEffect(() => {
+    // If there are achievements in the queue and no visible achievements,
+    // show the next one from the queue
+    if (queue.length > 0 && visibleAchievements.length === 0) {
+      const nextAchievement = queue[0];
+      setVisibleAchievements([nextAchievement]);
+      setQueue(prev => prev.slice(1)); // Remove from queue
+    }
+  }, [queue, visibleAchievements]);
   
   const handleClose = (achievementId: string) => {
     setVisibleAchievements(prev => prev.filter(a => a.id !== achievementId));
