@@ -30,22 +30,17 @@ const initialStats: GameStats = {
   recentGames: []
 };
 
-// Initial achievements - ORDERED BY DIFFICULTY
+// Initial achievements - ORDERED BY DIFFICULTY FROM EASIEST TO HARDEST
 export const initialAchievements: Achievement[] = [
-  // -----------------------------------------------
-  // ONE-TIME ACHIEVEMENTS (goal: 1)
-  // -----------------------------------------------
-  
-  // First game achievement
+  // EASIEST - One-time achievements
   {
     id: 'first_game',
     title: 'First Steps',
     description: 'Complete your first game',
     icon: '🎮',
-    unlocked: false
+    unlocked: false,
+    goal: 1
   },
-  
-  // First high score beaten
   {
     id: 'highscore_1',
     title: 'Record Breaker',
@@ -56,11 +51,7 @@ export const initialAchievements: Achievement[] = [
     goal: 1
   },
   
-  // -----------------------------------------------
-  // GOAL: 5 ACHIEVEMENTS
-  // -----------------------------------------------
-  
-  // Games played: 5
+  // LEVEL 5 achievements
   {
     id: 'games_5',
     title: 'Getting Started',
@@ -70,8 +61,33 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 5
   },
-  
-  // Unlock 5 trophies
+  {
+    id: 'identify_master_5',
+    title: 'Surah Novice',
+    description: 'Reach a streak of 5 in Identify Surah mode',
+    icon: '🔍',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  {
+    id: 'ordering_master_5',
+    title: 'Order Novice',
+    description: 'Reach a streak of 5 in Surah Ordering mode',
+    icon: '⚖️',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
+  {
+    id: 'highscore_5',
+    title: 'Consistent Improver',
+    description: 'Beat your high score 5 times',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 5
+  },
   {
     id: 'trophies_5',
     title: 'Trophy Collector',
@@ -82,44 +98,7 @@ export const initialAchievements: Achievement[] = [
     goal: 5
   },
   
-  // Identify Surah streak: 5
-  {
-    id: 'identify_master_5',
-    title: 'Surah Novice',
-    description: 'Reach a streak of 5 in Identify Surah mode',
-    icon: '🔍',
-    unlocked: false,
-    progress: 0,
-    goal: 5
-  },
-  
-  // Surah Ordering streak: 5
-  {
-    id: 'ordering_master_5',
-    title: 'Order Novice',
-    description: 'Reach a streak of 5 in Surah Ordering mode',
-    icon: '⚖️',
-    unlocked: false,
-    progress: 0,
-    goal: 5
-  },
-  
-  // High score beaten: 5 times
-  {
-    id: 'highscore_5',
-    title: 'Consistent Improver',
-    description: 'Beat your high score 5 times',
-    icon: '📊',
-    unlocked: false,
-    progress: 0,
-    goal: 5
-  },
-  
-  // -----------------------------------------------
-  // GOAL: 10 ACHIEVEMENTS
-  // -----------------------------------------------
-  
-  // Games played: 10
+  // LEVEL 10 achievements
   {
     id: 'games_10',
     title: 'Dedicated Student',
@@ -129,8 +108,33 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 10
   },
-  
-  // Unlock 10 trophies
+  {
+    id: 'identify_master_10',
+    title: 'Surah Master',
+    description: 'Reach a streak of 10 in Identify Surah mode',
+    icon: '🎯',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  {
+    id: 'ordering_master_10',
+    title: 'Order Master',
+    description: 'Reach a streak of 10 in Surah Ordering mode',
+    icon: '📊',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
+  {
+    id: 'highscore_10',
+    title: 'Growth Mindset',
+    description: 'Beat your high score 10 times',
+    icon: '🚀',
+    unlocked: false,
+    progress: 0,
+    goal: 10
+  },
   {
     id: 'trophies_10',
     title: 'Trophy Master',
@@ -141,44 +145,7 @@ export const initialAchievements: Achievement[] = [
     goal: 10
   },
   
-  // Identify Surah streak: 10
-  {
-    id: 'identify_master_10',
-    title: 'Surah Master',
-    description: 'Reach a streak of 10 in Identify Surah mode',
-    icon: '🎯',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  
-  // Surah Ordering streak: 10
-  {
-    id: 'ordering_master_10',
-    title: 'Order Master',
-    description: 'Reach a streak of 10 in Surah Ordering mode',
-    icon: '📊',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  
-  // High score beaten: 10 times
-  {
-    id: 'highscore_10',
-    title: 'Growth Mindset',
-    description: 'Beat your high score 10 times',
-    icon: '🚀',
-    unlocked: false,
-    progress: 0,
-    goal: 10
-  },
-  
-  // -----------------------------------------------
-  // GOAL: 15+ ACHIEVEMENTS
-  // -----------------------------------------------
-  
-  // Unlock 15 trophies
+  // LEVEL 15-20 achievements
   {
     id: 'trophies_15',
     title: 'Trophy Expert',
@@ -188,52 +155,6 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 15
   },
-  
-  // Games played: 25
-  {
-    id: 'games_25',
-    title: 'Regular Learner',
-    description: 'Play 25 games',
-    icon: '📝',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
-  
-  // Identify Surah streak: 25
-  {
-    id: 'identify_streak_25',
-    title: 'Ayah Expert',
-    description: 'Reach a streak of 25 in Identify Surah mode',
-    icon: '📜',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
-  
-  // Surah Ordering streak: 25
-  {
-    id: 'ordering_streak_25',
-    title: 'Sequencing Expert',
-    description: 'Reach a streak of 25 in Surah Ordering mode',
-    icon: '📋',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
-  
-  // High score beaten: 25 times
-  {
-    id: 'highscore_25',
-    title: 'Continuous Learner',
-    description: 'Beat your high score 25 times',
-    icon: '📱',
-    unlocked: false,
-    progress: 0,
-    goal: 25
-  },
-  
-  // Unlock 20 trophies
   {
     id: 'trophies_20',
     title: 'Trophy Champion',
@@ -243,8 +164,6 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 20
   },
-  
-  // Unlock 25 trophies
   {
     id: 'trophies_25',
     title: 'Trophy Legend',
@@ -255,7 +174,45 @@ export const initialAchievements: Achievement[] = [
     goal: 25
   },
   
-  // Games played: 50
+  // LEVEL 25 achievements
+  {
+    id: 'games_25',
+    title: 'Regular Learner',
+    description: 'Play 25 games',
+    icon: '📝',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'identify_streak_25',
+    title: 'Ayah Expert',
+    description: 'Reach a streak of 25 in Identify Surah mode',
+    icon: '📜',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'ordering_streak_25',
+    title: 'Sequencing Expert',
+    description: 'Reach a streak of 25 in Surah Ordering mode',
+    icon: '📋',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  {
+    id: 'highscore_25',
+    title: 'Continuous Learner',
+    description: 'Beat your high score 25 times',
+    icon: '📱',
+    unlocked: false,
+    progress: 0,
+    goal: 25
+  },
+  
+  // LEVEL 50 achievements
   {
     id: 'games_50',
     title: 'Knowledge Seeker',
@@ -265,8 +222,6 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 50
   },
-  
-  // Identify Surah streak: 50
   {
     id: 'identify_streak_50',
     title: 'Quran Navigator',
@@ -276,8 +231,6 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 50
   },
-  
-  // Surah Ordering streak: 50
   {
     id: 'ordering_streak_50',
     title: 'Arrangement Guru',
@@ -287,8 +240,6 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 50
   },
-  
-  // High score beaten: 50 times
   {
     id: 'highscore_50',
     title: 'Excellence Pursuer',
@@ -299,7 +250,7 @@ export const initialAchievements: Achievement[] = [
     goal: 50
   },
   
-  // Games played: 100
+  // LEVEL 100 achievements
   {
     id: 'games_100',
     title: 'Scholar',
@@ -309,8 +260,24 @@ export const initialAchievements: Achievement[] = [
     progress: 0,
     goal: 100
   },
-  
-  // High score beaten: 100 times
+  {
+    id: 'identify_streak_100',
+    title: 'Quran Hafiz',
+    description: 'Reach a streak of 100 in Identify Surah mode',
+    icon: '🕌',
+    unlocked: false,
+    progress: 0,
+    goal: 100
+  },
+  {
+    id: 'ordering_streak_100',
+    title: 'Quran Organizer',
+    description: 'Reach a streak of 100 in Surah Ordering mode',
+    icon: '📚',
+    unlocked: false,
+    progress: 0,
+    goal: 100
+  },
   {
     id: 'highscore_100',
     title: 'Mastery Achieved',
@@ -531,7 +498,8 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
       { id: 'identify_master_5', goal: 5 },
       { id: 'identify_master_10', goal: 10 },
       { id: 'identify_streak_25', goal: 25 },
-      { id: 'identify_streak_50', goal: 50 }
+      { id: 'identify_streak_50', goal: 50 },
+      { id: 'identify_streak_100', goal: 100 }
     ];
     
     identifyStreakAchievements.forEach(({ id, goal }) => {
@@ -553,7 +521,8 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
       { id: 'ordering_master_5', goal: 5 },
       { id: 'ordering_master_10', goal: 10 },
       { id: 'ordering_streak_25', goal: 25 },
-      { id: 'ordering_streak_50', goal: 50 }
+      { id: 'ordering_streak_50', goal: 50 },
+      { id: 'ordering_streak_100', goal: 100 }
     ];
     
     orderingStreakAchievements.forEach(({ id, goal }) => {
@@ -706,7 +675,8 @@ export function checkAchievementsProgress(): Achievement[] {
     { id: 'identify_master_5', goal: 5 },
     { id: 'identify_master_10', goal: 10 },
     { id: 'identify_streak_25', goal: 25 },
-    { id: 'identify_streak_50', goal: 50 }
+    { id: 'identify_streak_50', goal: 50 },
+    { id: 'identify_streak_100', goal: 100 }
   ];
   
   identifyStreakAchievements.forEach(({ id, goal }) => {
@@ -728,7 +698,8 @@ export function checkAchievementsProgress(): Achievement[] {
     { id: 'ordering_master_5', goal: 5 },
     { id: 'ordering_master_10', goal: 10 },
     { id: 'ordering_streak_25', goal: 25 },
-    { id: 'ordering_streak_50', goal: 50 }
+    { id: 'ordering_streak_50', goal: 50 },
+    { id: 'ordering_streak_100', goal: 100 }
   ];
   
   orderingStreakAchievements.forEach(({ id, goal }) => {
