@@ -1,206 +1,68 @@
-import { useState, useEffect, useCallback } from "react";
-import { useRandomSurahsForGame } from "@/hooks/useQuranData";
-import { useSaveGameResult, useGameStats } from "@/hooks/useGameStats";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DraggableSurah } from "@/components/ui/draggable-surah";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Check, Trophy, Clock, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Surah } from "@shared/schema";
-import { getNewlyUnlockedAchievements, checkAchievementsProgress, getAchievements, saveAchievements, incrementHighScoreBeatenCount } from "@/lib/localStorageService";
+import { useGameState } from "@/hooks/useGameState";
+import { useSurahOrderingData } from "@/hooks/useGameData";
+import { useAchievementNotifications } from "@/hooks/useAchievements";
 
 export default function SurahOrdering() {
-  const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
-  const { data: stats } = useGameStats();
-  const { mutate: saveGameResult } = useSaveGameResult();
-  const { toast } = useToast();
+  // Game state management
+  const {
+    score,
+    gameEnded,
+    previousHighScore,
+    isNewHighScore,
+    formattedTime,
+    incrementScore,
+    endGame,
+    checkHighScore,
+    resetGame
+  } = useGameState({ gameMode: 'surah_ordering' });
   
-  const [surahs, setSurahs] = useState<Surah[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [gameEnded, setGameEnded] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [timeSpent, setTimeSpent] = useState(0);
-  const [timer, setTimer] = useState("00:00");
+  // Game data management
+  const {
+    surahs,
+    isLoading,
+    isLoadingNext,
+    initializeSurahs,
+    loadNextQuestion,
+    handleMoveSurah,
+    checkCorrectOrder,
+    originalSurahs
+  } = useSurahOrderingData();
+  
+  // Achievement progress tracking
+  const { checkProgress } = useAchievementNotifications();
+  
+  // Local UI state
   const [checked, setChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [previousHighScore, setPreviousHighScore] = useState(0);
-  const [isNewHighScore, setIsNewHighScore] = useState(false);
-  const [isLoadingNextQuestion, setIsLoadingNextQuestion] = useState(false);
   
-  // Endless mode - no fixed number of questions
-  
-  // Get the best previous score for this mode
+  // Initialize surahs when data loads
   useEffect(() => {
-    if (stats && stats.modePerformance) {
-      setPreviousHighScore(stats.modePerformance.surahOrdering || 0);
+    if (originalSurahs && originalSurahs.length > 0 && !gameEnded) {
+      initializeSurahs(originalSurahs);
     }
-  }, [stats]);
-  
-  useEffect(() => {
-    if (originalSurahs && originalSurahs.length > 0) {
-      // Create a shuffled copy
-      const shuffled = [...originalSurahs].sort(() => Math.random() - 0.5);
-      setSurahs(shuffled);
-      
-      if (!startTime) {
-        setStartTime(new Date());
-      }
-    }
-  }, [originalSurahs, startTime]);
-  
-  useEffect(() => {
-    if (!startTime || gameEnded) return;
-    
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-      setTimeSpent(diff);
-      
-      const minutes = Math.floor(diff / 60);
-      const seconds = diff % 60;
-      setTimer(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [startTime, gameEnded]);
-  
-  const handleMoveItem = (dragIndex: number, hoverIndex: number) => {
-    if (checked) return; // Disable reordering after checking
-    
-    const dragItem = surahs[dragIndex];
-    const newItems = [...surahs];
-    newItems.splice(dragIndex, 1);
-    newItems.splice(hoverIndex, 0, dragItem);
-    setSurahs(newItems);
-  };
+  }, [originalSurahs, gameEnded, initializeSurahs]);
   
   const handleCheckOrder = () => {
     setChecked(true);
     
-    // Check if the order is correct (sorted by surah number)
-    const isOrderCorrect = [...surahs]
-      .every((surah, index, array) => 
-        index === 0 || surah.number > array[index - 1].number
-      );
+    // Check if the order is correct
+    const orderCorrect = checkCorrectOrder();
+    setIsCorrect(orderCorrect);
     
-    setIsCorrect(isOrderCorrect);
-    
-    if (isOrderCorrect) {
-      // Correct answer - Increment score first
-      const newScore = score + 1;
-      setScore(newScore);
-      
-      // Update a temporary game result in memory to check for achievements
-      // But don't save it to history yet (we'll do that at game end)
-      const tempGameData = {
-        userId: 1,
-        gameType: "surah_ordering",
-        score: newScore,
-        maxScore: newScore,
-        completedAt: new Date()
-      };
-      
-      // First, check specifically for streak achievements
-      const streakAchievements = ['streak_5', 'streak_10', 'ordering_master'];
-      const currentAchievements = getAchievements();
-      
-      // Update streak-based achievements without adding to game history
-      streakAchievements.forEach(achievementId => {
-        const achievement = currentAchievements.find(a => a.id === achievementId);
-        if (achievement && !achievement.unlocked) {
-          let shouldUnlock = false;
-          
-          // Check unlock conditions
-          if (achievementId === 'ordering_master' && newScore >= 7) {
-            shouldUnlock = true;
-          } else if (achievementId === 'streak_5' && newScore >= 5) {
-            shouldUnlock = true;
-          } else if (achievementId === 'streak_10' && newScore >= 10) {
-            shouldUnlock = true;
-          }
-          
-          // Unlock if conditions met
-          if (shouldUnlock) {
-            achievement.unlocked = true;
-            achievement.unlockedAt = new Date().toISOString();
-            achievement.progress = newScore;
-            
-            // Show achievement toast right away
-            toast({
-              title: "🏆 Achievement Unlocked!",
-              description: `${achievement.title}: ${achievement.description}`,
-              variant: "default",
-            });
-          } else {
-            // Just update progress
-            achievement.progress = Math.max(achievement.progress || 0, newScore);
-          }
-        }
-      });
-      
-      // Save updated achievements
-      saveAchievements(currentAchievements);
+    if (orderCorrect) {
+      // Correct answer - Increment score and check for achievements
+      incrementScore();
     } else {
-      // No need for a toast message - the user can already see from the UI that the order is incorrect
-      // and the correct ordering is explained in the message at the top
-      // We'll save the game result when the user clicks "See Results"
-      
-      // Check if this is a new high score
-      if (score > previousHighScore) {
-        setIsNewHighScore(true);
-        
-        // Increment the high score beaten count for achievements
-        const newCount = incrementHighScoreBeatenCount();
-        
-        // Check for new high score achievements
-        const highScoreAchievements = checkAchievementsProgress();
-        
-        toast({
-          title: "New High Score!",
-          description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
-          variant: "default",
-        });
-        
-        // Show notifications for any newly unlocked high score achievements
-        highScoreAchievements
-          .filter(a => a.id.startsWith('highscore_'))
-          .forEach(achievement => {
-            toast({
-              title: "🏆 Achievement Unlocked!",
-              description: `${achievement.title}: ${achievement.description}`,
-              variant: "default",
-            });
-          });
-      }
+      // Incorrect answer - check if this is a new high score
+      checkHighScore();
     }
   };
   
-  // Function to get the next question with completely random surahs
-  const getNextQuestion = useCallback(async () => {
-    setIsLoadingNextQuestion(true);
-    try {
-      // Fetch new random surahs directly 
-      const response = await fetch('/api/quran/random-surahs?count=5');
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        // Shuffle the order for the game
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
-        setSurahs(shuffled);
-      }
-    } catch (error) {
-      console.error("Failed to fetch next question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch the next question. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoadingNextQuestion(false);
-    }
-  }, []);
-
   const handleNext = () => {
     if (gameEnded) return;
     
@@ -208,37 +70,21 @@ export default function SurahOrdering() {
     
     // Only continue if the answer was correct
     if (isCorrect) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      // Use our direct fetch method instead of refetch to ensure complete randomness
-      getNextQuestion();
+      // Load next question
+      loadNextQuestion();
+      
+      // Check for achievements during gameplay
+      checkProgress();
     }
   };
   
   const handleStartNewGame = () => {
-    // Don't save the game when Play Again is clicked - we already saved at the fail point
-    
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setGameEnded(false);
-    setStartTime(new Date());
-    setTimeSpent(0);
-    setTimer("00:00");
+    resetGame();
     setChecked(false);
-    setIsNewHighScore(false);
+    setIsCorrect(false);
     
-    // Fetch completely fresh random surahs with a randomization parameter
-    // to help prevent repeating the same first challenge
-    fetch('/api/quran/random-surahs?count=5&rand=' + Math.random())
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          const shuffled = [...data].sort(() => Math.random() - 0.5);
-          setSurahs(shuffled);
-        }
-      })
-      .catch(err => {
-        console.error("Failed to fetch new surahs:", err);
-      });
+    // Load fresh surahs
+    loadNextQuestion();
   };
   
   if (isLoading) {
@@ -274,7 +120,7 @@ export default function SurahOrdering() {
               <Clock className="w-5 h-5 text-primary mr-2" />
               <span className="text-gray-600">Time:</span>
             </div>
-            <span className="font-bold text-xl text-accent">{timer}</span>
+            <span className="font-bold text-xl text-accent">{formattedTime}</span>
           </div>
         </div>
         
@@ -329,13 +175,13 @@ export default function SurahOrdering() {
               arabicName={surah.name}
               number={surah.number}
               index={index}
-              onMoveItem={handleMoveItem}
+              onMoveItem={handleMoveSurah}
               showNumber={checked}
             />
           ))}
         </div>
         
-        {isLoadingNextQuestion && (
+        {isLoadingNext && (
           <div className="flex items-center justify-center p-4 mt-4 bg-primary/10 text-primary rounded-lg">
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
             <span>Loading next challenge...</span>
@@ -347,38 +193,15 @@ export default function SurahOrdering() {
             <Button 
               className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
               onClick={handleCheckOrder}
-              disabled={isLoadingNextQuestion}
+              disabled={isLoadingNext}
             >
               <Check className="w-5 h-5 mr-2" /> Check Order
             </Button>
           ) : checked && !isCorrect ? (
             <Button
               className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
-              onClick={() => {
-                // Save game result and check for game-played achievements when the game is actually ending
-                saveGameResult({
-                  userId: 1,
-                  gameType: "surah_ordering",
-                  score,
-                  maxScore: score,
-                  timeSpent
-                });
-                
-                // Check for game completion achievements (like first_game and games_10)
-                const playedAchievements = checkAchievementsProgress();
-                playedAchievements
-                  .filter(a => a.id === 'first_game' || a.id === 'games_10')
-                  .forEach(achievement => {
-                    toast({
-                      title: "🏆 Achievement Unlocked!",
-                      description: `${achievement.title}: ${achievement.description}`,
-                      variant: "default",
-                    });
-                  });
-                
-                setGameEnded(true);
-              }}
-              disabled={isLoadingNextQuestion}
+              onClick={endGame}
+              disabled={isLoadingNext}
             >
               See Results
             </Button>
@@ -387,9 +210,9 @@ export default function SurahOrdering() {
               <Button
                 className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
                 onClick={handleNext}
-                disabled={isLoadingNextQuestion}
+                disabled={isLoadingNext}
               >
-                {isLoadingNextQuestion ? (
+                {isLoadingNext ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
                     Loading...
@@ -410,7 +233,7 @@ export default function SurahOrdering() {
         </div>
         <div className="flex items-center">
           <Clock className="w-4 h-4 text-primary mr-1" />
-          <span className="text-sm">Time: {timer}</span>
+          <span className="text-sm">Time: {formattedTime}</span>
         </div>
       </div>
     </div>
