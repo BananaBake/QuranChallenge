@@ -86,51 +86,51 @@ export const initialAchievements: Achievement[] = [
     goal: 100
   },
   
-  // Streak achievements for any mode
+  // Trophy collection achievements
   {
-    id: 'streak_5',
-    title: 'Getting Good',
-    description: 'Reach a streak of 5 in any game mode',
+    id: 'trophies_5',
+    title: 'Trophy Collector',
+    description: 'Unlock 5 different achievements',
     icon: '🔥',
     unlocked: false,
     progress: 0,
     goal: 5
   },
   {
-    id: 'streak_10',
-    title: 'Master',
-    description: 'Reach a streak of 10 in any game mode',
+    id: 'trophies_10',
+    title: 'Trophy Master',
+    description: 'Unlock 10 different achievements',
     icon: '🏆',
     unlocked: false,
     progress: 0,
     goal: 10
   },
   {
-    id: 'streak_25',
-    title: 'Expert',
-    description: 'Reach a streak of 25 in any game mode',
+    id: 'trophies_15',
+    title: 'Trophy Expert',
+    description: 'Unlock 15 different achievements',
     icon: '💫',
     unlocked: false,
     progress: 0,
-    goal: 25
+    goal: 15
   },
   {
-    id: 'streak_50',
-    title: 'Champion',
-    description: 'Reach a streak of 50 in any game mode',
+    id: 'trophies_20',
+    title: 'Trophy Champion',
+    description: 'Unlock 20 different achievements',
     icon: '🌟',
     unlocked: false,
     progress: 0,
-    goal: 50
+    goal: 20
   },
   {
-    id: 'streak_100',
-    title: 'Legendary',
-    description: 'Reach a streak of 100 in any game mode',
+    id: 'trophies_25',
+    title: 'Trophy Legend',
+    description: 'Unlock 25 different achievements',
     icon: '👑',
     unlocked: false,
     progress: 0,
-    goal: 100
+    goal: 25
   },
   
   // Identify Surah mode achievements
