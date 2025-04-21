@@ -4,61 +4,103 @@ import { storage } from "./storage";
 import axios from "axios";
 import { z } from "zod";
 import { insertGameHistorySchema } from "@shared/schema";
+import type { Ayah, Surah } from "@shared/schema";
 
-// Quran API base URL
 const QURAN_API_BASE_URL = "https://api.alquran.cloud/v1";
+const DEFAULT_USER_ID = 1;
+
+async function fetchAllSurahs(): Promise<Surah[]> {
+  const response = await axios.get(`${QURAN_API_BASE_URL}/surah`);
+  return response.data.data;
+}
+
+async function fetchAyahWithTranslation(surahNumber: number, ayahNumber: number) {
+  const ayahResponse = await axios.get(
+    `${QURAN_API_BASE_URL}/ayah/${surahNumber}:${ayahNumber}/editions/quran-uthmani,en.asad`
+  );
+  
+  if (ayahResponse.data.data?.length >= 2) {
+    const arabicAyah = ayahResponse.data.data[0];
+    const translationAyah = ayahResponse.data.data[1];
+    return { arabicAyah, translationAyah };
+  }
+  return null;
+}
+
+async function fetchAyahAudio(surahNumber: number, ayahNumber: number) {
+  const audioResponse = await axios.get(
+    `${QURAN_API_BASE_URL}/ayah/${surahNumber}:${ayahNumber}/ar.alafasy`
+  );
+  
+  if (audioResponse.data?.data) {
+    return audioResponse.data.data;
+  }
+  return null;
+}
+
+function createAyahObject(arabicAyah: any, translationAyah: any, surah: any, audioData: any = null): Ayah {
+  return {
+    number: arabicAyah.number,
+    text: arabicAyah.text,
+    translation: translationAyah.text,
+    ...(audioData && { 
+      audio: audioData.audio,
+      audioSecondary: audioData.audioSecondary
+    }),
+    ayahRef: `${surah.number}:${arabicAyah.ayahNumber}`,
+    surah: {
+      number: surah.number,
+      name: surah.name,
+      englishName: surah.englishName
+    }
+  };
+}
+
+function calculateModePerformance(gameHistory: any[], mode: string): number {
+  const modeGames = gameHistory.filter(g => g.gameType === mode);
+  
+  if (modeGames.length === 0) {
+    return 0;
+  }
+  
+  const totalModeScorePercentage = modeGames.reduce((sum: number, game: any) => {
+    return sum + (game.score / game.maxScore) * 100;
+  }, 0);
+  
+  return Math.round(totalModeScorePercentage / modeGames.length);
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Quran data endpoints
-  
-  // Get all surahs
   app.get("/api/quran/surahs", async (req, res) => {
     try {
-      const response = await axios.get(`${QURAN_API_BASE_URL}/surah`);
-      res.json(response.data.data);
+      const surahs = await fetchAllSurahs();
+      res.json(surahs);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Surah data" });
     }
   });
   
-  // Get random ayahs for the identify surah game
   app.get("/api/quran/random-ayahs", async (req, res) => {
     try {
-      // First get the list of all surahs to know the ranges
-      const surahsResponse = await axios.get(`${QURAN_API_BASE_URL}/surah`);
-      const surahs = surahsResponse.data.data;
-      
-      // Parse count parameter with a default of 10
+      const surahs = await fetchAllSurahs();
       const count = parseInt(req.query.count as string) || 10;
-      
-      // Generate random ayahs - try to get diverse ayahs from different surahs
       const ayahs = [];
       const usedSurahs = new Set();
       
-      // First attempt to get one from each surah
       while (ayahs.length < count && usedSurahs.size < surahs.length) {
-        // Pick a random surah that hasn't been used yet
-        const availableSurahs = surahs.filter((s: any) => !usedSurahs.has(s.number));
+        const availableSurahs = surahs.filter(s => !usedSurahs.has(s.number));
         const randomSurah = availableSurahs[Math.floor(Math.random() * availableSurahs.length)];
-        
-        // Pick a random ayah from this surah
         const ayahNumber = Math.floor(Math.random() * randomSurah.numberOfAyahs) + 1;
         
         try {
-          const ayahResponse = await axios.get(
-            `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/editions/quran-uthmani,en.asad`
-          );
-          
-          if (ayahResponse.data.data && ayahResponse.data.data.length >= 2) {
-            const arabicAyah = ayahResponse.data.data[0];
-            const translationAyah = ayahResponse.data.data[1];
+          const result = await fetchAyahWithTranslation(randomSurah.number, ayahNumber);
+          if (result) {
+            const { arabicAyah, translationAyah } = result;
             
-            // Add the ayah without audio to improve load time
             ayahs.push({
               number: arabicAyah.number,
               text: arabicAyah.text,
               translation: translationAyah.text,
-              // Save reference for later audio fetching
               ayahRef: `${randomSurah.number}:${ayahNumber}`,
               surah: {
                 number: randomSurah.number,
@@ -70,81 +112,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             usedSurahs.add(randomSurah.number);
           }
         } catch (error) {
-          // Skip this ayah if there's an error and try another one
           console.error(`Error fetching ayah ${randomSurah.number}:${ayahNumber}`, error);
         }
       }
       
-      // If we still need more ayahs, pick from random surahs
       while (ayahs.length < count) {
         const randomSurah = surahs[Math.floor(Math.random() * surahs.length)];
         const ayahNumber = Math.floor(Math.random() * randomSurah.numberOfAyahs) + 1;
         
         try {
-          const ayahResponse = await axios.get(
-            `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/editions/quran-uthmani,en.asad`
-          );
-          
-          if (ayahResponse.data.data && ayahResponse.data.data.length >= 2) {
-            const arabicAyah = ayahResponse.data.data[0];
-            const translationAyah = ayahResponse.data.data[1];
-            
-            // Check if this exact ayah is already included
+          const result = await fetchAyahWithTranslation(randomSurah.number, ayahNumber);
+          if (result) {
+            const { arabicAyah, translationAyah } = result;
             const isDuplicate = ayahs.some(a => a.number === arabicAyah.number);
             
             if (!isDuplicate) {
-              // Get audio for this ayah
               try {
-                const audioResponse = await axios.get(
-                  `${QURAN_API_BASE_URL}/ayah/${randomSurah.number}:${ayahNumber}/ar.alafasy`
-                );
+                const audioData = await fetchAyahAudio(randomSurah.number, ayahNumber);
                 
-                if (audioResponse.data && audioResponse.data.data) {
-                  const audioData = audioResponse.data.data;
-                  
-                  ayahs.push({
-                    number: arabicAyah.number,
-                    text: arabicAyah.text,
-                    translation: translationAyah.text,
-                    audio: audioData.audio,
-                    audioSecondary: audioData.audioSecondary,
-                    surah: {
-                      number: randomSurah.number,
-                      name: randomSurah.name,
-                      englishName: randomSurah.englishName
-                    }
-                  });
+                if (audioData) {
+                  ayahs.push(createAyahObject(arabicAyah, translationAyah, randomSurah, audioData));
                 } else {
-                  // Fallback if audio couldn't be retrieved
-                  ayahs.push({
-                    number: arabicAyah.number,
-                    text: arabicAyah.text,
-                    translation: translationAyah.text,
-                    surah: {
-                      number: randomSurah.number,
-                      name: randomSurah.name,
-                      englishName: randomSurah.englishName
-                    }
-                  });
+                  ayahs.push(createAyahObject(arabicAyah, translationAyah, randomSurah));
                 }
               } catch (error) {
-                // Fallback if there's an error fetching audio
                 console.error(`Error fetching audio for ayah ${randomSurah.number}:${ayahNumber}`, error);
-                ayahs.push({
-                  number: arabicAyah.number,
-                  text: arabicAyah.text,
-                  translation: translationAyah.text,
-                  surah: {
-                    number: randomSurah.number,
-                    name: randomSurah.name,
-                    englishName: randomSurah.englishName
-                  }
-                });
+                ayahs.push(createAyahObject(arabicAyah, translationAyah, randomSurah));
               }
             }
           }
         } catch (error) {
-          // Skip this ayah if there's an error and try another one
           console.error(`Error fetching ayah ${randomSurah.number}:${ayahNumber}`, error);
         }
       }
@@ -156,16 +153,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get random surahs for the ordering game
   app.get("/api/quran/random-surahs", async (req, res) => {
     try {
-      const response = await axios.get(`${QURAN_API_BASE_URL}/surah`);
-      const allSurahs = response.data.data;
-      
-      // Parse count parameter with a default of 5
+      const allSurahs = await fetchAllSurahs();
       const count = parseInt(req.query.count as string) || 5;
       
-      // Select random surahs
       const randomSurahs = [];
       const usedIndices = new Set();
       
@@ -184,15 +176,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Stats endpoints
-  
-  // Get user statistics
   app.get("/api/stats", async (req, res) => {
     try {
-      // For this prototype, we'll use user ID 1
-      const userId = 1;
-      
-      // Get all game history for this user
+      const userId = DEFAULT_USER_ID;
       const gameHistory = await storage.getGameHistoryByUserId(userId);
       
       if (!gameHistory || gameHistory.length === 0) {
@@ -209,21 +195,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Calculate statistics
       const totalGames = gameHistory.length;
       
-      // Calculate average score as a percentage
       const totalScorePercentage = gameHistory.reduce((sum, game) => {
         return sum + (game.score / game.maxScore) * 100;
       }, 0);
       const averageScore = Math.round(totalScorePercentage / totalGames);
       
-      // Calculate best streak (consecutive correct answers)
       const chronologicalGames = [...gameHistory].sort(
         (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
       );
       
-      // For simplicity, we'll count best streak as consecutive games with score >= 70%
       let currentStreak = 0;
       let bestStreak = 0;
       
@@ -238,11 +220,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Calculate total ayat learned (for simplicity, we'll count each correct answer in identify surah mode)
       const identifySurahGames = gameHistory.filter(g => g.gameType === "identify_surah");
       const ayatLearned = identifySurahGames.reduce((sum, game) => sum + game.score, 0);
       
-      // Calculate performance by game mode
       const identifySurahPerformance = calculateModePerformance(gameHistory, "identify_surah");
       const surahOrderingPerformance = calculateModePerformance(gameHistory, "surah_ordering");
       
@@ -255,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           identifySurah: identifySurahPerformance,
           surahOrdering: surahOrderingPerformance
         },
-        recentGames: chronologicalGames.slice(0, 5) // Return 5 most recent games
+        recentGames: chronologicalGames.slice(0, 5)
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -263,16 +243,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get recent games
   app.get("/api/stats/recent", async (req, res) => {
     try {
-      // For this prototype, we'll use user ID 1
-      const userId = 1;
-      
-      // Parse limit parameter with a default of 5
+      const userId = DEFAULT_USER_ID;
       const limit = parseInt(req.query.limit as string) || 5;
-      
-      // Get recent game history for this user
       const gameHistory = await storage.getRecentGameHistory(userId, limit);
       
       res.json(gameHistory);
@@ -281,11 +255,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Save game result
   app.post("/api/stats/save", async (req, res) => {
     try {
       const validatedData = insertGameHistorySchema.parse(req.body);
-      
       const gameHistory = await storage.saveGameHistory(validatedData);
       
       res.status(201).json(gameHistory);
@@ -298,7 +270,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get audio for a specific ayah
   app.get("/api/quran/audio/:ayahRef", async (req, res) => {
     try {
       const { ayahRef } = req.params;
@@ -307,12 +278,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ayah reference format. Expected 'surah:ayah'" });
       }
       
-      // Get audio for this ayah
       const audioResponse = await axios.get(
         `${QURAN_API_BASE_URL}/ayah/${ayahRef}/ar.alafasy`
       );
       
-      if (audioResponse.data && audioResponse.data.data) {
+      if (audioResponse.data?.data) {
         const audioData = audioResponse.data.data;
         res.json({
           audio: audioData.audio,
@@ -329,19 +299,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
-}
-
-// Helper function to calculate performance for a specific game mode
-function calculateModePerformance(gameHistory: any[], mode: string): number {
-  const modeGames = gameHistory.filter((g: any) => g.gameType === mode);
-  
-  if (modeGames.length === 0) {
-    return 0;
-  }
-  
-  const totalModeScorePercentage = modeGames.reduce((sum: number, game: any) => {
-    return sum + (game.score / game.maxScore) * 100;
-  }, 0);
-  
-  return Math.round(totalModeScorePercentage / modeGames.length);
 }

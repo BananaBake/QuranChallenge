@@ -28,7 +28,10 @@ export class MemStorage implements IStorage {
     this.userCurrentId = 1;
     this.gameHistoryCurrentId = 1;
     
-    // Create a default user
+    this.initializeDefaultUser();
+  }
+
+  private async initializeDefaultUser(): Promise<void> {
     this.createUser({
       username: "default",
       password: "password"
@@ -40,9 +43,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -54,12 +55,18 @@ export class MemStorage implements IStorage {
   
   async saveGameHistory(data: InsertGameHistory): Promise<GameHistory> {
     const id = this.gameHistoryCurrentId++;
-    const now = new Date();
+    
+    // Ensure userId is not undefined
+    const userId = typeof data.userId === 'number' ? data.userId : null;
     
     const gameHistoryEntry: GameHistory = {
-      ...data,
       id,
-      completedAt: now
+      userId,
+      gameType: data.gameType,
+      score: data.score,
+      maxScore: data.maxScore,
+      timeSpent: data.timeSpent,
+      completedAt: new Date()
     };
     
     this.gameHistories.set(id, gameHistoryEntry);
@@ -74,11 +81,7 @@ export class MemStorage implements IStorage {
   async getRecentGameHistory(userId: number, limit: number): Promise<GameHistory[]> {
     return Array.from(this.gameHistories.values())
       .filter(history => history.userId === userId)
-      .sort((a, b) => {
-        const dateA = new Date(a.completedAt).getTime();
-        const dateB = new Date(b.completedAt).getTime();
-        return dateB - dateA; // Sort in descending order (newest first)
-      })
+      .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
       .slice(0, limit);
   }
 }
