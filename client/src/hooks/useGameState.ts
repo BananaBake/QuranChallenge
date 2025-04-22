@@ -1,31 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSaveGameResult, useGameStats } from '@/hooks/useGameStats';
 import { useAchievementNotifications } from '@/hooks/useAchievements';
 import { useGameTimer } from '@/hooks/useGameTimer';
 import { useToast } from '@/hooks/use-toast';
-import { GameHistory } from '@shared/schema';
 
-type GameMode = 'identify_surah' | 'surah_ordering';
+export type GameMode = 'identify_surah' | 'surah_ordering';
 
 interface GameStateProps {
   gameMode: GameMode;
   initialScore?: number;
 }
 
-/**
- * Hook to manage common game state logic across different game modes
- */
 export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
-  // Game state
   const [score, setScore] = useState(initialScore);
   const [gameEnded, setGameEnded] = useState(false);
   const [previousHighScore, setPreviousHighScore] = useState(0);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   
-  // External hooks
   const { data: stats } = useGameStats();
   const { mutate: saveGameResult } = useSaveGameResult();
-  const { toast } = useToast();
   const { timeSpent, formattedTime, resetTimer } = useGameTimer(!gameEnded);
   const { 
     handleHighScoreAchievements,
@@ -33,9 +26,8 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     checkProgress
   } = useAchievementNotifications();
   
-  // Get previous high score for this game mode when stats load
   useEffect(() => {
-    if (stats && stats.modePerformance) {
+    if (stats?.modePerformance) {
       const highScore = gameMode === 'identify_surah' 
         ? stats.modePerformance.identifySurah 
         : stats.modePerformance.surahOrdering;
@@ -44,20 +36,15 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     }
   }, [stats, gameMode]);
   
-  // Increment score and check for achievements
-  const incrementScore = () => {
-    const newScore = score + 1;
-    setScore(newScore);
-    
-    // Update streak-based achievements
-    updateStreakAchievements(gameMode, newScore);
-    
-    return newScore;
-  };
+  const incrementScore = useCallback(() => {
+    setScore(prevScore => {
+      const newScore = prevScore + 1;
+      updateStreakAchievements(gameMode, newScore);
+      return newScore;
+    });
+  }, [gameMode, updateStreakAchievements]);
   
-  // End the game and save results
-  const endGame = () => {
-    // Save the game result
+  const endGame = useCallback(() => {
     saveGameResult({
       userId: 1,
       gameType: gameMode,
@@ -66,41 +53,33 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
       timeSpent
     });
     
-    // Check for game completion achievements
-    const playedAchievements = checkProgress();
-    
-    // End the game
+    checkProgress();
     setGameEnded(true);
-  };
+  }, [gameMode, score, timeSpent, saveGameResult, checkProgress]);
   
-  // Check if new score is a high score
-  const checkHighScore = (currentScore = score) => {
+  const checkHighScore = useCallback((currentScore = score) => {
     if (currentScore > previousHighScore) {
       setIsNewHighScore(true);
-      const isNewHigh = handleHighScoreAchievements(currentScore, previousHighScore);
+      handleHighScoreAchievements(currentScore, previousHighScore);
       return true;
     }
     return false;
-  };
+  }, [score, previousHighScore, handleHighScoreAchievements]);
   
-  // Reset the game state
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setScore(initialScore);
     setGameEnded(false);
     setIsNewHighScore(false);
     resetTimer();
-  };
+  }, [initialScore, resetTimer]);
   
   return {
-    // State
     score,
     gameEnded,
     previousHighScore,
     isNewHighScore,
     timeSpent,
     formattedTime,
-    
-    // Actions
     incrementScore,
     endGame,
     checkHighScore,

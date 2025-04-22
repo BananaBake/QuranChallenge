@@ -196,8 +196,8 @@ export default function IdentifySurah() {
       selectedOption !== null && 
       options[selectedOption].number === currentAyah.surah.number;
     
-    if (isCorrectAnswer) {
-      loadNextQuestion(allSurahs || []);
+    if (isCorrectAnswer && allSurahs) {
+      loadNextQuestion(allSurahs);
       checkProgress();
     }
   };
@@ -206,7 +206,9 @@ export default function IdentifySurah() {
     resetGame();
     setSelectedOption(null);
     setRevealAnswer(false);
-    loadNextQuestion(allSurahs || []);
+    if (allSurahs) {
+      loadNextQuestion(allSurahs);
+    }
   };
   
   if (isLoading || isLoadingSurahs) {

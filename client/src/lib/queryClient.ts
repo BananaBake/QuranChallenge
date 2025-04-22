@@ -7,20 +7,31 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
+export async function apiRequest<T = any>(
   url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
+  options?: RequestInit
+): Promise<T> {
   const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    ...options,
     credentials: "include",
+    headers: {
+      ...(options?.headers || {}),
+      ...(options?.body ? { "Content-Type": "application/json" } : {})
+    }
   });
 
   await throwIfResNotOk(res);
-  return res;
+  return await res.json();
+}
+
+export async function apiPost<T = any>(
+  url: string, 
+  data: any
+): Promise<T> {
+  return apiRequest<T>(url, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -29,7 +40,19 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    let queryParams = '';
+    
+    // Handle query parameters if they exist in the queryKey
+    if (queryKey.length > 1 && typeof queryKey[1] === 'number') {
+      const paramName = url.includes('random-ayahs') ? 'count' : 
+                        url.includes('random-surahs') ? 'count' : '';
+      if (paramName) {
+        queryParams = `?${paramName}=${queryKey[1]}`;
+      }
+    }
+    
+    const res = await fetch(`${url}${queryParams}`, {
       credentials: "include",
     });
 
@@ -47,8 +70,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes as default stale time
+      retry: 1,
     },
     mutations: {
       retry: false,
