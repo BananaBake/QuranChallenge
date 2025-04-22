@@ -305,7 +305,13 @@ export function getGameHistory(): GameHistory[] {
 }
 
 // Save a new game history entry
-export function saveGameHistory(game: Omit<GameHistory, 'id'>): GameHistory {
+export function saveGameHistory(game: {
+  userId: number;
+  gameType: string;
+  score: number;
+  maxScore: number;
+  timeSpent: number;
+}): GameHistory {
   const history = getGameHistory();
   
   const newGame: GameHistory = {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { DraggableSurah } from "@/components/ui/draggable-surah";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -7,8 +7,119 @@ import { useGameState } from "@/hooks/useGameState";
 import { useSurahOrderingData } from "@/hooks/useGameData";
 import { useAchievementNotifications } from "@/hooks/useAchievements";
 
+interface GameResultProps {
+  score: number;
+  formattedTime: string;
+  isNewHighScore: boolean;
+  onPlayAgain: () => void;
+}
+
+const GameResult = ({ score, formattedTime, isNewHighScore, onPlayAgain }: GameResultProps) => (
+  <div className="bg-white rounded-lg shadow-md p-6 text-center">
+    <h2 className="text-2xl font-bold text-primary mb-2">
+      {isNewHighScore ? '🏆 New High Score!' : 'Great Effort!'}
+    </h2>
+    
+    {isNewHighScore ? (
+      <p className="text-accent font-bold mb-4">
+        Congratulations! You've beaten your previous best score!
+      </p>
+    ) : (
+      <p className="text-primary font-medium mb-4">
+        You did well! Each attempt helps you learn more about the order of the Quran.
+      </p>
+    )}
+    
+    <div className="bg-gray-50 rounded-lg p-6 mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center">
+          <Trophy className="w-5 h-5 text-secondary mr-2" />
+          <span className="text-gray-600">Score:</span>
+        </div>
+        <span className="font-bold text-xl text-primary">{score}</span>
+      </div>
+      
+      <div className="flex justify-between items-center">
+        <div className="flex items-center">
+          <Clock className="w-5 h-5 text-primary mr-2" />
+          <span className="text-gray-600">Time:</span>
+        </div>
+        <span className="font-bold text-xl text-accent">{formattedTime}</span>
+      </div>
+    </div>
+    
+    <p className="text-sm text-gray-600 mb-6">
+      You correctly ordered {score} {score === 1 ? 'round' : 'rounds'} of Surahs.
+      {isNewHighScore && ' Keep going to improve your knowledge!'}
+    </p>
+    
+    <Button 
+      className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
+      onClick={onPlayAgain}
+    >
+      Play Again
+    </Button>
+  </div>
+);
+
+interface GameControlsProps {
+  checked: boolean;
+  isCorrect: boolean;
+  gameEnded: boolean;
+  isLoadingNext: boolean;
+  onCheckOrder: () => void;
+  onSeeResults: () => void;
+  onNext: () => void;
+}
+
+const GameControls = ({ 
+  checked, 
+  isCorrect, 
+  gameEnded,
+  isLoadingNext, 
+  onCheckOrder, 
+  onSeeResults,
+  onNext
+}: GameControlsProps) => (
+  <div className="flex justify-center mt-6">
+    {!checked ? (
+      <Button 
+        className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
+        onClick={onCheckOrder}
+        disabled={isLoadingNext}
+      >
+        <Check className="w-5 h-5 mr-2" /> Check Order
+      </Button>
+    ) : checked && !isCorrect ? (
+      <Button
+        className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
+        onClick={onSeeResults}
+        disabled={isLoadingNext}
+      >
+        See Results
+      </Button>
+    ) : (
+      isCorrect && !gameEnded && (
+        <Button
+          className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
+          onClick={onNext}
+          disabled={isLoadingNext}
+        >
+          {isLoadingNext ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              Loading...
+            </>
+          ) : (
+            'Next Question'
+          )}
+        </Button>
+      )
+    )}
+  </div>
+);
+
 export default function SurahOrdering() {
-  // Game state management
   const {
     score,
     gameEnded,
@@ -21,7 +132,6 @@ export default function SurahOrdering() {
     resetGame
   } = useGameState({ gameMode: 'surah_ordering' });
   
-  // Game data management
   const {
     surahs,
     isLoading,
@@ -33,59 +143,47 @@ export default function SurahOrdering() {
     originalSurahs
   } = useSurahOrderingData();
   
-  // Achievement progress tracking
   const { checkProgress } = useAchievementNotifications();
   
-  // Local UI state
   const [checked, setChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   
-  // Initialize surahs when data loads
   useEffect(() => {
     if (originalSurahs && originalSurahs.length > 0 && !gameEnded) {
       initializeSurahs(originalSurahs);
     }
   }, [originalSurahs, gameEnded, initializeSurahs]);
   
-  const handleCheckOrder = () => {
+  const handleCheckOrder = useCallback(() => {
     setChecked(true);
     
-    // Check if the order is correct
     const orderCorrect = checkCorrectOrder();
     setIsCorrect(orderCorrect);
     
     if (orderCorrect) {
-      // Correct answer - Increment score and check for achievements
       incrementScore();
     } else {
-      // Incorrect answer - check if this is a new high score
       checkHighScore();
     }
-  };
+  }, [checkCorrectOrder, incrementScore, checkHighScore]);
   
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (gameEnded) return;
     
     setChecked(false);
     
-    // Only continue if the answer was correct
     if (isCorrect) {
-      // Load next question
       loadNextQuestion();
-      
-      // Check for achievements during gameplay
       checkProgress();
     }
-  };
+  }, [gameEnded, isCorrect, loadNextQuestion, checkProgress]);
   
-  const handleStartNewGame = () => {
+  const handleStartNewGame = useCallback(() => {
     resetGame();
     setChecked(false);
     setIsCorrect(false);
-    
-    // Load fresh surahs
     loadNextQuestion();
-  };
+  }, [resetGame, loadNextQuestion]);
   
   if (isLoading) {
     return <LoadingSpinner message="Loading surahs..." />;
@@ -93,51 +191,28 @@ export default function SurahOrdering() {
   
   if (gameEnded) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 text-center">
-        <h2 className="text-2xl font-bold text-primary mb-2">{isNewHighScore ? '🏆 New High Score!' : 'Great Effort!'}</h2>
-        
-        {isNewHighScore ? (
-          <p className="text-accent font-bold mb-4">
-            Congratulations! You've beaten your previous best score!
-          </p>
-        ) : (
-          <p className="text-primary font-medium mb-4">
-            You did well! Each attempt helps you learn more about the order of the Quran.
-          </p>
-        )}
-        
-        <div className="bg-gray-50 rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-              <Trophy className="w-5 h-5 text-secondary mr-2" />
-              <span className="text-gray-600">Score:</span>
-            </div>
-            <span className="font-bold text-xl text-primary">{score}</span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <Clock className="w-5 h-5 text-primary mr-2" />
-              <span className="text-gray-600">Time:</span>
-            </div>
-            <span className="font-bold text-xl text-accent">{formattedTime}</span>
-          </div>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-6">
-          You correctly ordered {score} {score === 1 ? 'round' : 'rounds'} of Surahs.
-          {isNewHighScore && ' Keep going to improve your knowledge!'}
-        </p>
-        
-        <Button 
-          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
-          onClick={handleStartNewGame}
-        >
-          Play Again
-        </Button>
-      </div>
+      <GameResult 
+        score={score}
+        formattedTime={formattedTime}
+        isNewHighScore={isNewHighScore}
+        onPlayAgain={handleStartNewGame}
+      />
     );
   }
+  
+  const getFeedbackMessage = () => {
+    if (checked) {
+      return isCorrect 
+        ? "✓ Correct! Your order is perfect."
+        : "✗ Incorrect. The correct order is from lowest to highest surah number.";
+    }
+    return "Drag and drop the Surahs to arrange them in the correct Qur'anic order (from lowest to highest number)";
+  };
+  
+  const getFeedbackClass = () => {
+    if (!checked) return "bg-primary/10 text-primary";
+    return isCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+  };
   
   return (
     <div>
@@ -152,19 +227,8 @@ export default function SurahOrdering() {
           </div>
         </div>
         
-        <div className={`p-3 text-center mb-6 rounded-lg ${
-          checked 
-            ? (isCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
-            : "bg-primary/10 text-primary"
-        }`}>
-          <p className="font-medium">
-            {checked 
-              ? isCorrect 
-                ? "✓ Correct! Your order is perfect."
-                : "✗ Incorrect. The correct order is from lowest to highest surah number."
-              : "Drag and drop the Surahs to arrange them in the correct Qur'anic order (from lowest to highest number)"
-            }
-          </p>
+        <div className={`p-3 text-center mb-6 rounded-lg ${getFeedbackClass()}`}>
+          <p className="font-medium">{getFeedbackMessage()}</p>
         </div>
         
         <div className="space-y-2 mb-6">
@@ -188,48 +252,21 @@ export default function SurahOrdering() {
           </div>
         )}
         
-        <div className="flex justify-center mt-6">
-          {!checked ? (
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
-              onClick={handleCheckOrder}
-              disabled={isLoadingNext}
-            >
-              <Check className="w-5 h-5 mr-2" /> Check Order
-            </Button>
-          ) : checked && !isCorrect ? (
-            <Button
-              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
-              onClick={endGame}
-              disabled={isLoadingNext}
-            >
-              See Results
-            </Button>
-          ) : (
-            isCorrect && !gameEnded && (
-              <Button
-                className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
-                onClick={handleNext}
-                disabled={isLoadingNext}
-              >
-                {isLoadingNext ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Loading...
-                  </>
-                ) : (
-                  'Next Question'
-                )}
-              </Button>
-            )
-          )}
-        </div>
+        <GameControls 
+          checked={checked}
+          isCorrect={isCorrect}
+          gameEnded={gameEnded}
+          isLoadingNext={isLoadingNext}
+          onCheckOrder={handleCheckOrder}
+          onSeeResults={endGame}
+          onNext={handleNext}
+        />
       </div>
       
       <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
         <div className="flex items-center">
           <Trophy className="w-4 h-4 text-secondary mr-1" />
-          <span className="text-sm">Best: {previousHighScore > score ? previousHighScore : score}</span>
+          <span className="text-sm">Best: {Math.max(previousHighScore, score)}</span>
         </div>
         <div className="flex items-center">
           <Clock className="w-4 h-4 text-primary mr-1" />

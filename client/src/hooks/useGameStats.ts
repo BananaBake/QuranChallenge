@@ -29,7 +29,13 @@ export function useSaveGameResult() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (gameData: Omit<GameHistory, 'id' | 'completedAt'>) => {
+    mutationFn: async (gameData: {
+      userId: number;
+      gameType: string;
+      score: number;
+      maxScore: number;
+      timeSpent: number;
+    }) => {
       const savedGame = saveGameHistory(gameData);
       
       const newAchievements = getNewlyUnlockedAchievements();
