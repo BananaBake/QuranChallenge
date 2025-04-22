@@ -1,5 +1,4 @@
 // Layout Components
-export { default as Header } from './layout/Header';
 export { default as BottomNavigation } from './layout/BottomNavigation';
 
 // Common UI Components
