@@ -1,9 +1,10 @@
 import { BookOpen } from "lucide-react";
+import { memo } from "react";
 
-export default function Header() {
+const Header = memo(() => {
   return (
     <header className="bg-primary text-white py-4 px-4 text-center relative shadow-md">
-      <div className="absolute inset-0 opacity-10 islamic-pattern"></div>
+      <div className="absolute inset-0 opacity-10 islamic-pattern" aria-hidden="true"></div>
       <div className="flex items-center justify-center relative z-10">
         <BookOpen className="text-secondary w-6 h-6 mr-2" />
         <h1 className="text-2xl font-bold">
@@ -12,4 +13,8 @@ export default function Header() {
       </div>
     </header>
   );
-}
+});
+
+Header.displayName = "Header";
+
+export default Header;
