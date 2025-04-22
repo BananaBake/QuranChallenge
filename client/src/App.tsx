@@ -3,7 +3,6 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { memo } from "react";
-import Header from "@/components/layout/Header";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 
 // Import page components directly to avoid lazy loading issues
@@ -18,7 +17,6 @@ const AppRoutes = memo(() => {
 
   return (
     <>
-      <Header />
       <main className="p-4 pb-20 w-full">
         <Switch>
           <Route path="/" component={Home} />
