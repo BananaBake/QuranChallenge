@@ -3,9 +3,9 @@ import { GameStats, GameHistory } from "@shared/schema";
 import { 
   getGameStats, 
   getRecentGameHistory, 
-  saveGameHistory,
-  getNewlyUnlockedAchievements
+  saveGameHistory
 } from "@/lib/localStorageService";
+import { getNewlyUnlockedAchievements } from "@/lib/trophyService";
 import { useToast } from "@/hooks/use-toast";
 
 export function useGameStats() {

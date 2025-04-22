@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, memo, useMemo } from 'react';
-import { useAchievements } from '@/hooks/useLocalStorage';
+import { useAchievements } from '@/hooks/useAchievements';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { TrophyCabinet, TrophyDetails } from '@/components/ui/trophy-cabinet';
-import { AchievementsList } from '@/components/ui/achievement-display';
+import { TrophyCabinet, TrophyDetails } from '@/components/achievements/TrophyCabinet';
+import { AchievementsList } from '@/components/achievements/AchievementDisplay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer } from '@/components/common/PageContainer';
 import { Award, Trophy, Medal } from 'lucide-react';
-import { Achievement } from '@/lib/localStorageService';
+import { Achievement } from '@/lib/trophyService';
 
 interface EmptyStateProps {
   title?: string;
@@ -118,12 +118,25 @@ const AchievementModal = memo(({ achievement, onClose }: AchievementModalProps) 
 AchievementModal.displayName = "AchievementModal";
 
 export default function Achievements() {
-  const { data: achievements, isLoading, refresh } = useAchievements();
+  const { data: achievements, isLoading, refetch } = useAchievements();
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   
+  // Calculate achievement stats - moved before conditional rendering to fix hook order
+  const achievementStats = useMemo(() => {
+    if (!achievements || achievements.length === 0) {
+      return { unlockedCount: 0, totalCount: 0, percentComplete: 0 };
+    }
+    
+    const unlockedCount = achievements.filter(a => a.unlocked).length;
+    const totalCount = achievements.length;
+    const percentComplete = Math.round((unlockedCount / totalCount) * 100);
+    
+    return { unlockedCount, totalCount, percentComplete };
+  }, [achievements]);
+  
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    refetch();
+  }, [refetch]);
   
   const handleSelectAchievement = useCallback((achievement: Achievement) => {
     setSelectedAchievement(achievement);
@@ -148,14 +161,6 @@ export default function Achievements() {
       </PageContainer>
     );
   }
-  
-  const achievementStats = useMemo(() => {
-    const unlockedCount = achievements.filter(a => a.unlocked).length;
-    const totalCount = achievements.length;
-    const percentComplete = Math.round((unlockedCount / totalCount) * 100);
-    
-    return { unlockedCount, totalCount, percentComplete };
-  }, [achievements]);
   
   return (
     <PageContainer>

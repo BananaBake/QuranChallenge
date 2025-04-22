@@ -1,0 +1,218 @@
+[
+  {
+    "id": "first_game",
+    "title": "First Steps",
+    "description": "Complete your first game",
+    "icon": "🎮",
+    "type": "milestone",
+    "goal": 1
+  },
+  {
+    "id": "highscore_1",
+    "title": "Record Breaker",
+    "description": "Beat your high score for the first time",
+    "icon": "📈",
+    "type": "high_score",
+    "goal": 1
+  },
+  {
+    "id": "games_5",
+    "title": "Getting Started",
+    "description": "Play 5 games",
+    "icon": "📖",
+    "type": "games_played",
+    "goal": 5
+  },
+  {
+    "id": "identify_master_5",
+    "title": "Surah Novice",
+    "description": "Reach a streak of 5 in Identify Surah mode",
+    "icon": "🔍",
+    "type": "identify_streak",
+    "goal": 5
+  },
+  {
+    "id": "ordering_master_5",
+    "title": "Order Novice",
+    "description": "Reach a streak of 5 in Surah Ordering mode",
+    "icon": "⚖️",
+    "type": "ordering_streak",
+    "goal": 5
+  },
+  {
+    "id": "highscore_5",
+    "title": "Consistent Improver",
+    "description": "Beat your high score 5 times",
+    "icon": "📊",
+    "type": "high_score",
+    "goal": 5
+  },
+  {
+    "id": "trophies_5",
+    "title": "Trophy Collector",
+    "description": "Unlock 5 different achievements",
+    "icon": "🔥",
+    "type": "trophy_collection",
+    "goal": 5
+  },
+  {
+    "id": "games_10",
+    "title": "Dedicated Student",
+    "description": "Play 10 games",
+    "icon": "📚",
+    "type": "games_played",
+    "goal": 10
+  },
+  {
+    "id": "identify_master_10",
+    "title": "Surah Master",
+    "description": "Reach a streak of 10 in Identify Surah mode",
+    "icon": "🎯",
+    "type": "identify_streak",
+    "goal": 10
+  },
+  {
+    "id": "ordering_master_10",
+    "title": "Order Master",
+    "description": "Reach a streak of 10 in Surah Ordering mode",
+    "icon": "📊",
+    "type": "ordering_streak",
+    "goal": 10
+  },
+  {
+    "id": "highscore_10",
+    "title": "Growth Mindset",
+    "description": "Beat your high score 10 times",
+    "icon": "🚀",
+    "type": "high_score",
+    "goal": 10
+  },
+  {
+    "id": "trophies_10",
+    "title": "Trophy Master",
+    "description": "Unlock 10 different achievements",
+    "icon": "🏆",
+    "type": "trophy_collection",
+    "goal": 10
+  },
+  {
+    "id": "trophies_15",
+    "title": "Trophy Expert",
+    "description": "Unlock 15 different achievements",
+    "icon": "💫",
+    "type": "trophy_collection",
+    "goal": 15
+  },
+  {
+    "id": "trophies_20",
+    "title": "Trophy Champion",
+    "description": "Unlock 20 different achievements",
+    "icon": "🌟",
+    "type": "trophy_collection",
+    "goal": 20
+  },
+  {
+    "id": "trophies_25",
+    "title": "Trophy Legend",
+    "description": "Unlock 25 different achievements",
+    "icon": "👑",
+    "type": "trophy_collection",
+    "goal": 25
+  },
+  {
+    "id": "games_25",
+    "title": "Regular Learner",
+    "description": "Play 25 games",
+    "icon": "📝",
+    "type": "games_played",
+    "goal": 25
+  },
+  {
+    "id": "identify_streak_25",
+    "title": "Ayah Expert",
+    "description": "Reach a streak of 25 in Identify Surah mode",
+    "icon": "📜",
+    "type": "identify_streak",
+    "goal": 25
+  },
+  {
+    "id": "ordering_streak_25",
+    "title": "Sequencing Expert",
+    "description": "Reach a streak of 25 in Surah Ordering mode",
+    "icon": "📋",
+    "type": "ordering_streak",
+    "goal": 25
+  },
+  {
+    "id": "highscore_25",
+    "title": "Continuous Learner",
+    "description": "Beat your high score 25 times",
+    "icon": "📱",
+    "type": "high_score",
+    "goal": 25
+  },
+  {
+    "id": "games_50",
+    "title": "Knowledge Seeker",
+    "description": "Play 50 games",
+    "icon": "🔖",
+    "type": "games_played",
+    "goal": 50
+  },
+  {
+    "id": "identify_streak_50",
+    "title": "Quran Navigator",
+    "description": "Reach a streak of 50 in Identify Surah mode",
+    "icon": "🧭",
+    "type": "identify_streak",
+    "goal": 50
+  },
+  {
+    "id": "ordering_streak_50",
+    "title": "Arrangement Guru",
+    "description": "Reach a streak of 50 in Surah Ordering mode",
+    "icon": "🔄",
+    "type": "ordering_streak",
+    "goal": 50
+  },
+  {
+    "id": "highscore_50",
+    "title": "Excellence Pursuer",
+    "description": "Beat your high score 50 times",
+    "icon": "🏅",
+    "type": "high_score",
+    "goal": 50
+  },
+  {
+    "id": "games_100",
+    "title": "Scholar",
+    "description": "Play 100 games",
+    "icon": "🧠",
+    "type": "games_played",
+    "goal": 100
+  },
+  {
+    "id": "identify_streak_100",
+    "title": "Quran Hafiz",
+    "description": "Reach a streak of 100 in Identify Surah mode",
+    "icon": "🕌",
+    "type": "identify_streak",
+    "goal": 100
+  },
+  {
+    "id": "ordering_streak_100",
+    "title": "Quran Organizer",
+    "description": "Reach a streak of 100 in Surah Ordering mode",
+    "icon": "📚",
+    "type": "ordering_streak",
+    "goal": 100
+  },
+  {
+    "id": "highscore_100",
+    "title": "Mastery Achieved",
+    "description": "Beat your high score 100 times",
+    "icon": "🎯",
+    "type": "high_score",
+    "goal": 100
+  }
+]

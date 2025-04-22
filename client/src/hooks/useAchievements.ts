@@ -1,5 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { 
   getAchievements, 
@@ -8,7 +7,7 @@ import {
   checkAchievementsProgress,
   incrementHighScoreBeatenCount,
   type Achievement
-} from '@/lib/localStorageService';
+} from '@/lib/trophyService';
 import { GameHistory } from '@shared/schema';
 
 /**

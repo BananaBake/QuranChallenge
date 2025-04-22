@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   getGameStats, 
   getRecentGameHistory, 
-  saveGameHistory, 
+  saveGameHistory
+} from '@/lib/localStorageService';
+import { 
   getAchievements,
   getNewlyUnlockedAchievements,
-  type Achievement
-} from '@/lib/localStorageService';
+  type Achievement 
+} from '@/lib/trophyService';
 import { GameHistory, InsertGameHistory, GameStats } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,7 +60,11 @@ export function useSaveGameResult() {
     
     try {
       // Save to localStorage
-      const savedGame = saveGameHistory(gameData);
+      // Force userId to be 1 to ensure it's a number
+      const savedGame = saveGameHistory({
+        ...gameData,
+        userId: 1
+      });
       
       // No longer showing toast notifications here - we'll check for newly unlocked achievements in the game components
       // This way we can show the notifications during gameplay rather than all at the end
