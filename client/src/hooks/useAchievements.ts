@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 import { 
   getAchievements, 
   getNewlyUnlockedAchievements,
@@ -15,8 +14,6 @@ import { GameHistory } from '@shared/schema';
  * Hook to fetch all achievements
  */
 export function useAchievements() {
-  const { toast } = useToast();
-  
   return useQuery<Achievement[]>({
     queryKey: ['achievements'],
     queryFn: () => {
@@ -25,11 +22,13 @@ export function useAchievements() {
         return achievements;
       } catch (error) {
         console.error('Error fetching achievements:', error);
-        toast({
-          title: "Error",
-          description: "Could not load your achievements",
-          variant: "destructive",
-        });
+        if (window.showAlertMessage) {
+          window.showAlertMessage({
+            title: "Error",
+            description: "Could not load your achievements",
+            variant: "destructive",
+          });
+        }
         throw error;
       }
     }
@@ -38,11 +37,9 @@ export function useAchievements() {
 
 /**
  * Hook to check for newly unlocked achievements
- * @returns Function to check achievement progress and show toast notifications
+ * @returns Function to check achievement progress and show achievement notifications
  */
 export function useAchievementNotifications() {
-  const { toast } = useToast();
-  
   // Notifications are now handled by the AchievementNotificationsContainer
   const showAchievementNotifications = (_achievements: Achievement[]) => {
     // Do nothing - notifications are handled by AchievementNotificationsContainer

@@ -1,11 +1,11 @@
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import { AchievementNotificationsContainer } from "@/components/achievements/AchievementDisplay";
 import { getNewlyUnlockedAchievements, type Achievement } from "@/lib/trophyService";
+import { AlertMessagesContainer, useAlertMessage } from "@/components/ui/alert-message";
 
 // Import page components directly to avoid lazy loading issues
 import Home from "@/pages/Home";
@@ -37,6 +37,7 @@ AppRoutes.displayName = "AppRoutes";
 
 function App() {
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const { messages, showMessage, dismissMessage } = useAlertMessage();
   
   // Check for new achievements and create a custom event listener to detect them
   useEffect(() => {
@@ -78,12 +79,24 @@ function App() {
     }
   }, [newAchievements]);
   
+  // Provide the alert message context to the entire app
+  // so it can be accessed from any component
+  useEffect(() => {
+    // Expose the showMessage function to the window object
+    // for global error handling
+    window.showAlertMessage = showMessage;
+    
+    return () => {
+      delete window.showAlertMessage;
+    };
+  }, [showMessage]);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <div className="islamic-pattern min-h-screen bg-background text-textColor font-english relative">
         <div className="w-full relative min-h-screen pb-16">
           <AppRoutes />
-          <Toaster />
+          <AlertMessagesContainer messages={messages} onDismiss={dismissMessage} />
           <AchievementNotificationsContainer achievements={newAchievements} />
         </div>
       </div>
