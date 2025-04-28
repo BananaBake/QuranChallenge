@@ -6,7 +6,6 @@ import {
   saveGameHistory
 } from "@/lib/localStorageService";
 import { getNewlyUnlockedAchievements } from "@/lib/trophyService";
-import { useToast } from "@/hooks/use-toast";
 
 export function useGameStats() {
   return useQuery<GameStats>({
@@ -25,7 +24,6 @@ export function useRecentGames(limit: number = 5) {
 }
 
 export function useSaveGameResult() {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -38,17 +36,8 @@ export function useSaveGameResult() {
     }) => {
       const savedGame = saveGameHistory(gameData);
       
-      const newAchievements = getNewlyUnlockedAchievements();
-      
-      if (newAchievements.length > 0) {
-        newAchievements.forEach(achievement => {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${achievement.title}: ${achievement.description}`,
-            variant: "default",
-          });
-        });
-      }
+      // We no longer show toast notifications for achievements
+      // The AchievementNotificationsContainer component handles this
       
       return savedGame;
     },
@@ -58,11 +47,14 @@ export function useSaveGameResult() {
       queryClient.invalidateQueries({ queryKey: ['achievements'] });
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to save your game results",
-        variant: "destructive",
-      });
+      if (window.showAlertMessage) {
+        window.showAlertMessage({
+          title: "Error",
+          description: "Failed to save your game results",
+          variant: "destructive",
+        });
+      }
+      console.error("Failed to save game results");
     }
   });
 }

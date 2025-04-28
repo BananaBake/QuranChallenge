@@ -10,7 +10,6 @@ import {
   type Achievement 
 } from '@/lib/trophyService';
 import { GameHistory, InsertGameHistory, GameStats } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
 
 // Hook for retrieving game stats from localStorage
 export function useGameStats() {
