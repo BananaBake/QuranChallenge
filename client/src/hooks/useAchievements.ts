@@ -77,8 +77,8 @@ export function useAchievementNotifications() {
     const highScoreAchievements = checkAchievementsProgress();
     
     // High score achievement notifications are now handled by AchievementNotificationsContainer
-    
-    return true;
+    // Return whether new achievements were unlocked
+    return highScoreAchievements.length > 0;
   };
   
   /**

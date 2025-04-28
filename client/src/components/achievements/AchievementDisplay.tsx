@@ -129,8 +129,15 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
   // Process incoming achievements immediately - don't wait for game completion
   useEffect(() => {
     if (achievements.length > 0) {
-      console.log("New achievements received:", achievements.map(a => a.title).join(", "));
-      setQueue(prev => [...prev, ...achievements]);
+      const achievementTitles = achievements.map(a => a.title).join(", ");
+      console.log(`New achievements received (${achievements.length}): ${achievementTitles}`);
+      
+      // Add to queue and prioritize showing them
+      setQueue(prev => {
+        const newQueue = [...prev, ...achievements];
+        console.log(`Achievement queue updated: ${newQueue.length} items total`);
+        return newQueue;
+      });
     }
   }, [achievements]);
   
@@ -172,8 +179,11 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
   }, []);
   
   const handleClose = useCallback(() => {
+    if (currentAchievement) {
+      console.log(`Achievement notification closed: ${currentAchievement.title}`);
+    }
     setCurrentAchievement(null);
-  }, []);
+  }, [currentAchievement]);
   
   return (
     <AnimatePresence mode="wait">
