@@ -125,21 +125,34 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
   const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
   const [queue, setQueue] = useState<Achievement[]>([]);
   const [processingQueue, setProcessingQueue] = useState(false);
+  const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   
   // Process incoming achievements immediately - don't wait for game completion
   useEffect(() => {
     if (achievements.length > 0) {
-      const achievementTitles = achievements.map(a => a.title).join(", ");
-      console.log(`New achievements received (${achievements.length}): ${achievementTitles}`);
+      // Filter out achievements we've already shown
+      const uniqueAchievements = achievements.filter(a => !processedIds.has(a.id));
       
-      // Add to queue and prioritize showing them
-      setQueue(prev => {
-        const newQueue = [...prev, ...achievements];
-        console.log(`Achievement queue updated: ${newQueue.length} items total`);
-        return newQueue;
-      });
+      if (uniqueAchievements.length > 0) {
+        const achievementTitles = uniqueAchievements.map(a => a.title).join(", ");
+        console.log(`New achievements received (${uniqueAchievements.length}): ${achievementTitles}`);
+        
+        // Add to queue and prioritize showing them
+        setQueue(prev => {
+          const newQueue = [...prev, ...uniqueAchievements];
+          console.log(`Achievement queue updated: ${newQueue.length} items total`);
+          return newQueue;
+        });
+        
+        // Mark these as processed
+        setProcessedIds(prev => {
+          const newProcessedIds = new Set(prev);
+          uniqueAchievements.forEach(a => newProcessedIds.add(a.id));
+          return newProcessedIds;
+        });
+      }
     }
-  }, [achievements]);
+  }, [achievements, processedIds]);
   
   // Handle showing the next achievement from the queue
   useEffect(() => {
@@ -176,6 +189,9 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
     };
     
     initializeAchievements();
+    
+    // Clear new unlocked ID storage on mount to start with a clean slate
+    clearNewlyUnlockedIds();
   }, []);
   
   const handleClose = useCallback(() => {

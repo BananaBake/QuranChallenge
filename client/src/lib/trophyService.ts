@@ -87,10 +87,13 @@ function getNewlyUnlockedIds(): string[] {
   if (!newlyUnlockedString) return [];
   try {
     const data = JSON.parse(newlyUnlockedString);
-    // Only return IDs if they were unlocked in the last 30 seconds
-    // Extended from 5 to 30 seconds to ensure proper display of achievements
-    if (Date.now() - data.timestamp < 30000) {
+    // Only return IDs if they were unlocked in the last 10 seconds
+    // This ensures we don't keep showing the same notifications
+    if (Date.now() - data.timestamp < 10000) {
       return data.ids;
+    } else {
+      // Clear the data if it's too old
+      clearNewlyUnlockedIds();
     }
     return [];
   } catch (error) {

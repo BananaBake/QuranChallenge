@@ -46,7 +46,17 @@ function App() {
       const unlocked = getNewlyUnlockedAchievements();
       if (unlocked.length > 0) {
         console.log("Found new achievements in App:", unlocked.map(a => a.title).join(", "));
-        setNewAchievements(prev => [...prev, ...unlocked]);
+        
+        // Filter out achievements already being displayed
+        const newUnlockedIds = unlocked.map(a => a.id);
+        const uniqueAchievements = unlocked.filter(
+          // Filter out achievements already in the queue
+          a => !newAchievements.some(existing => existing.id === a.id)
+        );
+        
+        if (uniqueAchievements.length > 0) {
+          setNewAchievements(prev => [...prev, ...uniqueAchievements]);
+        }
       }
     };
     
@@ -55,18 +65,10 @@ function App() {
       checkForUnlockedAchievements();
     }, 1000);
     
-    // Create an interval to periodically check for achievements (every 3 seconds)
-    // This ensures we catch achievements that might be unlocked through other means
-    const intervalId = setInterval(checkForUnlockedAchievements, 3000);
-    
     // Create a custom event handler for game completion
     const handleGameComplete = () => {
       // Check immediately after game completion
       checkForUnlockedAchievements();
-      
-      // Check again after a short delay to catch any achievements that might
-      // be processed slightly later
-      setTimeout(checkForUnlockedAchievements, 1000);
     };
     
     // Register event
@@ -75,9 +77,8 @@ function App() {
     return () => {
       window.removeEventListener('gameComplete', handleGameComplete);
       clearTimeout(initialCheckTimer);
-      clearInterval(intervalId);
     };
-  }, []);
+  }, [newAchievements]);
   
   // We don't need to clear achievements as the AchievementNotificationsContainer
   // handles this internally by queueing and processing them one by one
