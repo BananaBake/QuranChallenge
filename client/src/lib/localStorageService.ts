@@ -1,5 +1,5 @@
 import { GameHistory, GameStats } from "@shared/schema";
-import { updateAchievements } from './trophyService';
+import { updateAchievements, incrementHighScoreBeatenCount as incrementScoreBeaten } from './trophyService';
 
 // Key for storing game history in localStorage
 const GAME_HISTORY_KEY = 'quran_challenge_history';
@@ -119,8 +119,10 @@ export function getGameStats(): GameStats {
 
 // Function to increment the high score beaten count
 export function incrementHighScoreBeatenCount(): number {
-  const currentCount = parseInt(localStorage.getItem('quran_challenge_highscore_beats') || '0');
+  // Using the shared key from trophyService
+  const HIGH_SCORE_BEATS_KEY = 'quran_challenge_highscore_beats';
+  const currentCount = parseInt(localStorage.getItem(HIGH_SCORE_BEATS_KEY) || '0');
   const newCount = currentCount + 1;
-  localStorage.setItem('quran_challenge_highscore_beats', newCount.toString());
+  localStorage.setItem(HIGH_SCORE_BEATS_KEY, newCount.toString());
   return newCount;
 }

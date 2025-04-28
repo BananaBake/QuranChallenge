@@ -6,6 +6,7 @@ import {
   saveAchievements,
   checkAchievementsProgress,
   incrementHighScoreBeatenCount,
+  updateAchievements,
   type Achievement
 } from '@/lib/trophyService';
 import { GameHistory } from '@shared/schema';
@@ -110,63 +111,22 @@ export function useAchievementNotifications() {
    * @param score Current score/streak
    */
   const updateStreakAchievements = (gameType: string, score: number) => {
-    const streakAchievements = getAchievements();
-    let relevantAchievementIds: string[] = [];
+    // Create a mock game to process through the normal achievement system
+    const mockGame: GameHistory = {
+      id: Date.now(),
+      userId: 1,
+      gameType,
+      score,
+      maxScore: score,
+      timeSpent: 0,
+      completedAt: new Date()
+    };
     
-    // Determine which achievement IDs to check based on game type
-    if (gameType === 'identify_surah') {
-      relevantAchievementIds = [
-        'identify_master_5',
-        'identify_master_10',
-        'identify_streak_25',
-        'identify_streak_50'
-      ];
-    } else if (gameType === 'surah_ordering') {
-      relevantAchievementIds = [
-        'ordering_master_5',
-        'ordering_master_10',
-        'ordering_streak_25',
-        'ordering_streak_50'
-      ];
-    } else if (gameType === 'streak') {
-      // General streak achievements
-      relevantAchievementIds = ['streak_5', 'streak_10'];
-    }
+    // Use the updated achievement system from trophyService
+    const newlyUnlocked = updateAchievements(mockGame);
     
-    const updatedAchievements = streakAchievements.map(achievement => {
-      if (relevantAchievementIds.includes(achievement.id)) {
-        const updatedAchievement = { ...achievement };
-        // Update progress if current score is higher
-        const currentProgress = Math.max(updatedAchievement.progress || 0, score);
-        updatedAchievement.progress = currentProgress;
-        
-        // Check for unlock condition
-        if (currentProgress >= (updatedAchievement.goal || 0) && !updatedAchievement.unlocked) {
-          updatedAchievement.unlocked = true;
-          updatedAchievement.unlockedAt = new Date().toISOString();
-          
-          // Show achievement notification
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `${updatedAchievement.title}: ${updatedAchievement.description}`,
-            variant: "default",
-          });
-        }
-        return updatedAchievement;
-      }
-      return achievement;
-    });
-    
-    // Save updated achievements
-    saveAchievements(updatedAchievements);
-    
-    // Return newly unlocked achievements
-    return updatedAchievements.filter(a => 
-      relevantAchievementIds.includes(a.id) && 
-      a.unlocked && 
-      a.unlockedAt && 
-      (new Date().getTime() - new Date(a.unlockedAt).getTime() < 5000)
-    );
+    // Return the newly unlocked achievements
+    return newlyUnlocked;
   };
   
   return {

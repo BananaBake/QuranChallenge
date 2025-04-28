@@ -1,5 +1,5 @@
-import React from 'react';
-import { type Achievement } from "@/lib/trophyService";
+import React, { useEffect, useState, useCallback } from 'react';
+import { type Achievement, clearNewlyUnlockedIds } from "@/lib/trophyService";
 import { cn } from "@/lib/utils";
 import { Progress } from "../ui/progress";
 import { AnimatePresence, motion } from "framer-motion";
@@ -77,7 +77,7 @@ interface AchievementNotificationProps {
 }
 
 export function AchievementNotification({ achievement, onClose }: AchievementNotificationProps) {
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
     }, 5000);
@@ -111,39 +111,45 @@ interface AchievementNotificationsContainerProps {
 }
 
 export function AchievementNotificationsContainer({ achievements }: AchievementNotificationsContainerProps) {
-  const [visibleAchievements, setVisibleAchievements] = React.useState<Achievement[]>([]);
-  const [queue, setQueue] = React.useState<Achievement[]>([]);
+  const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
+  const [queue, setQueue] = useState<Achievement[]>([]);
   
-  React.useEffect(() => {
-    // If we have new achievements, add them to the queue
+  // Process incoming achievements
+  useEffect(() => {
     if (achievements.length > 0) {
       setQueue(prev => [...prev, ...achievements]);
     }
   }, [achievements]);
   
-  React.useEffect(() => {
-    // If there are achievements in the queue and no visible achievements,
-    // show the next one from the queue
-    if (queue.length > 0 && visibleAchievements.length === 0) {
-      const nextAchievement = queue[0];
-      setVisibleAchievements([nextAchievement]);
-      setQueue(prev => prev.slice(1)); // Remove from queue
+  // Handle showing the next achievement from the queue
+  useEffect(() => {
+    if (queue.length > 0 && !currentAchievement) {
+      // Show the next one
+      setCurrentAchievement(queue[0]);
+      setQueue(prev => prev.slice(1));
     }
-  }, [queue, visibleAchievements]);
+  }, [queue, currentAchievement]);
   
-  const handleClose = (achievementId: string) => {
-    setVisibleAchievements(prev => prev.filter(a => a.id !== achievementId));
-  };
+  // When all notifications are done, clear the newly unlocked storage
+  useEffect(() => {
+    if (queue.length === 0 && !currentAchievement) {
+      clearNewlyUnlockedIds();
+    }
+  }, [queue, currentAchievement]);
+  
+  const handleClose = useCallback(() => {
+    setCurrentAchievement(null);
+  }, []);
   
   return (
-    <AnimatePresence>
-      {visibleAchievements.map(achievement => (
+    <AnimatePresence mode="wait">
+      {currentAchievement && (
         <AchievementNotification 
-          key={achievement.id} 
-          achievement={achievement} 
-          onClose={() => handleClose(achievement.id)} 
+          key={currentAchievement.id}
+          achievement={currentAchievement} 
+          onClose={handleClose} 
         />
-      ))}
+      )}
     </AnimatePresence>
   );
 }

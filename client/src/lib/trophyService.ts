@@ -1,9 +1,13 @@
 import trophyData from '@/data/trophies.json';
-import { getGameStats, getGameHistory } from './localStorageService';
+import { getGameStats } from './localStorageService';
 import { GameHistory } from '@shared/schema';
 
 // Keys for local storage
-const ACHIEVEMENTS_KEY = 'quran_challenge_achievements';
+const UNLOCKED_TROPHIES_KEY = 'quran_challenge_unlocked_trophies';
+const TROPHY_PROGRESS_KEY = 'quran_challenge_trophy_progress';
+const HIGH_SCORE_BEATS_KEY = 'quran_challenge_highscore_beats';
+const NEWLY_UNLOCKED_KEY = 'quran_challenge_newly_unlocked';
+const ACHIEVEMENTS_KEY = 'quran_challenge_achievements'; // Keep for backward compatibility
 
 // Achievement definition type
 export type Achievement = {
@@ -17,239 +21,323 @@ export type Achievement = {
   unlockedAt?: string;
 };
 
-// Initialize achievements from the trophy data
-export function getInitialAchievements(): Achievement[] {
-  return trophyData.map(trophy => ({
-    id: trophy.id,
-    title: trophy.title,
-    description: trophy.description,
-    icon: trophy.icon,
-    unlocked: false,
-    progress: 0,
-    goal: trophy.goal
+// Store for newly unlocked achievements to show notifications
+export interface TrophyProgress {
+  [key: string]: string | number;
+}
+
+/**
+ * Get unlocked trophy IDs from localStorage
+ */
+function getUnlockedTrophyIds(): string[] {
+  const idsString = localStorage.getItem(UNLOCKED_TROPHIES_KEY);
+  if (!idsString) return [];
+  try {
+    return JSON.parse(idsString);
+  } catch (error) {
+    console.error('Error parsing unlocked trophies from localStorage', error);
+    return [];
+  }
+}
+
+/**
+ * Get trophy progress from localStorage
+ */
+function getTrophyProgress(): TrophyProgress {
+  const progressString = localStorage.getItem(TROPHY_PROGRESS_KEY);
+  if (!progressString) return {};
+  try {
+    return JSON.parse(progressString);
+  } catch (error) {
+    console.error('Error parsing trophy progress from localStorage', error);
+    return {};
+  }
+}
+
+/**
+ * Save unlocked trophy IDs to localStorage
+ */
+function saveUnlockedTrophyIds(ids: string[]): void {
+  localStorage.setItem(UNLOCKED_TROPHIES_KEY, JSON.stringify(ids));
+}
+
+/**
+ * Save trophy progress to localStorage
+ */
+function saveTrophyProgress(progress: TrophyProgress): void {
+  localStorage.setItem(TROPHY_PROGRESS_KEY, JSON.stringify(progress));
+}
+
+/**
+ * Store newly unlocked trophy IDs temporarily for notifications
+ */
+function saveNewlyUnlockedIds(ids: string[]): void {
+  const newlyUnlockedIds = [...getNewlyUnlockedIds(), ...ids];
+  localStorage.setItem(NEWLY_UNLOCKED_KEY, JSON.stringify({
+    ids: newlyUnlockedIds,
+    timestamp: Date.now()
   }));
 }
 
-// Get achievements from localStorage or initialize if they don't exist
-export function getAchievements(): Achievement[] {
-  const achievementsString = localStorage.getItem(ACHIEVEMENTS_KEY);
-  if (!achievementsString) {
-    // Initialize achievements if none exist
-    const initialAchievements = getInitialAchievements();
-    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(initialAchievements));
-    return initialAchievements;
-  }
-  
+/**
+ * Get newly unlocked trophy IDs for notifications
+ */
+function getNewlyUnlockedIds(): string[] {
+  const newlyUnlockedString = localStorage.getItem(NEWLY_UNLOCKED_KEY);
+  if (!newlyUnlockedString) return [];
   try {
-    const savedAchievements = JSON.parse(achievementsString);
-    
-    // Check if there are new trophies in trophyData that aren't in savedAchievements
-    const savedIds = savedAchievements.map((a: Achievement) => a.id);
-    const initialAchievements = getInitialAchievements();
-    const newAchievements = initialAchievements.filter(a => !savedIds.includes(a.id));
-    
-    if (newAchievements.length > 0) {
-      // We found new achievements! Add them to the saved list
-      const updatedAchievements = [...savedAchievements, ...newAchievements];
-      // Save the updated list
-      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(updatedAchievements));
-      return updatedAchievements;
+    const data = JSON.parse(newlyUnlockedString);
+    // Only return IDs if they were unlocked in the last 5 seconds
+    if (Date.now() - data.timestamp < 5000) {
+      return data.ids;
     }
-    
-    return savedAchievements;
+    return [];
   } catch (error) {
-    console.error('Error parsing achievements from localStorage', error);
-    const initialAchievements = getInitialAchievements();
-    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(initialAchievements));
-    return initialAchievements;
+    console.error('Error parsing newly unlocked trophies from localStorage', error);
+    return [];
   }
 }
 
-// Save achievements to localStorage
-export function saveAchievements(achievements: Achievement[]): void {
-  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+/**
+ * Clear newly unlocked trophies after showing notifications
+ */
+export function clearNewlyUnlockedIds(): void {
+  localStorage.removeItem(NEWLY_UNLOCKED_KEY);
 }
 
-// Update achievements based on a completed game
+/**
+ * Get all achievements with their current state
+ */
+export function getAchievements(): Achievement[] {
+  const unlockedIds = getUnlockedTrophyIds();
+  const progress = getTrophyProgress();
+  
+  return trophyData.map(trophy => {
+    const isUnlocked = unlockedIds.includes(trophy.id);
+    // Ensure currentProgress is a number
+    const progressValue = progress[trophy.id];
+    const currentProgress = typeof progressValue === 'number' ? progressValue : 0;
+    
+    return {
+      id: trophy.id,
+      title: trophy.title,
+      description: trophy.description,
+      icon: trophy.icon,
+      unlocked: isUnlocked,
+      progress: currentProgress,
+      goal: trophy.goal,
+      unlockedAt: isUnlocked ? progress[`${trophy.id}_unlockedAt`] as string : undefined
+    };
+  });
+}
+
+/**
+ * Update trophy progress and check for newly unlocked trophies
+ */
+function updateTrophyProgress(
+  trophyId: string, 
+  currentValue: number, 
+  goalValue: number
+): boolean {
+  const progress = getTrophyProgress();
+  const unlockedIds = getUnlockedTrophyIds();
+  
+  // Get the existing progress value, ensure it's a number
+  const existingProgress = progress[trophyId];
+  let existingValue = 0;
+  
+  if (typeof existingProgress === 'number') {
+    existingValue = existingProgress;
+  } else if (typeof existingProgress === 'string') {
+    // Try to parse the string as a number
+    const parsed = parseInt(existingProgress, 10);
+    if (!isNaN(parsed)) {
+      existingValue = parsed;
+    }
+  }
+  
+  // Update progress with the max value
+  progress[trophyId] = Math.max(existingValue, currentValue);
+  
+  // Check if trophy should be unlocked
+  let isNewlyUnlocked = false;
+  if (currentValue >= goalValue && !unlockedIds.includes(trophyId)) {
+    unlockedIds.push(trophyId);
+    progress[`${trophyId}_unlockedAt`] = new Date().toISOString();
+    isNewlyUnlocked = true;
+  }
+  
+  // Save changes
+  saveTrophyProgress(progress);
+  saveUnlockedTrophyIds(unlockedIds);
+  
+  return isNewlyUnlocked;
+}
+
+/**
+ * Update achievements based on a completed game
+ */
 export function updateAchievements(newGame: GameHistory): Achievement[] {
-  const achievements = getAchievements();
   const stats = getGameStats();
-  const updatedAchievements = [...achievements];
-  
-  // Array to track newly unlocked achievements in this function call
-  const newlyUnlocked: Achievement[] = [];
-  
-  let hasChanges = false;
+  const newlyUnlockedIds: string[] = [];
   
   // Process achievements by type from trophyData
   trophyData.forEach(trophy => {
-    const achievement = updatedAchievements.find(a => a.id === trophy.id);
-    if (!achievement) return;
+    let currentValue = 0;
+    let shouldUpdate = false;
     
     switch (trophy.type) {
       case 'milestone':
         // First game achievement
-        if (trophy.id === 'first_game' && !achievement.unlocked) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
+        if (trophy.id === 'first_game') {
+          currentValue = stats.totalGames > 0 ? 1 : 0;
+          shouldUpdate = true;
         }
         break;
         
       case 'games_played':
         // Games played achievements
-        achievement.progress = stats.totalGames;
-        if (stats.totalGames >= trophy.goal && !achievement.unlocked) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = stats.totalGames;
+        shouldUpdate = true;
         break;
         
       case 'trophy_collection':
         // Trophy collection achievements
-        // Count how many trophies are already unlocked (excluding the ones we just unlocked)
-        const unlockedCount = updatedAchievements.filter(a => 
-          a.unlocked && !newlyUnlocked.some(nu => nu.id === a.id)
-        ).length;
-        
-        // Add the newly unlocked achievements to the count
-        const totalUnlocked = unlockedCount + newlyUnlocked.length;
-        achievement.progress = totalUnlocked;
-        
-        if (totalUnlocked >= trophy.goal && !achievement.unlocked) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = getUnlockedTrophyIds().length;
+        shouldUpdate = true;
         break;
         
       case 'identify_streak':
         // Identify Surah streak achievements
         if (newGame.gameType === 'identify_surah') {
-          const currentProgress = Math.max(achievement.progress || 0, newGame.score);
-          achievement.progress = currentProgress;
-          if (currentProgress >= trophy.goal && !achievement.unlocked) {
-            achievement.unlocked = true;
-            achievement.unlockedAt = new Date().toISOString();
-            hasChanges = true;
-            newlyUnlocked.push({...achievement});
-          }
+          currentValue = newGame.score;
+          shouldUpdate = true;
         }
         break;
         
       case 'ordering_streak':
         // Surah Ordering streak achievements
         if (newGame.gameType === 'surah_ordering') {
-          const currentProgress = Math.max(achievement.progress || 0, newGame.score);
-          achievement.progress = currentProgress;
-          if (currentProgress >= trophy.goal && !achievement.unlocked) {
-            achievement.unlocked = true;
-            achievement.unlockedAt = new Date().toISOString();
-            hasChanges = true;
-            newlyUnlocked.push({...achievement});
-          }
+          currentValue = newGame.score;
+          shouldUpdate = true;
         }
         break;
         
       case 'high_score':
         // High score beaten achievements
-        achievement.progress = stats.highScoreBeatenCount;
-        if (stats.highScoreBeatenCount >= trophy.goal && !achievement.unlocked) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = stats.highScoreBeatenCount;
+        shouldUpdate = true;
         break;
+    }
+    
+    if (shouldUpdate) {
+      const isNewlyUnlocked = updateTrophyProgress(trophy.id, currentValue, trophy.goal);
+      if (isNewlyUnlocked) {
+        newlyUnlockedIds.push(trophy.id);
+      }
     }
   });
   
-  if (hasChanges) {
-    saveAchievements(updatedAchievements);
+  // Store newly unlocked trophy IDs for notifications
+  if (newlyUnlockedIds.length > 0) {
+    saveNewlyUnlockedIds(newlyUnlockedIds);
   }
   
-  // Return only the achievements unlocked during this specific function call
-  return newlyUnlocked;
+  // Return achievement objects for newly unlocked trophies
+  return getAchievements().filter(a => newlyUnlockedIds.includes(a.id));
 }
 
-// Get newly unlocked achievements (for showing notifications)
+/**
+ * Get newly unlocked achievements (for showing notifications)
+ */
 export function getNewlyUnlockedAchievements(): Achievement[] {
-  const achievements = getAchievements();
-  return achievements.filter(a => {
-    if (!a.unlocked || !a.unlockedAt) return false;
-    
-    // Consider "newly unlocked" if it was unlocked in the last 5 seconds
-    const unlockTime = new Date(a.unlockedAt).getTime();
-    const now = Date.now();
-    return (now - unlockTime) < 5000; // 5 seconds
-  });
+  const newlyUnlockedIds = getNewlyUnlockedIds();
+  if (newlyUnlockedIds.length === 0) return [];
+  
+  return getAchievements().filter(a => newlyUnlockedIds.includes(a.id));
 }
 
-// Check achievements progress for other situations (like app init)
+/**
+ * Save achievements to localStorage - compatibility function
+ * @deprecated Use the new storage functions instead
+ */
+export function saveAchievements(achievements: Achievement[]): void {
+  // Extract the unlocked IDs
+  const unlockedIds = achievements
+    .filter(a => a.unlocked)
+    .map(a => a.id);
+  
+  // Extract progress values
+  const progress: TrophyProgress = {};
+  achievements.forEach(a => {
+    if (a.progress !== undefined) {
+      progress[a.id] = a.progress;
+    }
+    if (a.unlockedAt) {
+      progress[`${a.id}_unlockedAt`] = a.unlockedAt;
+    }
+  });
+  
+  // Save the data using the new format
+  saveUnlockedTrophyIds(unlockedIds);
+  saveTrophyProgress(progress);
+  
+  // Also save in the old format for backward compatibility
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+}
+
+/**
+ * Check achievements progress for other situations (like app init)
+ */
 export function checkAchievementsProgress(): Achievement[] {
-  const achievements = getAchievements();
   const stats = getGameStats();
-  const updatedAchievements = [...achievements];
-  
-  // Array to track newly unlocked achievements
-  const newlyUnlocked: Achievement[] = [];
-  
-  let hasChanges = false;
+  const newlyUnlockedIds: string[] = [];
   
   // Process achievements by type from trophyData
   trophyData.forEach(trophy => {
-    const achievement = updatedAchievements.find(a => a.id === trophy.id);
-    if (!achievement || achievement.unlocked) return; // Skip already unlocked achievements
+    let currentValue = 0;
+    let shouldUpdate = false;
     
     switch (trophy.type) {
       case 'games_played':
-        achievement.progress = stats.totalGames;
-        if (stats.totalGames >= trophy.goal) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = stats.totalGames;
+        shouldUpdate = true;
         break;
         
       case 'high_score':
-        achievement.progress = stats.highScoreBeatenCount;
-        if (stats.highScoreBeatenCount >= trophy.goal) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = stats.highScoreBeatenCount;
+        shouldUpdate = true;
         break;
         
       case 'trophy_collection':
-        const unlockedCount = updatedAchievements.filter(a => a.unlocked).length;
-        achievement.progress = unlockedCount;
-        if (unlockedCount >= trophy.goal) {
-          achievement.unlocked = true;
-          achievement.unlockedAt = new Date().toISOString();
-          hasChanges = true;
-          newlyUnlocked.push({...achievement});
-        }
+        currentValue = getUnlockedTrophyIds().length;
+        shouldUpdate = true;
         break;
+    }
+    
+    if (shouldUpdate) {
+      const isNewlyUnlocked = updateTrophyProgress(trophy.id, currentValue, trophy.goal);
+      if (isNewlyUnlocked) {
+        newlyUnlockedIds.push(trophy.id);
+      }
     }
   });
   
-  if (hasChanges) {
-    saveAchievements(updatedAchievements);
+  // Store newly unlocked trophy IDs for notifications
+  if (newlyUnlockedIds.length > 0) {
+    saveNewlyUnlockedIds(newlyUnlockedIds);
   }
   
-  return newlyUnlocked;
+  // Return achievement objects for newly unlocked trophies
+  return getAchievements().filter(a => newlyUnlockedIds.includes(a.id));
 }
 
-// Increment high score beaten count
+/**
+ * Increment high score beaten count
+ */
 export function incrementHighScoreBeatenCount(): number {
-  const currentCount = parseInt(localStorage.getItem('quran_challenge_highscore_beats') || '0');
+  const currentCount = parseInt(localStorage.getItem(HIGH_SCORE_BEATS_KEY) || '0');
   const newCount = currentCount + 1;
-  localStorage.setItem('quran_challenge_highscore_beats', newCount.toString());
+  localStorage.setItem(HIGH_SCORE_BEATS_KEY, newCount.toString());
   return newCount;
 }
