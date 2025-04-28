@@ -106,7 +106,8 @@ interface GameHistoryItemProps {
 
 const GameHistoryItem = memo(({ game, isNewHighScore }: GameHistoryItemProps) => {
   const gameType = game.gameType === "identify_surah" ? "Identify Surah" : "Surah Ordering";
-  const scoreText = `${game.score}`;
+  // Ensure score is displayed correctly
+  const scoreText = `${game.score || game.maxScore || 0}`;
   const timeText = `${Math.floor(game.timeSpent / 60)}:${(game.timeSpent % 60).toString().padStart(2, '0')}`;
   const timeAgo = formatDistanceToNow(new Date(game.completedAt), { addSuffix: true });
   
@@ -176,7 +177,7 @@ const RecentActivity = memo(({ games, isLoading, stats, className }: RecentActiv
 RecentActivity.displayName = "RecentActivity";
 
 export default function Home() {
-  const { data: recentGames, isLoading: isLoadingRecentGames } = useRecentGames(3);
+  const { data: recentGames, isLoading: isLoadingRecentGames } = useRecentGames(10);
   const { data: stats, isLoading: isLoadingStats } = useGameStats();
   
   const { totalGames, bestStreak } = useMemo(() => {

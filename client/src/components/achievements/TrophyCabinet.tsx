@@ -123,7 +123,7 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
         </div>
       </div>
       
-      {achievement.goal && achievement.progress !== undefined && (
+      {achievement.goal && achievement.progress !== undefined && !achievement.unlocked && (
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="flex justify-between text-sm mb-1">
             <span>Progress</span>
@@ -131,10 +131,7 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
           </div>
           <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
             <div 
-              className={cn(
-                "h-full",
-                achievement.unlocked ? "bg-green-500" : "bg-primary"
-              )}
+              className="h-full bg-primary"
               style={{ width: `${Math.min(100, (achievement.progress / achievement.goal) * 100)}%` }}
             ></div>
           </div>
