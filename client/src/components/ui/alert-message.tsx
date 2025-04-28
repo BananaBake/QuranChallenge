@@ -53,25 +53,29 @@ export function AlertMessage({ title, description, variant = "default", onClose 
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className={cn(
-        "relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg",
-        variant === "destructive" && "border-destructive bg-destructive text-destructive-foreground",
-        variant === "success" && "border-green-400 bg-green-100 text-green-800"
+        "relative flex w-full items-center justify-between overflow-hidden rounded-lg border p-4 pr-8 shadow-lg",
+        variant === "destructive" && "border-red-500 bg-red-50 text-red-800",
+        variant === "success" && "border-green-500 bg-green-50 text-green-800",
+        variant === "default" && "border-primary/20 bg-primary/5 text-primary-foreground"
       )}
     >
       <div className="flex items-start gap-3">
-        {variant === "destructive" && <AlertCircle className="h-5 w-5" />}
-        {variant === "success" && <CheckCircle className="h-5 w-5" />}
+        {variant === "destructive" && <AlertCircle className="h-5 w-5 text-red-600" />}
+        {variant === "success" && <CheckCircle className="h-5 w-5 text-green-600" />}
+        {variant === "default" && <CheckCircle className="h-5 w-5 text-primary" />}
         <div className="grid gap-1">
-          {title && <div className="text-sm font-semibold">{title}</div>}
-          {description && <div className="text-sm opacity-90">{description}</div>}
+          {title && <div className="text-sm font-bold">{title}</div>}
+          {description && <div className="text-sm">{description}</div>}
         </div>
       </div>
       {onClose && (
         <button
           onClick={onClose}
           className={cn(
-            "absolute right-2 top-2 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100",
-            variant === "destructive" ? "text-destructive-foreground" : "text-foreground"
+            "absolute right-2 top-2 rounded-md p-1 transition-opacity hover:opacity-100",
+            variant === "destructive" ? "text-red-700 hover:bg-red-100" : 
+            variant === "success" ? "text-green-700 hover:bg-green-100" :
+            "text-primary/70 hover:bg-primary/10"
           )}
         >
           <X className="h-4 w-4" />
@@ -83,7 +87,7 @@ export function AlertMessage({ title, description, variant = "default", onClose 
 
 export function AlertMessagesContainer({ messages, onDismiss }: AlertMessageContainerProps) {
   return (
-    <div className="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse gap-2 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
+    <div className="fixed bottom-4 right-4 z-[100] flex max-h-screen w-full flex-col gap-3 p-4 md:max-w-[420px]">
       <AnimatePresence>
         {messages.map((message) => (
           <AlertMessage
