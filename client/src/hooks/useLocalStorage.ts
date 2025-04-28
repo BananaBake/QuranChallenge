@@ -52,7 +52,6 @@ export function useRecentGames(limit: number = 5) {
 // Hook for saving game results to localStorage
 export function useSaveGameResult() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { toast } = useToast();
   
   const saveGameResult = useCallback((gameData: Omit<InsertGameHistory, 'id' | 'completedAt'>) => {
     setIsLoading(true);
@@ -65,22 +64,24 @@ export function useSaveGameResult() {
         userId: 1
       });
       
-      // No longer showing toast notifications here - we'll check for newly unlocked achievements in the game components
+      // No longer showing notifications here - we'll check for newly unlocked achievements in the game components
       // This way we can show the notifications during gameplay rather than all at the end
       
       return savedGame;
     } catch (error) {
       console.error('Error saving game result:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save your game result.",
-        variant: "destructive",
-      });
+      if (window.showAlertMessage) {
+        window.showAlertMessage({
+          title: "Error",
+          description: "Failed to save your game result.",
+          variant: "destructive",
+        });
+      }
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, []);
   
   return {
     mutate: saveGameResult,

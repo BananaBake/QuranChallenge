@@ -1,7 +1,7 @@
 // Export all UI components for easier imports
 export { Button } from './button';
 export { Badge } from './badge';
-export { Toaster } from './toaster';
+export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './alert-message';
 export { Progress } from './progress';
 export { Input } from './input';
 export { Textarea } from './textarea';
@@ -26,16 +26,5 @@ export {
   DialogTitle,
   DialogTrigger
 } from './dialog';
-
-// Toast components
-export {
-  Toast,
-  ToastAction,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport
-} from './toast';
 
 // Reexport other UI components as needed
