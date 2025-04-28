@@ -41,22 +41,32 @@ function App() {
   
   // Check for new achievements and create a custom event listener to detect them
   useEffect(() => {
-    // Initial check on mount
+    // Create the achievement check function
     const checkForUnlockedAchievements = () => {
       const unlocked = getNewlyUnlockedAchievements();
       if (unlocked.length > 0) {
-        setNewAchievements(unlocked);
+        console.log("Found new achievements in App:", unlocked.map(a => a.title).join(", "));
+        setNewAchievements(prev => [...prev, ...unlocked]);
       }
     };
     
-    // Check once on mount
-    checkForUnlockedAchievements();
+    // Check on mount with a small delay to ensure app is fully initialized
+    const initialCheckTimer = setTimeout(() => {
+      checkForUnlockedAchievements();
+    }, 1000);
+    
+    // Create an interval to periodically check for achievements (every 3 seconds)
+    // This ensures we catch achievements that might be unlocked through other means
+    const intervalId = setInterval(checkForUnlockedAchievements, 3000);
     
     // Create a custom event handler for game completion
     const handleGameComplete = () => {
-      setTimeout(() => {
-        checkForUnlockedAchievements();
-      }, 500); // Small delay to allow achievements to be processed
+      // Check immediately after game completion
+      checkForUnlockedAchievements();
+      
+      // Check again after a short delay to catch any achievements that might
+      // be processed slightly later
+      setTimeout(checkForUnlockedAchievements, 1000);
     };
     
     // Register event
@@ -64,20 +74,13 @@ function App() {
     
     return () => {
       window.removeEventListener('gameComplete', handleGameComplete);
+      clearTimeout(initialCheckTimer);
+      clearInterval(intervalId);
     };
   }, []);
   
-  // Clear achievements after they've been shown
-  useEffect(() => {
-    if (newAchievements.length > 0) {
-      // Reset after a delay to ensure component has processed them
-      const timer = setTimeout(() => {
-        setNewAchievements([]);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [newAchievements]);
+  // We don't need to clear achievements as the AchievementNotificationsContainer
+  // handles this internally by queueing and processing them one by one
   
   // Provide the alert message context to the entire app
   // so it can be accessed from any component

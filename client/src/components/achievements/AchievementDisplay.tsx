@@ -81,12 +81,10 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3500);
+    }, 4000);
     
     return () => {
       clearTimeout(timer);
-      // Make sure we clean up properly
-      onClose();
     };
   }, [onClose]);
   
@@ -96,7 +94,7 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.8 }}
       transition={{ duration: 0.3 }}
-      className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 border-l-4 border-secondary z-50 max-w-sm"
+      className="fixed bottom-16 right-4 bg-white rounded-lg shadow-lg p-4 border-l-4 border-primary z-50 max-w-sm"
     >
       <div className="flex items-center">
         <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-3">
@@ -109,7 +107,7 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
         </div>
         <button 
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1"
           aria-label="Close notification"
         >
           ✕
@@ -126,29 +124,52 @@ interface AchievementNotificationsContainerProps {
 export function AchievementNotificationsContainer({ achievements }: AchievementNotificationsContainerProps) {
   const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
   const [queue, setQueue] = useState<Achievement[]>([]);
+  const [processingQueue, setProcessingQueue] = useState(false);
   
-  // Process incoming achievements
+  // Process incoming achievements immediately - don't wait for game completion
   useEffect(() => {
     if (achievements.length > 0) {
+      console.log("New achievements received:", achievements.map(a => a.title).join(", "));
       setQueue(prev => [...prev, ...achievements]);
     }
   }, [achievements]);
   
   // Handle showing the next achievement from the queue
   useEffect(() => {
-    if (queue.length > 0 && !currentAchievement) {
+    if (queue.length > 0 && !currentAchievement && !processingQueue) {
       // Show the next one
-      setCurrentAchievement(queue[0]);
-      setQueue(prev => prev.slice(1));
+      setProcessingQueue(true);
+      setTimeout(() => {
+        setCurrentAchievement(queue[0]);
+        setQueue(prev => prev.slice(1));
+        setProcessingQueue(false);
+      }, 300); // Small delay to ensure animations work properly
     }
-  }, [queue, currentAchievement]);
+  }, [queue, currentAchievement, processingQueue]);
   
   // When all notifications are done, clear the newly unlocked storage
   useEffect(() => {
-    if (queue.length === 0 && !currentAchievement) {
+    if (queue.length === 0 && !currentAchievement && !processingQueue) {
+      // Only clear when we've truly shown everything
       clearNewlyUnlockedIds();
     }
-  }, [queue, currentAchievement]);
+  }, [queue, currentAchievement, processingQueue]);
+  
+  // Initialize achievement system on mount
+  useEffect(() => {
+    // This ensures achievements are properly initialized on app start
+    const initializeAchievements = async () => {
+      // Import dynamically to avoid circular dependencies
+      const { checkAchievementsProgress } = await import('@/lib/trophyService');
+      const newAchievements = checkAchievementsProgress();
+      
+      if (newAchievements.length > 0) {
+        console.log("Initialized achievements:", newAchievements.map(a => a.title).join(", "));
+      }
+    };
+    
+    initializeAchievements();
+  }, []);
   
   const handleClose = useCallback(() => {
     setCurrentAchievement(null);
