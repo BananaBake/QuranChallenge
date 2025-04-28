@@ -186,6 +186,8 @@ export function useSurahOrderingData() {
     surahs,
     isLoading,
     isLoadingNext,
+    error,
+    setError,
     initializeSurahs,
     loadNextQuestion,
     handleMoveSurah,

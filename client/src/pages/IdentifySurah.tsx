@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Check, Trophy, Clock, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Check, Trophy, Clock, Loader2, AlertCircle } from "lucide-react";
 import { useGameState } from "@/hooks/useGameState";
 import { useIdentifySurahData } from "@/hooks/useGameData";
 import { useAchievementNotifications } from "@/hooks/useAchievements";
@@ -122,8 +121,6 @@ const GameControls = ({
 
 export default function IdentifySurah() {
   const { data: allSurahs, isLoading: isLoadingSurahs } = useSurahs();
-  const { toast } = useToast();
-  
   const {
     score,
     gameEnded,
@@ -141,6 +138,8 @@ export default function IdentifySurah() {
     currentAyah,
     options,
     isLoadingNext,
+    error,
+    setError,
     loadNextQuestion,
     initializeQuestion
   } = useIdentifySurahData();
@@ -169,11 +168,7 @@ export default function IdentifySurah() {
   
   const handleConfirm = () => {
     if (selectedOption === null) {
-      toast({
-        title: "Please select an option",
-        description: "You need to select a Surah before confirming",
-        variant: "destructive"
-      });
+      setError("You need to select a Surah before confirming");
       return;
     }
     
@@ -270,6 +265,21 @@ export default function IdentifySurah() {
           <div className="flex items-center justify-center p-4 mt-4 bg-primary/10 text-primary rounded-lg">
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
             <span>Loading next challenge...</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="flex items-center p-4 my-4 bg-destructive/10 text-destructive rounded-lg">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            <span>{error}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="ml-auto" 
+              onClick={() => setError(null)}
+            >
+              Dismiss
+            </Button>
           </div>
         )}
         
