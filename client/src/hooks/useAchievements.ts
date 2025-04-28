@@ -43,14 +43,9 @@ export function useAchievements() {
 export function useAchievementNotifications() {
   const { toast } = useToast();
   
-  const showAchievementNotifications = (achievements: Achievement[]) => {
-    achievements.forEach(achievement => {
-      toast({
-        title: "🏆 Achievement Unlocked!",
-        description: `${achievement.title}: ${achievement.description}`,
-        variant: "default",
-      });
-    });
+  // Notifications are now handled by the AchievementNotificationsContainer
+  const showAchievementNotifications = (_achievements: Achievement[]) => {
+    // Do nothing - notifications are handled by AchievementNotificationsContainer
   };
   
   const checkForNewAchievements = () => {
@@ -84,23 +79,7 @@ export function useAchievementNotifications() {
     // Check for high score achievements
     const highScoreAchievements = checkAchievementsProgress();
     
-    // Show notifications for high score related achievements
-    highScoreAchievements
-      .filter(a => a.id.startsWith('highscore_'))
-      .forEach(achievement => {
-        toast({
-          title: "🏆 Achievement Unlocked!",
-          description: `${achievement.title}: ${achievement.description}`,
-          variant: "default",
-        });
-      });
-    
-    // Show the new high score toast
-    toast({
-      title: "New High Score!",
-      description: `Congratulations! You've beaten your previous best of ${previousHighScore}!`,
-      variant: "default",
-    });
+    // High score achievement notifications are now handled by AchievementNotificationsContainer
     
     return true;
   };

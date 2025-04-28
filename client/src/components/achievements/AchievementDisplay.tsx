@@ -77,12 +77,17 @@ interface AchievementNotificationProps {
 }
 
 export function AchievementNotification({ achievement, onClose }: AchievementNotificationProps) {
+  // Use a shorter display time (3.5 seconds) and ensure onClose is always called
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 5000);
+    }, 3500);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Make sure we clean up properly
+      onClose();
+    };
   }, [onClose]);
   
   return (
@@ -90,6 +95,7 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
       initial={{ opacity: 0, y: 50, scale: 0.8 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.8 }}
+      transition={{ duration: 0.3 }}
       className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 border-l-4 border-secondary z-50 max-w-sm"
     >
       <div className="flex items-center">
@@ -101,6 +107,13 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
           <p className="font-semibold">{achievement.title}</p>
           <p className="text-sm text-gray-600">{achievement.description}</p>
         </div>
+        <button 
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          aria-label="Close notification"
+        >
+          ✕
+        </button>
       </div>
     </motion.div>
   );

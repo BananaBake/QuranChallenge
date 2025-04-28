@@ -38,23 +38,45 @@ AppRoutes.displayName = "AppRoutes";
 function App() {
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
   
-  // Check for newly unlocked achievements periodically
+  // Check for new achievements and create a custom event listener to detect them
   useEffect(() => {
     // Initial check on mount
-    const checkAchievements = () => {
+    const checkForUnlockedAchievements = () => {
       const unlocked = getNewlyUnlockedAchievements();
       if (unlocked.length > 0) {
         setNewAchievements(unlocked);
       }
     };
     
-    checkAchievements();
+    // Check once on mount
+    checkForUnlockedAchievements();
     
-    // Set up interval to check periodically (every 2 seconds)
-    const intervalId = setInterval(checkAchievements, 2000);
+    // Create a custom event handler for game completion
+    const handleGameComplete = () => {
+      setTimeout(() => {
+        checkForUnlockedAchievements();
+      }, 500); // Small delay to allow achievements to be processed
+    };
     
-    return () => clearInterval(intervalId);
+    // Register event
+    window.addEventListener('gameComplete', handleGameComplete);
+    
+    return () => {
+      window.removeEventListener('gameComplete', handleGameComplete);
+    };
   }, []);
+  
+  // Clear achievements after they've been shown
+  useEffect(() => {
+    if (newAchievements.length > 0) {
+      // Reset after a delay to ensure component has processed them
+      const timer = setTimeout(() => {
+        setNewAchievements([]);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [newAchievements]);
   
   return (
     <QueryClientProvider client={queryClient}>
