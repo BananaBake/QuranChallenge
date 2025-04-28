@@ -16,8 +16,8 @@ interface NavItemProps {
 }
 
 const NavItem = memo(({ href, icon: Icon, label, isActive }: NavItemProps) => (
-  <Link href={href}>
-    <div className={`flex flex-col items-center justify-center py-2 w-1/4 
+  <Link href={href} className="w-1/4">
+    <div className={`flex flex-col items-center justify-center py-2 px-4 w-full h-full
       ${isActive ? "text-primary" : "text-gray-500"} 
       hover:text-primary/80 transition-colors duration-200`}>
       <Icon className="w-5 h-5" />

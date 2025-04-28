@@ -87,7 +87,7 @@ export function AlertMessage({ title, description, variant = "default", onClose 
 
 export function AlertMessagesContainer({ messages, onDismiss }: AlertMessageContainerProps) {
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex max-h-screen w-full flex-col gap-3 p-4 md:max-w-[420px]">
+    <div className="fixed top-4 right-4 z-[100] flex max-h-screen w-full flex-col gap-3 p-4 md:max-w-[420px]">
       <AnimatePresence>
         {messages.map((message) => (
           <AlertMessage
