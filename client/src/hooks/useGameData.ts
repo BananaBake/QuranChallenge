@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useRandomAyahsForGame, useRandomSurahsForGame } from '@/hooks/useQuranData';
-import { useToast } from '@/hooks/use-toast';
 import { Ayah, Surah } from '@shared/schema';
 
 /**
@@ -8,11 +7,11 @@ import { Ayah, Surah } from '@shared/schema';
  */
 export function useIdentifySurahData() {
   const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
-  const { toast } = useToast();
   
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [options, setOptions] = useState<Array<{ name: string, arabicName: string, number: number }>>([]);
   const [isLoadingNext, setIsLoadingNext] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   /**
    * Generate options for the current ayah
@@ -76,16 +75,12 @@ export function useIdentifySurahData() {
       return null;
     } catch (error) {
       console.error("Failed to fetch next question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch the next question. Please try again.",
-        variant: "destructive"
-      });
+      setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
       setIsLoadingNext(false);
     }
-  }, [generateOptionsForAyah, toast]);
+  }, [generateOptionsForAyah]);
   
   /**
    * Initialize the first question
@@ -102,6 +97,8 @@ export function useIdentifySurahData() {
     currentAyah,
     options,
     isLoadingNext,
+    error,
+    setError,
     initializeQuestion,
     loadNextQuestion,
     generateOptionsForAyah
@@ -113,10 +110,10 @@ export function useIdentifySurahData() {
  */
 export function useSurahOrderingData() {
   const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
-  const { toast } = useToast();
   
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [isLoadingNext, setIsLoadingNext] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   /**
    * Shuffle surahs into random order
@@ -145,16 +142,12 @@ export function useSurahOrderingData() {
       return null;
     } catch (error) {
       console.error("Failed to fetch next question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch the next question. Please try again.",
-        variant: "destructive"
-      });
+      setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
       setIsLoadingNext(false);
     }
-  }, [shuffleSurahs, toast]);
+  }, [shuffleSurahs]);
   
   /**
    * Handle moving surahs during ordering
