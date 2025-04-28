@@ -55,6 +55,9 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     
     checkProgress();
     setGameEnded(true);
+    
+    // Dispatch a game complete event to trigger achievement checks
+    window.dispatchEvent(new Event('gameComplete'));
   }, [gameMode, score, timeSpent, saveGameResult, checkProgress]);
   
   const checkHighScore = useCallback((currentScore = score) => {
