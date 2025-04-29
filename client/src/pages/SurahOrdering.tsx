@@ -246,7 +246,10 @@ export default function SurahOrdering() {
         </div>
         
         {isLoadingNext && (
-          <LoadingSpinner message="Loading next challenge..." />
+          <div className="flex items-center justify-center p-4 mt-4 bg-primary/10 text-primary rounded-lg">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            <span>Loading next challenge...</span>
+          </div>
         )}
         
         <GameControls 
