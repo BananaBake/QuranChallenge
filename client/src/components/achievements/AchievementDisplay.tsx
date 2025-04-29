@@ -34,14 +34,11 @@ export function AchievementItem({ achievement }: AchievementItemProps) {
         </h4>
         <p className="text-sm text-gray-600">{achievement.description}</p>
         
-        {achievement.goal && (achievement.progress !== undefined) && (
+        {achievement.goal && (achievement.progress !== undefined) && !achievement.unlocked && (
           <div className="mt-1">
             <Progress 
               value={(achievement.progress / achievement.goal) * 100} 
-              className={cn(
-                "h-2",
-                achievement.unlocked ? "bg-green-200" : "bg-gray-200"
-              )}
+              className="h-2 bg-gray-200"
             />
             <span className="text-xs text-gray-500">
               {achievement.progress} / {achievement.goal}
