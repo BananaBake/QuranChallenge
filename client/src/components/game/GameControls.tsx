@@ -38,10 +38,8 @@ function LoadingButton({
 }
 
 export interface GameControlsProps {
-  // Common controls props
   isLoadingNext: boolean;
   
-  // Identify Surah specific props
   revealAnswer?: boolean;
   selectedOption?: number | null;
   isCorrectAnswer?: boolean;
@@ -49,7 +47,6 @@ export interface GameControlsProps {
   onNext?: () => void;
   onEndGame?: () => void;
   
-  // Surah Ordering specific props
   checked?: boolean;
   isCorrect?: boolean;
   gameEnded?: boolean;
@@ -58,10 +55,8 @@ export interface GameControlsProps {
 }
 
 export function GameControls({ 
-  // Common props
   isLoadingNext,
   
-  // Identify Surah props
   revealAnswer,
   selectedOption,
   isCorrectAnswer,
@@ -69,7 +64,6 @@ export function GameControls({
   onNext,
   onEndGame,
   
-  // Surah Ordering props
   checked,
   isCorrect,
   gameEnded,
@@ -77,7 +71,6 @@ export function GameControls({
   onSeeResults
 }: GameControlsProps) {
   
-  // Identify Surah mode
   if (revealAnswer !== undefined) {
     return (
       <div className="flex justify-center mt-6">
@@ -109,7 +102,6 @@ export function GameControls({
     );
   }
   
-  // Surah Ordering mode
   return (
     <div className="flex justify-center mt-6">
       {!checked ? (

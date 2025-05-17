@@ -51,7 +51,6 @@ interface TrophyCabinetProps {
 }
 
 export function TrophyCabinet({ achievements, onSelect, selectedId }: TrophyCabinetProps) {
-  // Sort achievements: unlocked first, then in-progress, then locked
   const sortedAchievements = [...achievements].sort((a, b) => {
     if (a.unlocked && !b.unlocked) return -1;
     if (!a.unlocked && b.unlocked) return 1;

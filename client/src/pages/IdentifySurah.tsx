@@ -3,7 +3,6 @@ import { useSurahs, useGameState, useIdentifySurahData, useAchievementNotificati
 import { Button, QuranText, SurahOption, LoadingSpinner } from "@/components/ui";
 import { Loader2, AlertCircle } from "lucide-react";
 
-// Import game components from the components index
 import { GameResult, GameControls, GameHeader, GameStatsBar } from "@/components";
 
 export default function IdentifySurah() {

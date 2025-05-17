@@ -119,7 +119,6 @@ export default function Achievements() {
   const { data: achievements, isLoading, refetch } = useAchievements();
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   
-  // Calculate achievement stats - moved before conditional rendering to fix hook order
   const achievementStats = useMemo(() => {
     if (!achievements || achievements.length === 0) {
       return { unlockedCount: 0, totalCount: 0, percentComplete: 0 };

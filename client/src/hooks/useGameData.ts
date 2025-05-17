@@ -19,10 +19,8 @@ export function useIdentifySurahData() {
   const generateOptionsForAyah = useCallback((ayah: Ayah, surahs: Surah[]) => {
     if (!ayah || !surahs.length) return [];
     
-    // Get all available surahs excluding the correct one
     const availableSurahs = surahs.filter(s => s.number !== ayah.surah.number);
     
-    // Get 3 random incorrect options
     const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
     const usedIndices = new Set<number>();
     
@@ -39,14 +37,12 @@ export function useIdentifySurahData() {
       }
     }
     
-    // Add the correct option
     const correctOption = {
       name: ayah.surah.englishName,
       arabicName: ayah.surah.name,
       number: ayah.surah.number
     };
     
-    // Insert the correct option at a random position
     const position = Math.floor(Math.random() * 4);
     incorrectOptions.splice(position, 0, correctOption);
     
@@ -59,14 +55,12 @@ export function useIdentifySurahData() {
   const loadNextQuestion = useCallback(async (allSurahs: Surah[]) => {
     setIsLoadingNext(true);
     try {
-      // Fetch a new random ayah
       const response = await fetch('/api/quran/random-ayahs?count=1');
       const data = await response.json();
       
       if (data && data.length > 0) {
         setCurrentAyah(data[0]);
         
-        // Generate options
         const newOptions = generateOptionsForAyah(data[0], allSurahs);
         setOptions(newOptions);
         
@@ -129,12 +123,10 @@ export function useSurahOrderingData() {
   const loadNextQuestion = useCallback(async () => {
     setIsLoadingNext(true);
     try {
-      // Fetch new random surahs
       const response = await fetch('/api/quran/random-surahs?count=5');
       const data = await response.json();
       
       if (data && data.length > 0) {
-        // Shuffle the order for the game
         const shuffled = shuffleSurahs(data);
         setSurahs(shuffled);
         return shuffled;

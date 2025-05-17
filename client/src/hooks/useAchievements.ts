@@ -21,7 +21,6 @@ export function useAchievements() {
         const achievements = getAchievements();
         return achievements;
       } catch (error) {
-        // Error is handled with alert message
         if (window.showAlertMessage) {
           window.showAlertMessage({
             title: "Error",
@@ -40,9 +39,7 @@ export function useAchievements() {
  * @returns Function to check achievement progress and show achievement notifications
  */
 export function useAchievementNotifications() {
-  // Notifications are now handled by the AchievementNotificationsContainer
   const showAchievementNotifications = (_achievements: Achievement[]) => {
-    // Do nothing - notifications are handled by AchievementNotificationsContainer
   };
   
   const checkForNewAchievements = () => {
@@ -70,14 +67,10 @@ export function useAchievementNotifications() {
   const handleHighScoreAchievements = (currentScore: number, previousHighScore: number) => {
     if (currentScore <= previousHighScore) return false;
     
-    // New high score achieved
     const newCount = incrementHighScoreBeatenCount();
     
-    // Check for high score achievements
     const highScoreAchievements = checkAchievementsProgress();
     
-    // High score achievement notifications are now handled by AchievementNotificationsContainer
-    // Return whether new achievements were unlocked
     return highScoreAchievements.length > 0;
   };
   
@@ -87,7 +80,6 @@ export function useAchievementNotifications() {
    * @param score Current score/streak
    */
   const updateStreakAchievements = (gameType: string, score: number) => {
-    // Create a mock game to process through the normal achievement system
     const mockGame: GameHistory = {
       id: Date.now(),
       userId: 1,
@@ -98,10 +90,8 @@ export function useAchievementNotifications() {
       completedAt: new Date()
     };
     
-    // Use the updated achievement system from trophyService
     const newlyUnlocked = updateAchievements(mockGame);
     
-    // Return the newly unlocked achievements
     return newlyUnlocked;
   };
   

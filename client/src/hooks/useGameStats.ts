@@ -36,8 +36,6 @@ export function useSaveGameResult() {
     }) => {
       const savedGame = saveGameHistory(gameData);
       
-      // We no longer show toast notifications for achievements
-      // The AchievementNotificationsContainer component handles this
       
       return savedGame;
     },
@@ -54,7 +52,6 @@ export function useSaveGameResult() {
           variant: "destructive",
         });
       }
-      // Error is already handled with alert message
     }
   });
 }

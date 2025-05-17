@@ -11,7 +11,6 @@ interface AudioButtonProps {
   onClick: () => void;
 }
 
-// Reusable audio control button component
 function AudioButton({ isLoading, isPlaying, disabled, onClick }: AudioButtonProps) {
   let icon: ReactNode;
   let text: string;
@@ -59,22 +58,17 @@ export function QuranText({
   const currentAyahRef = useRef<string | undefined>(ayahRef);
   const abortControllerRef = useRef<AbortController | null>(null);
   
-  // Track when ayahRef changes to reset audio state
   useEffect(() => {
-    // If ayahRef changed, reset everything
     if (ayahRef !== currentAyahRef.current) {
-      // Stop any playing audio
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
       
-      // Cancel any pending requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
       
-      // Reset state
       setIsPlaying(false);
       setIsLoading(false);
       setAudioError(null);
@@ -82,7 +76,6 @@ export function QuranText({
     }
   }, [ayahRef]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -96,14 +89,12 @@ export function QuranText({
   }, []);
 
   const loadAndPlayAudio = async () => {
-    // Toggle pause/play if audio is already loaded
     if (isPlaying && audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
       return;
     }
     
-    // If audio is already loaded but not playing, play it
     if (audioRef.current) {
       try {
         await audioRef.current.play();
@@ -115,19 +106,15 @@ export function QuranText({
       return;
     }
     
-    // Otherwise, load the audio and play it
     setIsLoading(true);
     
-    // Cancel any previous requests
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     
-    // Create new abort controller
     abortControllerRef.current = new AbortController();
     
     try {
-      // Use direct audio URL if available
       if (audioUrl) {
         const audio = new Audio(audioUrl);
         setupAudioEvents(audio);
@@ -135,7 +122,6 @@ export function QuranText({
         await audio.play();
         setIsPlaying(true);
       } 
-      // Otherwise fetch from API
       else if (ayahRef) {
         const response = await axios.get(`/api/quran/audio/${ayahRef}`, {
           signal: abortControllerRef.current.signal
@@ -158,11 +144,9 @@ export function QuranText({
     }
   };
   
-  // Helper function to set up audio event listeners
   const setupAudioEvents = (audio: HTMLAudioElement) => {
     const handleEnded = () => {
       setIsPlaying(false);
-      // Clean up references when audio finishes
       if (audioRef.current === audio) {
         audioRef.current = null;
       }
@@ -175,7 +159,6 @@ export function QuranText({
     const handleError = (e: Event) => {
       setAudioError("Audio playback failed. Please try again.");
       setIsPlaying(false);
-      // Clean up references on error
       if (audioRef.current === audio) {
         audioRef.current = null;
       }
@@ -185,7 +168,6 @@ export function QuranText({
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('error', handleError);
     
-    // Add cleanup to the audio element itself
     audio.addEventListener('ended', () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('pause', handlePause);

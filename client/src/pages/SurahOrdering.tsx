@@ -3,7 +3,6 @@ import { Loader2 } from "lucide-react";
 import { LoadingSpinner, DraggableSurah } from "@/components/ui";
 import { useGameState, useSurahOrderingData, useAchievementNotifications } from "@/hooks";
 
-// Import game components from the components index
 import { GameResult, GameControls, GameHeader, GameStatsBar } from "@/components";
 
 export default function SurahOrdering() {

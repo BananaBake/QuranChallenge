@@ -43,7 +43,6 @@ export const getQueryFn: <T>(options: {
     const url = queryKey[0] as string;
     let queryParams = '';
     
-    // Handle query parameters if they exist in the queryKey
     if (queryKey.length > 1 && typeof queryKey[1] === 'number') {
       const paramName = url.includes('random-ayahs') ? 'count' : 
                         url.includes('random-surahs') ? 'count' : '';

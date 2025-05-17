@@ -7,7 +7,6 @@ import { AchievementNotificationsContainer } from "@/components/achievements";
 import { getNewlyUnlockedAchievements, type Achievement } from "@/lib/trophyService";
 import { AlertMessagesContainer, useAlertMessage } from "@/components/ui";
 
-// Import page components directly to avoid lazy loading issues
 import Home from "@/pages/Home";
 import IdentifySurah from "@/pages/IdentifySurah";
 import SurahOrdering from "@/pages/SurahOrdering";
@@ -39,15 +38,11 @@ function App() {
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
   const { messages, showMessage, dismissMessage } = useAlertMessage();
   
-  // Check for new achievements and create a custom event listener to detect them
   useEffect(() => {
-    // Create the achievement check function
     const checkForUnlockedAchievements = () => {
       const unlocked = getNewlyUnlockedAchievements();
       if (unlocked.length > 0) {
-        // Filter out achievements already being displayed
         const uniqueAchievements = unlocked.filter(
-          // Filter out achievements already in the queue
           a => !newAchievements.some(existing => existing.id === a.id)
         );
         
@@ -57,18 +52,14 @@ function App() {
       }
     };
     
-    // Check on mount with a small delay to ensure app is fully initialized
     const initialCheckTimer = setTimeout(() => {
       checkForUnlockedAchievements();
     }, 1000);
     
-    // Create a custom event handler for game completion
     const handleGameComplete = () => {
-      // Check immediately after game completion
       checkForUnlockedAchievements();
     };
     
-    // Register event
     window.addEventListener('gameComplete', handleGameComplete);
     
     return () => {
@@ -77,14 +68,8 @@ function App() {
     };
   }, [newAchievements]);
   
-  // We don't need to clear achievements as the AchievementNotificationsContainer
-  // handles this internally by queueing and processing them one by one
   
-  // Provide the alert message context to the entire app
-  // so it can be accessed from any component
   useEffect(() => {
-    // Expose the showMessage function to the window object
-    // for global error handling
     window.showAlertMessage = showMessage;
     
     return () => {

@@ -38,10 +38,8 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
   const incrementScore = useCallback(() => {
     setScore(prevScore => {
       const newScore = prevScore + 1;
-      // Update streak achievements as score increases
       const newAchievements = updateStreakAchievements(gameMode, newScore);
       
-      // Trigger achievement check if we got new achievements
       if (newAchievements.length > 0) {
         setTimeout(() => {
           window.dispatchEvent(new Event('gameComplete'));
@@ -64,8 +62,6 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     checkProgress();
     setGameEnded(true);
     
-    // Dispatch a game complete event to trigger achievement checks
-    // Do this with a small delay to ensure the achievements are properly processed
     setTimeout(() => {
       window.dispatchEvent(new Event('gameComplete'));
     }, 300);
@@ -74,10 +70,8 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
   const checkHighScore = useCallback((currentScore = score) => {
     if (currentScore > previousHighScore) {
       setIsNewHighScore(true);
-      // Trigger high score achievement checks
       const isNewAchievement = handleHighScoreAchievements(currentScore, previousHighScore);
       
-      // Trigger achievement notification if needed
       if (isNewAchievement) {
         setTimeout(() => {
           window.dispatchEvent(new Event('gameComplete'));

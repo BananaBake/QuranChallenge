@@ -15,7 +15,6 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
   const [isDragging, setIsDragging] = useState(false);
   const [touchY, setTouchY] = useState<number | null>(null);
 
-  // Handle mobile touch events
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchY(e.touches[0].clientY);
   };
@@ -29,7 +28,6 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
     
     if (!element || !container) return;
     
-    // Find the element being dragged over
     const elementsBelow = document.elementsFromPoint(
       e.touches[0].clientX,
       e.touches[0].clientY
@@ -55,7 +53,6 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
     e.dataTransfer.setData('text/plain', index.toString());
     setIsDragging(true);
     
-    // Make dragged item semi-transparent
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '0.6';
     }
@@ -64,7 +61,6 @@ export function DraggableSurah({ name, arabicName, number, index, onMoveItem, sh
   const handleDragEnd = (e: React.DragEvent) => {
     setIsDragging(false);
     
-    // Reset opacity
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '1';
     }

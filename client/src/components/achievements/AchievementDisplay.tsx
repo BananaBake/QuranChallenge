@@ -74,7 +74,6 @@ interface AchievementNotificationProps {
 }
 
 export function AchievementNotification({ achievement, onClose }: AchievementNotificationProps) {
-  // Use a shorter display time (3.5 seconds) and ensure onClose is always called
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -124,20 +123,16 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
   const [processingQueue, setProcessingQueue] = useState(false);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   
-  // Process incoming achievements immediately - don't wait for game completion
   useEffect(() => {
     if (achievements.length > 0) {
-      // Filter out achievements we've already shown
       const uniqueAchievements = achievements.filter(a => !processedIds.has(a.id));
       
       if (uniqueAchievements.length > 0) {
-        // Add to queue and prioritize showing them
         setQueue(prev => {
           const newQueue = [...prev, ...uniqueAchievements];
           return newQueue;
         });
         
-        // Mark these as processed
         setProcessedIds(prev => {
           const newProcessedIds = new Set(prev);
           uniqueAchievements.forEach(a => newProcessedIds.add(a.id));
@@ -147,10 +142,8 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
     }
   }, [achievements, processedIds]);
   
-  // Handle showing the next achievement from the queue
   useEffect(() => {
     if (queue.length > 0 && !currentAchievement && !processingQueue) {
-      // Show the next one
       setProcessingQueue(true);
       setTimeout(() => {
         setCurrentAchievement(queue[0]);
@@ -160,34 +153,26 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
     }
   }, [queue, currentAchievement, processingQueue]);
   
-  // When all notifications are done, clear the newly unlocked storage
   useEffect(() => {
     if (queue.length === 0 && !currentAchievement && !processingQueue) {
-      // Only clear when we've truly shown everything
       clearNewlyUnlockedIds();
     }
   }, [queue, currentAchievement, processingQueue]);
   
-  // Initialize achievement system on mount
   useEffect(() => {
-    // This ensures achievements are properly initialized on app start
     const initializeAchievements = async () => {
-      // Import dynamically to avoid circular dependencies
       const { checkAchievementsProgress } = await import('@/lib/trophyService');
       const newAchievements = checkAchievementsProgress();
       
-      // Process any newly unlocked achievements during initialization
     };
     
     initializeAchievements();
     
-    // Clear new unlocked ID storage on mount to start with a clean slate
     clearNewlyUnlockedIds();
   }, []);
   
   const handleClose = useCallback(() => {
     if (currentAchievement) {
-      // Close the achievement notification
     }
     setCurrentAchievement(null);
   }, [currentAchievement]);

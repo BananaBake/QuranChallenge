@@ -10,19 +10,16 @@ export function useGameTimer(isRunning: boolean = false) {
   const [timeSpent, setTimeSpent] = useState(0);
   const [formattedTime, setFormattedTime] = useState("00:00");
   
-  // Start timer when isRunning becomes true
   useEffect(() => {
     if (isRunning && !startTime) {
       setStartTime(new Date());
     } else if (!isRunning && startTime) {
-      // When stopped, keep the current time but stop the timer
       const now = new Date();
       const diff = Math.floor((now.getTime() - startTime.getTime()) / 1000);
       setTimeSpent(diff);
     }
   }, [isRunning, startTime]);
   
-  // Timer update logic
   useEffect(() => {
     if (!startTime || !isRunning) return;
     

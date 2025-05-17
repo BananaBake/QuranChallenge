@@ -2,14 +2,12 @@ import trophyData from '@/data/trophies.json';
 import { getGameStats } from './localStorageService';
 import { GameHistory } from '@shared/schema';
 
-// Keys for local storage
 const UNLOCKED_TROPHIES_KEY = 'quran_challenge_unlocked_trophies';
 const TROPHY_PROGRESS_KEY = 'quran_challenge_trophy_progress';
 const HIGH_SCORE_BEATS_KEY = 'quran_challenge_highscore_beats';
 const NEWLY_UNLOCKED_KEY = 'quran_challenge_newly_unlocked';
 const ACHIEVEMENTS_KEY = 'quran_challenge_achievements'; // Keep for backward compatibility
 
-// Achievement definition type
 export type Achievement = {
   id: string;
   title: string;
@@ -21,7 +19,6 @@ export type Achievement = {
   unlockedAt?: string;
 };
 
-// Store for newly unlocked achievements to show notifications
 export interface TrophyProgress {
   [key: string]: string | number;
 }
@@ -35,7 +32,6 @@ function getUnlockedTrophyIds(): string[] {
   try {
     return JSON.parse(idsString);
   } catch (error) {
-    // If parsing fails, reset data and return empty array
     localStorage.removeItem(UNLOCKED_TROPHIES_KEY);
     return [];
   }
@@ -50,7 +46,6 @@ function getTrophyProgress(): TrophyProgress {
   try {
     return JSON.parse(progressString);
   } catch (error) {
-    // If parsing fails, reset data and return empty object
     localStorage.removeItem(TROPHY_PROGRESS_KEY);
     return {};
   }
@@ -89,17 +84,14 @@ function getNewlyUnlockedIds(): string[] {
   if (!newlyUnlockedString) return [];
   try {
     const data = JSON.parse(newlyUnlockedString);
-    // Only return IDs if they were unlocked in the last 10 seconds
-    // This ensures we don't keep showing the same notifications
     if (Date.now() - data.timestamp < 10000) {
       return data.ids;
     } else {
-      // Clear the data if it's too old
       clearNewlyUnlockedIds();
     }
     return [];
   } catch (error) {
-    console.error('Error parsing newly unlocked trophies from localStorage', error);
+    clearNewlyUnlockedIds();
     return [];
   }
 }
@@ -120,7 +112,6 @@ export function getAchievements(): Achievement[] {
   
   return trophyData.map(trophy => {
     const isUnlocked = unlockedIds.includes(trophy.id);
-    // Ensure currentProgress is a number
     const progressValue = progress[trophy.id];
     const currentProgress = typeof progressValue === 'number' ? progressValue : 0;
     
@@ -148,24 +139,20 @@ function updateTrophyProgress(
   const progress = getTrophyProgress();
   const unlockedIds = getUnlockedTrophyIds();
   
-  // Get the existing progress value, ensure it's a number
   const existingProgress = progress[trophyId];
   let existingValue = 0;
   
   if (typeof existingProgress === 'number') {
     existingValue = existingProgress;
   } else if (typeof existingProgress === 'string') {
-    // Try to parse the string as a number
     const parsed = parseInt(existingProgress, 10);
     if (!isNaN(parsed)) {
       existingValue = parsed;
     }
   }
   
-  // Update progress with the max value
   progress[trophyId] = Math.max(existingValue, currentValue);
   
-  // Check if trophy should be unlocked
   let isNewlyUnlocked = false;
   if (currentValue >= goalValue && !unlockedIds.includes(trophyId)) {
     unlockedIds.push(trophyId);
@@ -173,7 +160,6 @@ function updateTrophyProgress(
     isNewlyUnlocked = true;
   }
   
-  // Save changes
   saveTrophyProgress(progress);
   saveUnlockedTrophyIds(unlockedIds);
   
@@ -187,14 +173,12 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
   const stats = getGameStats();
   const newlyUnlockedIds: string[] = [];
   
-  // Process achievements by type from trophyData
   trophyData.forEach(trophy => {
     let currentValue = 0;
     let shouldUpdate = false;
     
     switch (trophy.type) {
       case 'milestone':
-        // First game achievement
         if (trophy.id === 'first_game') {
           currentValue = stats.totalGames > 0 ? 1 : 0;
           shouldUpdate = true;
@@ -202,19 +186,16 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
         break;
         
       case 'games_played':
-        // Games played achievements
         currentValue = stats.totalGames;
         shouldUpdate = true;
         break;
         
       case 'trophy_collection':
-        // Trophy collection achievements
         currentValue = getUnlockedTrophyIds().length;
         shouldUpdate = true;
         break;
         
       case 'identify_streak':
-        // Identify Surah streak achievements
         if (newGame.gameType === 'identify_surah') {
           currentValue = newGame.score;
           shouldUpdate = true;
@@ -222,7 +203,6 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
         break;
         
       case 'ordering_streak':
-        // Surah Ordering streak achievements
         if (newGame.gameType === 'surah_ordering') {
           currentValue = newGame.score;
           shouldUpdate = true;
@@ -230,7 +210,6 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
         break;
         
       case 'high_score':
-        // High score beaten achievements
         currentValue = stats.highScoreBeatenCount;
         shouldUpdate = true;
         break;
@@ -244,12 +223,10 @@ export function updateAchievements(newGame: GameHistory): Achievement[] {
     }
   });
   
-  // Store newly unlocked trophy IDs for notifications
   if (newlyUnlockedIds.length > 0) {
     saveNewlyUnlockedIds(newlyUnlockedIds);
   }
   
-  // Return achievement objects for newly unlocked trophies
   return getAchievements().filter(a => newlyUnlockedIds.includes(a.id));
 }
 
@@ -268,12 +245,10 @@ export function getNewlyUnlockedAchievements(): Achievement[] {
  * @deprecated Use the new storage functions instead
  */
 export function saveAchievements(achievements: Achievement[]): void {
-  // Extract the unlocked IDs
   const unlockedIds = achievements
     .filter(a => a.unlocked)
     .map(a => a.id);
   
-  // Extract progress values
   const progress: TrophyProgress = {};
   achievements.forEach(a => {
     if (a.progress !== undefined) {
@@ -284,11 +259,9 @@ export function saveAchievements(achievements: Achievement[]): void {
     }
   });
   
-  // Save the data using the new format
   saveUnlockedTrophyIds(unlockedIds);
   saveTrophyProgress(progress);
   
-  // Also save in the old format for backward compatibility
   localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
 }
 
@@ -299,7 +272,6 @@ export function checkAchievementsProgress(): Achievement[] {
   const stats = getGameStats();
   const newlyUnlockedIds: string[] = [];
   
-  // Process achievements by type from trophyData
   trophyData.forEach(trophy => {
     let currentValue = 0;
     let shouldUpdate = false;
@@ -329,12 +301,10 @@ export function checkAchievementsProgress(): Achievement[] {
     }
   });
   
-  // Store newly unlocked trophy IDs for notifications
   if (newlyUnlockedIds.length > 0) {
     saveNewlyUnlockedIds(newlyUnlockedIds);
   }
   
-  // Return achievement objects for newly unlocked trophies
   return getAchievements().filter(a => newlyUnlockedIds.includes(a.id));
 }
 
