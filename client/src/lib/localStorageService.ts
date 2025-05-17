@@ -28,7 +28,8 @@ export function getGameHistory(): GameHistory[] {
   try {
     return JSON.parse(historyString);
   } catch (error) {
-    console.error('Error parsing game history from localStorage', error);
+    // If parsing fails, return empty array and reset corrupt data
+    localStorage.removeItem(GAME_HISTORY_KEY);
     return [];
   }
 }

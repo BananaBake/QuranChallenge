@@ -35,7 +35,8 @@ function getUnlockedTrophyIds(): string[] {
   try {
     return JSON.parse(idsString);
   } catch (error) {
-    console.error('Error parsing unlocked trophies from localStorage', error);
+    // If parsing fails, reset data and return empty array
+    localStorage.removeItem(UNLOCKED_TROPHIES_KEY);
     return [];
   }
 }
@@ -49,7 +50,8 @@ function getTrophyProgress(): TrophyProgress {
   try {
     return JSON.parse(progressString);
   } catch (error) {
-    console.error('Error parsing trophy progress from localStorage', error);
+    // If parsing fails, reset data and return empty object
+    localStorage.removeItem(TROPHY_PROGRESS_KEY);
     return {};
   }
 }
