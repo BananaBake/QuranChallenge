@@ -43,3 +43,11 @@ export {
   CollapsibleTrigger,
   CollapsibleContent 
 } from './collapsible';
+
+// Export tabs components
+export {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from './tabs';
