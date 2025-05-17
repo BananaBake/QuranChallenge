@@ -54,7 +54,7 @@ export function useSaveGameResult() {
           variant: "destructive",
         });
       }
-      console.error("Failed to save game results");
+      // Error is already handled with alert message
     }
   });
 }

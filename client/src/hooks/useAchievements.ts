@@ -21,7 +21,7 @@ export function useAchievements() {
         const achievements = getAchievements();
         return achievements;
       } catch (error) {
-        console.error('Error fetching achievements:', error);
+        // Error is handled with alert message
         if (window.showAlertMessage) {
           window.showAlertMessage({
             title: "Error",

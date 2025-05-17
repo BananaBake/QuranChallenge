@@ -74,7 +74,7 @@ export function useIdentifySurahData() {
       }
       return null;
     } catch (error) {
-      console.error("Failed to fetch next question:", error);
+      
       setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
@@ -141,7 +141,7 @@ export function useSurahOrderingData() {
       }
       return null;
     } catch (error) {
-      console.error("Failed to fetch next question:", error);
+      
       setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
