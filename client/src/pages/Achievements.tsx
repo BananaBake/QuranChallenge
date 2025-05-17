@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback, memo, useMemo } from 'react';
-import { useAchievements } from '@/hooks/useAchievements';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { TrophyCabinet, TrophyDetails } from '@/components/achievements/TrophyCabinet';
-import { AchievementsList } from '@/components/achievements/AchievementDisplay';
+import { useAchievements } from '@/hooks';
+import { LoadingSpinner, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+import { TrophyCabinet, TrophyDetails, AchievementsList } from '@/components/achievements';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageContainer } from '@/components/common/PageContainer';
+import { PageContainer } from '@/components/common';
 import { Award, Trophy, Medal } from 'lucide-react';
 import { Achievement } from '@/lib/trophyService';
 

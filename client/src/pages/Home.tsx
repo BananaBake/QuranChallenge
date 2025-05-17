@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
-import { PageContainer } from "@/components/common/PageContainer";
+import { PageContainer } from "@/components/common";
 import { StatsCard, GameCard, RecentGamesTable } from "@/components/ui";
-import { useRecentGames, useGameStats } from "@/hooks/useGameStats";
+import { useRecentGames, useGameStats } from "@/hooks";
 import { BookOpen, Search, ArrowUpDown, Trophy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";

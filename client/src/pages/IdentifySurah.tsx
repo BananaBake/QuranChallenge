@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react";
-import { useSurahs } from "@/hooks/useQuranData";
-import { Button } from "@/components/ui/button";
-import { QuranText } from "@/components/ui/quran-text";
-import { SurahOption } from "@/components/ui/surah-option";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useSurahs, useGameState, useIdentifySurahData, useAchievementNotifications } from "@/hooks";
+import { Button, QuranText, SurahOption, LoadingSpinner } from "@/components/ui";
 import { Loader2, AlertCircle } from "lucide-react";
-import { useGameState } from "@/hooks/useGameState";
-import { useIdentifySurahData } from "@/hooks/useGameData";
-import { useAchievementNotifications } from "@/hooks/useAchievements";
 
-// Import directly from component files to avoid circular dependencies
-import { GameResult } from "@/components/game/GameResult";
-import { GameControls } from "@/components/game/GameControls";
-import { GameHeader, GameStatsBar } from "@/components/game/GameHeader";
+// Import game components from the components index
+import { GameResult, GameControls, GameHeader, GameStatsBar } from "@/components";
 
 export default function IdentifySurah() {
   const { data: allSurahs, isLoading: isLoadingSurahs } = useSurahs();
