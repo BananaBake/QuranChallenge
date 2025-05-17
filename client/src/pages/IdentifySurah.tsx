@@ -9,13 +9,10 @@ import { useGameState } from "@/hooks/useGameState";
 import { useIdentifySurahData } from "@/hooks/useGameData";
 import { useAchievementNotifications } from "@/hooks/useAchievements";
 
-// Import reusable components
-import { 
-  GameResult, 
-  GameControls, 
-  GameHeader, 
-  GameStatsBar 
-} from "@/components/game";
+// Import directly from component files to avoid circular dependencies
+import { GameResult } from "@/components/game/GameResult";
+import { GameControls } from "@/components/game/GameControls";
+import { GameHeader, GameStatsBar } from "@/components/game/GameHeader";
 
 export default function IdentifySurah() {
   const { data: allSurahs, isLoading: isLoadingSurahs } = useSurahs();

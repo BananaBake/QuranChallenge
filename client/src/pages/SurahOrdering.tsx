@@ -5,14 +5,11 @@ import { useGameState } from "@/hooks/useGameState";
 import { useSurahOrderingData } from "@/hooks/useGameData";
 import { useAchievementNotifications } from "@/hooks/useAchievements";
 
-// Import reusable components
-import { 
-  GameResult, 
-  GameControls, 
-  GameHeader, 
-  GameStatsBar,
-  DraggableSurah
-} from "@/components/game";
+// Import components directly to avoid circular dependencies
+import { GameResult } from "@/components/game/GameResult";
+import { GameControls } from "@/components/game/GameControls";
+import { GameHeader, GameStatsBar } from "@/components/game/GameHeader";
+import { DraggableSurah } from "@/components/ui/draggable-surah";
 
 export default function SurahOrdering() {
   const {
