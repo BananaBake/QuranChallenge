@@ -36,9 +36,7 @@ export {
   DialogTrigger
 } from './dialog';
 
-// Components below this line have been removed as they're not used in the application
-
-// Export tabs components
+// Tab components (used in Achievements page)
 export {
   Tabs,
   TabsContent,
