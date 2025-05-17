@@ -1,4 +1,5 @@
-// Export only the stable game-specific components
-// Note: GameResult, GameControls, and GameHeader are imported directly in page files
-export { GameCard } from './GameCard';
-export { RecentGamesTable } from './RecentGamesTable';
+// Export only game-specific components
+// These components contain game logic that isn't purely UI-related
+export { GameHeader, GameStatsBar } from './GameHeader';
+export { GameResult } from './GameResult';
+export { GameControls } from './GameControls';
