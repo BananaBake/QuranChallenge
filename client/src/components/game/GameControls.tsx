@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { Check, Loader2 } from "lucide-react";
 
 export interface GameControlsProps {

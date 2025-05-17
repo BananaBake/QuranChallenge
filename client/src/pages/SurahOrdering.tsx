@@ -1,15 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { useGameState } from "@/hooks/useGameState";
-import { useSurahOrderingData } from "@/hooks/useGameData";
-import { useAchievementNotifications } from "@/hooks/useAchievements";
+import { LoadingSpinner, DraggableSurah } from "@/components/ui";
+import { useGameState, useSurahOrderingData, useAchievementNotifications } from "@/hooks";
 
-// Import components directly to avoid circular dependencies
-import { GameResult } from "@/components/game/GameResult";
-import { GameControls } from "@/components/game/GameControls";
-import { GameHeader, GameStatsBar } from "@/components/game/GameHeader";
-import { DraggableSurah } from "@/components/ui/draggable-surah";
+// Import game components from the components index
+import { GameResult, GameControls, GameHeader, GameStatsBar } from "@/components";
 
 export default function SurahOrdering() {
   const {

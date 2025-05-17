@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { Trophy, Clock } from "lucide-react";
 
 interface GameResultProps {
