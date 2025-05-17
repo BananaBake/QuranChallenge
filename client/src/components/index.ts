@@ -1,24 +1,34 @@
 // Layout Components
 export { default as BottomNavigation } from './layout/BottomNavigation';
 
-// Common UI Components
-export { ArabesqueBorder } from './ui/arabesque-border';
-export { StatsCard } from './ui/stats-card';
-export { LoadingSpinner } from './ui/loading-spinner';
+// Common Components
 export { PageContainer } from './common/PageContainer';
 
-// Re-export game components
-export * from './game';
-
-// Re-export achievement components
+// Achievement components
 export * from './achievements';
 
-// UI Kit Components
+// Game specific components
+export { GameResult } from './game/GameResult';
+export { GameControls } from './game/GameControls';
+export { GameHeader, GameStatsBar } from './game/GameHeader';
+
+// Re-export UI components for convenience
 export { 
+  // Core UI
   Button,
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
   Input,
   AlertMessage, AlertMessagesContainer, useAlertMessage,
   Progress,
-  Badge
+  Badge,
+  LoadingSpinner,
+  ArabesqueBorder,
+  
+  // Game UI
+  StatsCard,
+  GameCard,
+  QuranText,
+  SurahOption,
+  DraggableSurah,
+  RecentGamesTable
 } from './ui';

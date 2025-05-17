@@ -7,9 +7,14 @@ export { Input } from './input';
 export { Textarea } from './textarea';
 export { LoadingSpinner } from './loading-spinner';
 export { ArabesqueBorder } from './arabesque-border';
+
+// Quran game specific components
 export { QuranText } from './quran-text';
 export { SurahOption } from './surah-option';
 export { DraggableSurah } from './draggable-surah';
+export { GameCard } from './game-card';
+export { RecentGamesTable } from './recent-games-table';
+export { StatsCard } from './stats-card';
 
 // Card components
 export { 
