@@ -187,7 +187,7 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
   
   const handleClose = useCallback(() => {
     if (currentAchievement) {
-      console.log(`Achievement notification closed: ${currentAchievement.title}`);
+      // Close the achievement notification
     }
     setCurrentAchievement(null);
   }, [currentAchievement]);

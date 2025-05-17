@@ -67,7 +67,6 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     // Dispatch a game complete event to trigger achievement checks
     // Do this with a small delay to ensure the achievements are properly processed
     setTimeout(() => {
-      console.log("Dispatching gameComplete event");
       window.dispatchEvent(new Event('gameComplete'));
     }, 300);
   }, [gameMode, score, timeSpent, saveGameResult, checkProgress]);
