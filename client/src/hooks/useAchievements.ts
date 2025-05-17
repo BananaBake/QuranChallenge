@@ -7,7 +7,7 @@ import {
   incrementHighScoreBeatenCount,
   updateAchievements,
   type Achievement
-} from '@/lib/trophyService';
+} from '../lib/trophyService';
 import { GameHistory } from '@shared/schema';
 
 /**
