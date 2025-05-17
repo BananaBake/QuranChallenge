@@ -8,6 +8,8 @@ export { Textarea } from './textarea';
 export { LoadingSpinner } from './loading-spinner';
 export { ArabesqueBorder } from './arabesque-border';
 export { QuranText } from './quran-text';
+export { SurahOption } from './surah-option';
+export { DraggableSurah } from './draggable-surah';
 
 // Card components
 export { 
