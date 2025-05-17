@@ -4,120 +4,18 @@ import { Button } from "@/components/ui/button";
 import { QuranText } from "@/components/ui/quran-text";
 import { SurahOption } from "@/components/ui/surah-option";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Check, Trophy, Clock, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useGameState } from "@/hooks/useGameState";
 import { useIdentifySurahData } from "@/hooks/useGameData";
 import { useAchievementNotifications } from "@/hooks/useAchievements";
 
-interface GameResultProps {
-  score: number;
-  formattedTime: string;
-  isNewHighScore: boolean;
-  onPlayAgain: () => void;
-}
-
-const GameResult = ({ score, formattedTime, isNewHighScore, onPlayAgain }: GameResultProps) => (
-  <div className="bg-white rounded-lg shadow-md p-6 text-center">
-    <h2 className="text-2xl font-bold text-primary mb-2">
-      {isNewHighScore ? '🏆 New High Score!' : 'Great Effort!'}
-    </h2>
-    
-    {isNewHighScore ? (
-      <p className="text-accent font-bold mb-4">
-        Congratulations! You've beaten your previous best score!
-      </p>
-    ) : (
-      <p className="text-primary font-medium mb-4">
-        You did well! Each attempt helps you learn more about the Quran.
-      </p>
-    )}
-    
-    <div className="bg-gray-50 rounded-lg p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center">
-          <Trophy className="w-5 h-5 text-secondary mr-2" />
-          <span className="text-gray-600">Score:</span>
-        </div>
-        <span className="font-bold text-xl text-primary">{score}</span>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Clock className="w-5 h-5 text-primary mr-2" />
-          <span className="text-gray-600">Time:</span>
-        </div>
-        <span className="font-bold text-xl text-accent">{formattedTime}</span>
-      </div>
-    </div>
-    
-    <p className="text-sm text-gray-600 mb-6">
-      You correctly identified {score} {score === 1 ? 'Surah' : 'Surahs'}.
-      {isNewHighScore && ' Keep going to improve your knowledge!'}
-    </p>
-    
-    <Button 
-      className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
-      onClick={onPlayAgain}
-    >
-      Play Again
-    </Button>
-  </div>
-);
-
-interface GameControlsProps {
-  revealAnswer: boolean;
-  selectedOption: number | null;
-  isLoadingNext: boolean;
-  isCorrectAnswer: boolean;
-  onConfirm: () => void;
-  onNext: () => void;
-  onEndGame: () => void;
-}
-
-const GameControls = ({ 
-  revealAnswer, 
-  selectedOption, 
-  isLoadingNext, 
-  isCorrectAnswer,
-  onConfirm, 
-  onNext, 
-  onEndGame 
-}: GameControlsProps) => (
-  <div className="flex justify-center mt-6">
-    {!revealAnswer ? (
-      <Button 
-        className="bg-primary hover:bg-primary/90 text-white px-6 py-4 text-base shadow-md"
-        onClick={onConfirm}
-        disabled={selectedOption === null || isLoadingNext}
-      >
-        <Check className="w-5 h-5 mr-2" /> Confirm
-      </Button>
-    ) : !isCorrectAnswer ? (
-      <Button
-        className="bg-accent hover:bg-accent/90 text-white px-8 py-4 text-base shadow-md"
-        onClick={onEndGame}
-        disabled={isLoadingNext}
-      >
-        See Results
-      </Button>
-    ) : (
-      <Button
-        className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-base shadow-md"
-        onClick={onNext}
-        disabled={isLoadingNext}
-      >
-        {isLoadingNext ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-            Loading...
-          </>
-        ) : (
-          'Next Question'
-        )}
-      </Button>
-    )}
-  </div>
-);
+// Import reusable components
+import { 
+  GameResult, 
+  GameControls, 
+  GameHeader, 
+  GameStatsBar 
+} from "@/components/game";
 
 export default function IdentifySurah() {
   const { data: allSurahs, isLoading: isLoadingSurahs } = useSurahs();
@@ -217,6 +115,7 @@ export default function IdentifySurah() {
         formattedTime={formattedTime}
         isNewHighScore={isNewHighScore}
         onPlayAgain={handleStartNewGame}
+        gameModeName="Surah"
       />
     );
   }
@@ -228,15 +127,11 @@ export default function IdentifySurah() {
   return (
     <div>
       <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-5 mb-4">
-        <div className="flex justify-between items-center mb-5">
-          <div>
-            <h2 className="text-2xl font-bold text-primary">Identify the Surah</h2>
-            <p className="text-sm text-gray-600 mt-1">Which Surah contains this Ayah?</p>
-          </div>
-          <div className="bg-primary text-white rounded-full h-10 px-4 flex items-center justify-center font-bold">
-            Score: {score}
-          </div>
-        </div>
+        <GameHeader
+          title="Identify the Surah"
+          subtitle="Which Surah contains this Ayah?"
+          score={score}
+        />
         
         {currentAyah && (
           <QuranText 
@@ -294,16 +189,11 @@ export default function IdentifySurah() {
         />
       </div>
       
-      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
-        <div className="flex items-center">
-          <Trophy className="w-4 h-4 text-secondary mr-1" />
-          <span className="text-sm">Best: {Math.max(previousHighScore, score)}</span>
-        </div>
-        <div className="flex items-center">
-          <Clock className="w-4 h-4 text-primary mr-1" />
-          <span className="text-sm">Time: {formattedTime}</span>
-        </div>
-      </div>
+      <GameStatsBar 
+        previousHighScore={previousHighScore}
+        currentScore={score}
+        formattedTime={formattedTime}
+      />
     </div>
   );
 }
