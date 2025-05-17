@@ -4,8 +4,8 @@ import {
   getGameStats, 
   getRecentGameHistory, 
   saveGameHistory
-} from "@/lib/localStorageService";
-import { getNewlyUnlockedAchievements } from "@/lib/trophyService";
+} from "../lib/localStorageService";
+import { getNewlyUnlockedAchievements } from "../lib/trophyService";
 
 export function useGameStats() {
   return useQuery<GameStats>({

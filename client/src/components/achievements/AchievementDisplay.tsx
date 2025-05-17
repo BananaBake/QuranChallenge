@@ -131,13 +131,9 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
       const uniqueAchievements = achievements.filter(a => !processedIds.has(a.id));
       
       if (uniqueAchievements.length > 0) {
-        const achievementTitles = uniqueAchievements.map(a => a.title).join(", ");
-        console.log(`New achievements received (${uniqueAchievements.length}): ${achievementTitles}`);
-        
         // Add to queue and prioritize showing them
         setQueue(prev => {
           const newQueue = [...prev, ...uniqueAchievements];
-          console.log(`Achievement queue updated: ${newQueue.length} items total`);
           return newQueue;
         });
         
@@ -180,9 +176,7 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
       const { checkAchievementsProgress } = await import('@/lib/trophyService');
       const newAchievements = checkAchievementsProgress();
       
-      if (newAchievements.length > 0) {
-        console.log("Initialized achievements:", newAchievements.map(a => a.title).join(", "));
-      }
+      // Process any newly unlocked achievements during initialization
     };
     
     initializeAchievements();

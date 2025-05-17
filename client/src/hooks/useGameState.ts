@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSaveGameResult, useGameStats } from '@/hooks/useGameStats';
-import { useAchievementNotifications } from '@/hooks/useAchievements';
-import { useGameTimer } from '@/hooks/useGameTimer';
+import { useSaveGameResult, useGameStats } from './useGameStats';
+import { useAchievementNotifications } from './useAchievements';
+import { useGameTimer } from './useGameTimer';
 
 export type GameMode = 'identify_surah' | 'surah_ordering';
 

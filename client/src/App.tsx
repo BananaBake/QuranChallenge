@@ -45,10 +45,7 @@ function App() {
     const checkForUnlockedAchievements = () => {
       const unlocked = getNewlyUnlockedAchievements();
       if (unlocked.length > 0) {
-        console.log("Found new achievements in App:", unlocked.map(a => a.title).join(", "));
-        
         // Filter out achievements already being displayed
-        const newUnlockedIds = unlocked.map(a => a.id);
         const uniqueAchievements = unlocked.filter(
           // Filter out achievements already in the queue
           a => !newAchievements.some(existing => existing.id === a.id)
