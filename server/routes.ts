@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             usedSurahs.add(randomSurah.number);
           }
         } catch (error) {
-          console.error(`Error fetching ayah ${randomSurah.number}:${ayahNumber}`, error);
+          // Skip failed ayahs and continue with the loop
         }
       }
       
@@ -136,19 +136,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ayahs.push(createAyahObject(arabicAyah, translationAyah, randomSurah));
                 }
               } catch (error) {
-                console.error(`Error fetching audio for ayah ${randomSurah.number}:${ayahNumber}`, error);
+                // Audio fetch failed, continue without audio
                 ayahs.push(createAyahObject(arabicAyah, translationAyah, randomSurah));
               }
             }
           }
         } catch (error) {
-          console.error(`Error fetching ayah ${randomSurah.number}:${ayahNumber}`, error);
+          // Skip failed ayahs and continue with the loop
         }
       }
       
       res.json(ayahs);
     } catch (error) {
-      console.error("Error fetching random ayahs:", error);
+      // Log failed request and return error response
       res.status(500).json({ message: "Failed to fetch random Ayahs" });
     }
   });
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "Audio not found for this ayah" });
       }
     } catch (error) {
-      console.error(`Error fetching audio for ayah ${req.params.ayahRef}:`, error);
+      // Failed to fetch audio, return error response
       res.status(500).json({ message: "Failed to fetch audio" });
     }
   });
