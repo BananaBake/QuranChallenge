@@ -1,8 +1,45 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { ArabesqueBorder } from "./arabesque-border";
 import { Play, Pause, Loader2 } from "lucide-react";
 import { Button } from "./button";
 import axios from "axios";
+
+interface AudioButtonProps {
+  isLoading: boolean;
+  isPlaying: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}
+
+// Reusable audio control button component
+function AudioButton({ isLoading, isPlaying, disabled, onClick }: AudioButtonProps) {
+  let icon: ReactNode;
+  let text: string;
+  
+  if (isLoading) {
+    icon = <Loader2 className="h-4 w-4 animate-spin" />;
+    text = "Loading";
+  } else if (isPlaying) {
+    icon = <Pause className="h-4 w-4" />;
+    text = "Pause";
+  } else {
+    icon = <Play className="h-4 w-4" />;
+    text = "Listen";
+  }
+  
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="flex items-center gap-2 text-primary hover:bg-primary/10"
+      onClick={onClick}
+      disabled={disabled || isLoading}
+    >
+      {icon}
+      <span>{text}</span>
+    </Button>
+  );
+}
 
 interface QuranTextProps {
   arabicText: string;
@@ -17,6 +54,7 @@ export function QuranText({
 }: QuranTextProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentAyahRef = useRef<string | undefined>(ayahRef);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -39,6 +77,7 @@ export function QuranText({
       // Reset state
       setIsPlaying(false);
       setIsLoading(false);
+      setAudioError(null);
       currentAyahRef.current = ayahRef;
     }
   }, [ayahRef]);
@@ -69,8 +108,9 @@ export function QuranText({
       try {
         await audioRef.current.play();
         setIsPlaying(true);
+        setAudioError(null);
       } catch (error) {
-        console.error("Error playing audio:", error);
+        setAudioError("Unable to play audio. Please try again.");
       }
       return;
     }
@@ -111,7 +151,7 @@ export function QuranText({
       }
     } catch (error) {
       if (!axios.isCancel(error)) {
-        console.error("Error loading or playing audio:", error);
+        setAudioError("Failed to load audio. Please try again later.");
       }
     } finally {
       setIsLoading(false);
@@ -169,30 +209,12 @@ export function QuranText({
         </p>
         
         <div className="mt-4 flex justify-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 text-primary hover:bg-primary/10"
+          <AudioButton
+            isLoading={isLoading}
+            isPlaying={isPlaying}
             onClick={loadAndPlayAudio}
             disabled={!ayahRef && !audioUrl}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Loading</span>
-              </>
-            ) : isPlaying ? (
-              <>
-                <Pause className="h-4 w-4" />
-                <span>Pause</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4" />
-                <span>Listen</span>
-              </>
-            )}
-          </Button>
+          />
         </div>
       </div>
     </ArabesqueBorder>
