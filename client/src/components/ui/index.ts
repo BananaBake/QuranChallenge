@@ -1,10 +1,13 @@
-// Export all UI components for easier imports
+// Core UI components
 export { Button } from './button';
 export { Badge } from './badge';
 export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './alert-message';
 export { Progress } from './progress';
 export { Input } from './input';
 export { Textarea } from './textarea';
+export { LoadingSpinner } from './loading-spinner';
+export { ArabesqueBorder } from './arabesque-border';
+export { QuranText } from './quran-text';
 
 // Card components
 export { 
@@ -27,4 +30,9 @@ export {
   DialogTrigger
 } from './dialog';
 
-// Reexport other UI components as needed
+// Export other dialog components for completeness
+export { 
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent 
+} from './collapsible';
