@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useRandomAyahsForGame, useRandomSurahsForGame } from '@/hooks/useQuranData';
+import { useRandomAyahsForGame, useRandomSurahsForGame } from './useQuranData';
 import { Ayah, Surah } from '@shared/schema';
 
 /**

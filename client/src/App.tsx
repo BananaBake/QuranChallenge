@@ -2,10 +2,10 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React, { memo, useEffect, useState } from "react";
-import BottomNavigation from "@/components/layout/BottomNavigation";
-import { AchievementNotificationsContainer } from "@/components/achievements/AchievementDisplay";
+import { BottomNavigation } from "@/components";
+import { AchievementNotificationsContainer } from "@/components/achievements";
 import { getNewlyUnlockedAchievements, type Achievement } from "@/lib/trophyService";
-import { AlertMessagesContainer, useAlertMessage } from "@/components/ui/alert-message";
+import { AlertMessagesContainer, useAlertMessage } from "@/components/ui";
 
 // Import page components directly to avoid lazy loading issues
 import Home from "@/pages/Home";

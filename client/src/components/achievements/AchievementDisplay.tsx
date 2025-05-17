@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { type Achievement, clearNewlyUnlockedIds } from "@/lib/trophyService";
 import { cn } from "@/lib/utils";
-import { Progress } from "../ui/progress";
+import { Progress } from "@/components/ui";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface AchievementItemProps {
