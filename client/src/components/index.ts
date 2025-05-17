@@ -20,7 +20,6 @@ export {
   Input,
   AlertMessage, AlertMessagesContainer, useAlertMessage,
   Progress,
-  Badge,
   LoadingSpinner,
   ArabesqueBorder,
   

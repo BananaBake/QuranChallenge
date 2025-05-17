@@ -36,12 +36,7 @@ export {
   DialogTrigger
 } from './dialog';
 
-// Export other dialog components for completeness
-export { 
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent 
-} from './collapsible';
+// Components below this line have been removed as they're not used in the application
 
 // Export tabs components
 export {
