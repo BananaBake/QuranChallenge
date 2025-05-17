@@ -173,7 +173,7 @@ export function QuranText({
     };
     
     const handleError = (e: Event) => {
-      console.error("Audio playback error:", e);
+      setAudioError("Audio playback failed. Please try again.");
       setIsPlaying(false);
       // Clean up references on error
       if (audioRef.current === audio) {
@@ -208,13 +208,17 @@ export function QuranText({
           {arabicText}
         </p>
         
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex flex-col items-center">
           <AudioButton
             isLoading={isLoading}
             isPlaying={isPlaying}
             onClick={loadAndPlayAudio}
             disabled={!ayahRef && !audioUrl}
           />
+          
+          {audioError && (
+            <p className="text-red-500 text-sm mt-2">{audioError}</p>
+          )}
         </div>
       </div>
     </ArabesqueBorder>
