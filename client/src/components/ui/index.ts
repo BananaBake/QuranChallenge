@@ -1,6 +1,5 @@
 // Core UI components
 export { Button } from './button';
-export { Badge } from './badge';
 export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './alert-message';
 export { Progress } from './progress';
 export { Input } from './input';
