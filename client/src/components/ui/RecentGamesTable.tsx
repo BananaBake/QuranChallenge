@@ -39,7 +39,7 @@ export function RecentGamesTable({ games }: RecentGamesTableProps) {
             <p className="font-bold text-lg text-primary">{game.score}</p>
             <div className="flex items-center text-xs text-gray-500">
               <Clock className="w-3 h-3 mr-1" />
-              {game.timeTaken}s
+              {game.timeSpent}s
             </div>
           </div>
         </div>

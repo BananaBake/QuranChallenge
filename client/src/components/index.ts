@@ -11,7 +11,6 @@ export { GameHeader, GameStatsBar } from './game/GameHeader';
 export { 
   Button,
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
-  Input,
   AlertMessage, AlertMessagesContainer, useAlertMessage,
   Progress,
   LoadingSpinner,

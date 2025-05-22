@@ -1,8 +1,6 @@
 export { Button } from './button';
 export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './AlertMessage';
 export { Progress } from './progress';
-export { Input } from './input';
-export { Textarea } from './textarea';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ArabesqueBorder } from './ArabesqueBorder';
 
