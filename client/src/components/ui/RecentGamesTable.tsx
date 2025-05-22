@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { Trophy, Clock } from "lucide-react";
-import { GameHistory } from "@/shared/schema";
+import { GameHistory } from "@shared/schema";
 
 interface RecentGamesTableProps {
   games: GameHistory[];
@@ -31,7 +31,7 @@ export function RecentGamesTable({ games }: RecentGamesTableProps) {
                 {game.gameType?.replace('_', ' ') || 'Game'}
               </p>
               <p className="text-xs text-gray-500">
-                {formatDistanceToNow(new Date(game.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(game.completedAt), { addSuffix: true })}
               </p>
             </div>
           </div>

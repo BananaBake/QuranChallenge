@@ -1,17 +1,17 @@
 export { Button } from './button';
-export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './alert-message';
+export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './AlertMessage';
 export { Progress } from './progress';
 export { Input } from './input';
 export { Textarea } from './textarea';
-export { LoadingSpinner } from './loading-spinner';
-export { ArabesqueBorder } from './arabesque-border';
+export { LoadingSpinner } from './LoadingSpinner';
+export { ArabesqueBorder } from './ArabesqueBorder';
 
-export { QuranText } from './quran-text';
-export { SurahOption } from './surah-option';
-export { DraggableSurah } from './draggable-surah';
-export { GameCard } from './game-card';
-export { RecentGamesTable } from './recent-games-table';
-export { StatsCard } from './stats-card';
+export { QuranText } from './QuranText';
+export { SurahOption } from './SurahOption';
+export { DraggableSurah } from './DraggableSurah';
+export { GameCard } from './GameCard';
+export { RecentGamesTable } from './RecentGamesTable';
+export { StatsCard } from './StatsCard';
 
 export { 
   Card, 
