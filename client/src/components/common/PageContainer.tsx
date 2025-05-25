@@ -1,14 +1,11 @@
 import { ReactNode, memo } from 'react';
 import { cn } from '@/lib/utils';
-
 interface PageHeaderProps {
   title?: string;
   subtitle?: string;
 }
-
 const PageHeader = memo(({ title, subtitle }: PageHeaderProps) => {
   if (!title && !subtitle) return null;
-  
   return (
     <div className="mb-6">
       {title && <h1 className="text-2xl font-bold text-primary">{title}</h1>}
@@ -16,16 +13,13 @@ const PageHeader = memo(({ title, subtitle }: PageHeaderProps) => {
     </div>
   );
 });
-
 PageHeader.displayName = "PageHeader";
-
 interface PageContainerProps {
   children: ReactNode;
   title?: string;
   subtitle?: string;
   className?: string;
 }
-
 export const PageContainer = memo(({ 
   children, 
   title, 
@@ -39,5 +33,4 @@ export const PageContainer = memo(({
     </div>
   );
 });
-
 PageContainer.displayName = "PageContainer";

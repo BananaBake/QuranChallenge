@@ -1,7 +1,6 @@
 import { Button } from "../ui";
 import { Check, Loader2 } from "lucide-react";
 import { ReactNode } from "react";
-
 interface LoadingButtonProps {
   isLoading: boolean;
   loadingText?: string;
@@ -10,7 +9,6 @@ interface LoadingButtonProps {
   disabled?: boolean;
   className?: string;
 }
-
 function LoadingButton({ 
   isLoading, 
   loadingText = "Loading...", 
@@ -36,41 +34,34 @@ function LoadingButton({
     </Button>
   );
 }
-
 export interface GameControlsProps {
   isLoadingNext: boolean;
-  
   revealAnswer?: boolean;
   selectedOption?: number | null;
   isCorrectAnswer?: boolean;
   onConfirm?: () => void;
   onNext?: () => void;
   onEndGame?: () => void;
-  
   checked?: boolean;
   isCorrect?: boolean;
   gameEnded?: boolean;
   onCheckOrder?: () => void;
   onSeeResults?: () => void;
 }
-
 export function GameControls({ 
   isLoadingNext,
-  
   revealAnswer,
   selectedOption,
   isCorrectAnswer,
   onConfirm,
   onNext,
   onEndGame,
-  
   checked,
   isCorrect,
   gameEnded,
   onCheckOrder,
   onSeeResults
 }: GameControlsProps) {
-  
   if (revealAnswer !== undefined) {
     return (
       <div className="flex justify-center mt-6">
@@ -101,7 +92,6 @@ export function GameControls({
       </div>
     );
   }
-  
   return (
     <div className="flex justify-center mt-6">
       {!checked ? (

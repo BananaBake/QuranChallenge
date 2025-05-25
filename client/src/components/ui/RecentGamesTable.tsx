@@ -1,11 +1,9 @@
 import { formatDistanceToNow } from "date-fns";
 import { Trophy, Clock } from "lucide-react";
 import { GameHistory } from "@shared/schema";
-
 interface RecentGamesTableProps {
   games: GameHistory[];
 }
-
 export function RecentGamesTable({ games }: RecentGamesTableProps) {
   if (!games || games.length === 0) {
     return (
@@ -15,7 +13,6 @@ export function RecentGamesTable({ games }: RecentGamesTableProps) {
       </div>
     );
   }
-
   return (
     <div className="space-y-3">
       {games.map((game) => (

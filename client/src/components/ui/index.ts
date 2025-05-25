@@ -3,14 +3,12 @@ export { AlertMessage, AlertMessagesContainer, useAlertMessage } from './AlertMe
 export { Progress } from './progress';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ArabesqueBorder } from './ArabesqueBorder';
-
 export { QuranText } from './QuranText';
 export { SurahOption } from './SurahOption';
 export { DraggableSurah } from './DraggableSurah';
 export { GameCard } from './GameCard';
 export { RecentGamesTable } from './RecentGamesTable';
 export { StatsCard } from './StatsCard';
-
 export { 
   Card, 
   CardContent, 
@@ -19,7 +17,6 @@ export {
   CardHeader, 
   CardTitle 
 } from './card';
-
 export { 
   Dialog,
   DialogContent,
@@ -29,7 +26,6 @@ export {
   DialogTitle,
   DialogTrigger
 } from './dialog';
-
 export {
   Tabs,
   TabsContent,

@@ -1,12 +1,10 @@
 import { ArabesqueBorder } from "./ArabesqueBorder";
-
 interface StatsCardProps {
   title: string;
   value: string | number;
   icon?: React.ComponentType<{ className?: string }>;
   subtitle?: string;
 }
-
 export function StatsCard({ title, value, icon: Icon, subtitle }: StatsCardProps) {
   return (
     <ArabesqueBorder className="h-full">

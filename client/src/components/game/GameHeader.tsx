@@ -1,11 +1,9 @@
 import { Trophy, Clock } from "lucide-react";
-
 interface GameHeaderProps {
   title: string;
   subtitle?: string;
   score: number;
 }
-
 export function GameHeader({ title, subtitle, score }: GameHeaderProps) {
   return (
     <div className="flex justify-between items-center mb-5">
@@ -19,13 +17,11 @@ export function GameHeader({ title, subtitle, score }: GameHeaderProps) {
     </div>
   );
 }
-
 interface GameStatsBarProps {
   previousHighScore: number;
   currentScore: number;
   formattedTime: string;
 }
-
 export function GameStatsBar({ previousHighScore, currentScore, formattedTime }: GameStatsBarProps) {
   return (
     <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">

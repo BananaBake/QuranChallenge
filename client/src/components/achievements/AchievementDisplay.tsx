@@ -3,11 +3,9 @@ import { type Achievement, clearNewlyUnlockedIds } from "@/lib/trophyService";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui";
 import { AnimatePresence, motion } from "framer-motion";
-
 interface AchievementItemProps {
   achievement: Achievement;
 }
-
 export function AchievementItem({ achievement }: AchievementItemProps) {
   return (
     <div 
@@ -24,7 +22,6 @@ export function AchievementItem({ achievement }: AchievementItemProps) {
       )}>
         {achievement.icon}
       </div>
-      
       <div className="flex-1">
         <h4 className={cn(
           "font-bold",
@@ -33,7 +30,6 @@ export function AchievementItem({ achievement }: AchievementItemProps) {
           {achievement.title}
         </h4>
         <p className="text-sm text-gray-600">{achievement.description}</p>
-        
         {achievement.goal && (achievement.progress !== undefined) && !achievement.unlocked && (
           <div className="mt-1">
             <Progress 
@@ -46,18 +42,15 @@ export function AchievementItem({ achievement }: AchievementItemProps) {
           </div>
         )}
       </div>
-      
       {achievement.unlocked && (
         <div className="text-2xl">✓</div>
       )}
     </div>
   );
 }
-
 interface AchievementsListProps {
   achievements: Achievement[];
 }
-
 export function AchievementsList({ achievements }: AchievementsListProps) {
   return (
     <div className="space-y-3">
@@ -67,23 +60,19 @@ export function AchievementsList({ achievements }: AchievementsListProps) {
     </div>
   );
 }
-
 interface AchievementNotificationProps {
   achievement: Achievement;
   onClose: () => void;
 }
-
 export function AchievementNotification({ achievement, onClose }: AchievementNotificationProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
     }, 4000);
-    
     return () => {
       clearTimeout(timer);
     };
   }, [onClose]);
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.8 }}
@@ -112,27 +101,22 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
     </motion.div>
   );
 }
-
 interface AchievementNotificationsContainerProps {
   achievements: Achievement[];
 }
-
 export function AchievementNotificationsContainer({ achievements }: AchievementNotificationsContainerProps) {
   const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
   const [queue, setQueue] = useState<Achievement[]>([]);
   const [processingQueue, setProcessingQueue] = useState(false);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
-  
   useEffect(() => {
     if (achievements.length > 0) {
       const uniqueAchievements = achievements.filter(a => !processedIds.has(a.id));
-      
       if (uniqueAchievements.length > 0) {
         setQueue(prev => {
           const newQueue = [...prev, ...uniqueAchievements];
           return newQueue;
         });
-        
         setProcessedIds(prev => {
           const newProcessedIds = new Set(prev);
           uniqueAchievements.forEach(a => newProcessedIds.add(a.id));
@@ -141,7 +125,6 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
       }
     }
   }, [achievements, processedIds]);
-  
   useEffect(() => {
     if (queue.length > 0 && !currentAchievement && !processingQueue) {
       setProcessingQueue(true);
@@ -149,34 +132,27 @@ export function AchievementNotificationsContainer({ achievements }: AchievementN
         setCurrentAchievement(queue[0]);
         setQueue(prev => prev.slice(1));
         setProcessingQueue(false);
-      }, 300); // Small delay to ensure animations work properly
+      }, 300); 
     }
   }, [queue, currentAchievement, processingQueue]);
-  
   useEffect(() => {
     if (queue.length === 0 && !currentAchievement && !processingQueue) {
       clearNewlyUnlockedIds();
     }
   }, [queue, currentAchievement, processingQueue]);
-  
   useEffect(() => {
     const initializeAchievements = async () => {
       const { checkAchievementsProgress } = await import('@/lib/trophyService');
       const newAchievements = checkAchievementsProgress();
-      
     };
-    
     initializeAchievements();
-    
     clearNewlyUnlockedIds();
   }, []);
-  
   const handleClose = useCallback(() => {
     if (currentAchievement) {
     }
     setCurrentAchievement(null);
   }, [currentAchievement]);
-  
   return (
     <AnimatePresence mode="wait">
       {currentAchievement && (

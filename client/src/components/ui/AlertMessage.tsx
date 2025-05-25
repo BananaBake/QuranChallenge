@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, AlertCircle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 export interface AlertMessageProps {
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -10,42 +9,33 @@ export interface AlertMessageProps {
   duration?: number;
   onClose?: () => void;
 }
-
 interface AlertMessageContainerProps {
   messages: (AlertMessageProps & { id: string })[];
   onDismiss: (id: string) => void;
 }
-
 export function useAlertMessage() {
   const [messages, setMessages] = useState<(AlertMessageProps & { id: string })[]>([]);
-
   const showMessage = (props: AlertMessageProps) => {
     const id = Date.now().toString();
     const newMessage = { ...props, id };
-    
     setMessages(prev => [...prev, newMessage]);
-    
     if (props.duration !== 0) {
       const duration = props.duration || 5000;
       setTimeout(() => {
         dismissMessage(id);
       }, duration);
     }
-    
     return id;
   };
-  
   const dismissMessage = (id: string) => {
     setMessages(prev => prev.filter(message => message.id !== id));
   };
-  
   return {
     messages,
     showMessage,
     dismissMessage
   };
 }
-
 export function AlertMessage({ title, description, variant = "default", onClose }: AlertMessageProps) {
   return (
     <motion.div
@@ -84,7 +74,6 @@ export function AlertMessage({ title, description, variant = "default", onClose 
     </motion.div>
   );
 }
-
 export function AlertMessagesContainer({ messages, onDismiss }: AlertMessageContainerProps) {
   return (
     <div className="fixed top-4 right-4 z-[100] flex max-h-screen w-full flex-col gap-3 p-4 md:max-w-[420px]">

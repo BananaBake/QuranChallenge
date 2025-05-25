@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui";
 import { Trophy, Clock } from "lucide-react";
-
 interface GameResultProps {
   score: number;
   formattedTime: string;
@@ -8,7 +7,6 @@ interface GameResultProps {
   onPlayAgain: () => void;
   gameModeName?: string;
 }
-
 export function GameResult({ 
   score, 
   formattedTime, 
@@ -21,7 +19,6 @@ export function GameResult({
       <h2 className="text-2xl font-bold text-primary mb-2">
         {isNewHighScore ? '🏆 New High Score!' : 'Great Effort!'}
       </h2>
-      
       {isNewHighScore ? (
         <p className="text-accent font-bold mb-4">
           Congratulations! You've beaten your previous best score!
@@ -31,7 +28,6 @@ export function GameResult({
           You did well! Each attempt helps you learn more about the Quran.
         </p>
       )}
-      
       <div className="bg-gray-50 rounded-lg p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
@@ -40,7 +36,6 @@ export function GameResult({
           </div>
           <span className="font-bold text-xl text-primary">{score}</span>
         </div>
-        
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <Clock className="w-5 h-5 text-primary mr-2" />
@@ -49,12 +44,10 @@ export function GameResult({
           <span className="font-bold text-xl text-accent">{formattedTime}</span>
         </div>
       </div>
-      
       <p className="text-sm text-gray-600 mb-6">
         You correctly identified {score} {score === 1 ? gameModeName : `${gameModeName}s`}.
         {isNewHighScore && ' Keep going to improve your knowledge!'}
       </p>
-      
       <Button 
         className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-base shadow-md"
         onClick={onPlayAgain}

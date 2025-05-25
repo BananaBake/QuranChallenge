@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-
 interface SurahOptionProps {
   name: string;
   arabicName: string;
@@ -10,7 +9,6 @@ interface SurahOptionProps {
   incorrect?: boolean;
   onClick: () => void;
 }
-
 export function SurahOption({ 
   name, 
   arabicName,

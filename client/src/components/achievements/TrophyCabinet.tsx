@@ -2,12 +2,10 @@ import React from 'react';
 import { type Achievement } from "@/lib/trophyService";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
 interface TrophyProps {
   achievement: Achievement;
   highlighted?: boolean;
 }
-
 export function Trophy({ achievement, highlighted = false }: TrophyProps) {
   return (
     <motion.div
@@ -34,7 +32,6 @@ export function Trophy({ achievement, highlighted = false }: TrophyProps) {
           {achievement.title}
         </p>
       </div>
-      
       {achievement.goal && achievement.progress !== undefined && !achievement.unlocked && (
         <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-white rounded-full border border-gray-300 flex items-center justify-center text-xs font-bold">
           {Math.min(99, Math.floor((achievement.progress / achievement.goal) * 100))}%
@@ -43,13 +40,11 @@ export function Trophy({ achievement, highlighted = false }: TrophyProps) {
     </motion.div>
   );
 }
-
 interface TrophyCabinetProps {
   achievements: Achievement[];
   onSelect?: (achievement: Achievement) => void;
   selectedId?: string;
 }
-
 export function TrophyCabinet({ achievements, onSelect, selectedId }: TrophyCabinetProps) {
   const sortedAchievements = [...achievements].sort((a, b) => {
     if (a.unlocked && !b.unlocked) return -1;
@@ -59,7 +54,6 @@ export function TrophyCabinet({ achievements, onSelect, selectedId }: TrophyCabi
     }
     return 0;
   });
-  
   return (
     <motion.div 
       className="p-4 bg-gray-50 rounded-lg"
@@ -69,7 +63,6 @@ export function TrophyCabinet({ achievements, onSelect, selectedId }: TrophyCabi
       <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
         <span className="mr-2 text-secondary text-2xl">•</span> Trophy Cabinet
       </h3>
-      
       <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
         {sortedAchievements.map(achievement => (
           <div key={achievement.id} onClick={() => onSelect?.(achievement)}>
@@ -83,12 +76,10 @@ export function TrophyCabinet({ achievements, onSelect, selectedId }: TrophyCabi
     </motion.div>
   );
 }
-
 interface TrophyDetailsProps {
   achievement: Achievement;
   onClose: () => void;
 }
-
 export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
   return (
     <motion.div
@@ -104,7 +95,6 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
         )}>
           {achievement.icon}
         </div>
-        
         <div>
           <h3 className={cn(
             "text-xl font-bold",
@@ -113,7 +103,6 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
             {achievement.title}
           </h3>
           <p className="text-gray-600">{achievement.description}</p>
-          
           {achievement.unlocked && achievement.unlockedAt && (
             <p className="text-xs text-gray-500 mt-1">
               Unlocked on {new Date(achievement.unlockedAt).toLocaleDateString()}
@@ -121,7 +110,6 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
           )}
         </div>
       </div>
-      
       {achievement.goal && achievement.progress !== undefined && !achievement.unlocked && (
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="flex justify-between text-sm mb-1">
@@ -136,7 +124,6 @@ export function TrophyDetails({ achievement, onClose }: TrophyDetailsProps) {
           </div>
         </div>
       )}
-      
       <div className="mt-6 flex justify-end">
         <button 
           onClick={onClose}

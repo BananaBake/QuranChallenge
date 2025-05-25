@@ -4,7 +4,6 @@ export {
   AchievementNotification,
   AchievementNotificationsContainer 
 } from './AchievementDisplay';
-
 export { 
   Trophy, 
   TrophyCabinet, 

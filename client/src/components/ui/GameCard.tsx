@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { Play } from "lucide-react";
 import { Trophy, Clock, Star } from "lucide-react";
-
 interface GameCardProps {
   title: string;
   description: string;
@@ -12,7 +11,6 @@ interface GameCardProps {
     played: number;
   };
 }
-
 export function GameCard({ title, description, path, stats }: GameCardProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
