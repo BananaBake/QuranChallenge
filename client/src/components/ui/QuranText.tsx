@@ -152,7 +152,7 @@ export function QuranText({
   return (
     <ArabesqueBorder className="mb-6">
       <div className="p-6">
-        <div className="text-center text-2xl leading-relaxed mb-4 font-arabic">
+        <div className="text-center text-2xl leading-relaxed mb-4 font-arabic text-primary">
           {arabicText}
         </div>
         {hasAudioSource && (

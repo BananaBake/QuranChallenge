@@ -79,20 +79,20 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.8 }}
       transition={{ duration: 0.3 }}
-      className="fixed bottom-16 right-4 bg-white rounded-lg shadow-lg p-4 border-l-4 border-primary z-50 max-w-sm"
+      className="fixed bottom-16 right-4 bg-white rounded-lg shadow-lg p-4 border-l-4 border-primary z-50 w-80"
     >
-      <div className="flex items-center">
-        <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-3">
+      <div className="flex items-start relative pr-6">
+        <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-3 flex-shrink-0">
           {achievement.icon}
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <h4 className="font-bold text-primary">Achievement Unlocked!</h4>
           <p className="font-semibold">{achievement.title}</p>
           <p className="text-sm text-gray-600">{achievement.description}</p>
         </div>
         <button 
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1"
+          className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1"
           aria-label="Close notification"
         >
           ✕

@@ -6,12 +6,12 @@ interface GameHeaderProps {
 }
 export function GameHeader({ title, subtitle, score }: GameHeaderProps) {
   return (
-    <div className="flex justify-between items-center mb-5">
-      <div>
+    <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
+      <div className="mr-2">
         <h2 className="text-2xl font-bold text-primary">{title}</h2>
         {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
       </div>
-      <div className="bg-primary text-white rounded-full h-10 px-4 flex items-center justify-center font-bold">
+      <div className="bg-primary text-white rounded-full h-10 px-4 flex items-center justify-center font-bold whitespace-nowrap">
         Score: {score}
       </div>
     </div>
