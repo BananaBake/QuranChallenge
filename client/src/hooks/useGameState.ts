@@ -10,6 +10,11 @@ interface GameStateProps {
   initialScore?: number;
 }
 
+/**
+ * Hook to manage the core game state
+ * @param props Game configuration props
+ * @returns Game state and control functions
+ */
 export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
   const [score, setScore] = useState(initialScore);
   const [gameEnded, setGameEnded] = useState(false);
@@ -25,6 +30,7 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     checkProgress
   } = useAchievementNotifications();
   
+  // Set previous high score when stats are loaded
   useEffect(() => {
     if (stats?.modePerformance) {
       const highScore = gameMode === 'identify_surah' 
@@ -35,21 +41,27 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
     }
   }, [stats, gameMode]);
   
+  /**
+   * Increment the game score
+   * Checks for achievement progress when score increases
+   */
   const incrementScore = useCallback(() => {
     setScore(prevScore => {
       const newScore = prevScore + 1;
-      const newAchievements = updateStreakAchievements(gameMode, newScore);
+      // Check for streak achievements
+      updateStreakAchievements(gameMode, newScore);
       
-      if (newAchievements.length > 0) {
-        setTimeout(() => {
-          window.dispatchEvent(new Event('gameComplete'));
-        }, 100);
-      }
+      // Trigger achievement check
+      window.dispatchEvent(new Event('gameComplete'));
       
       return newScore;
     });
   }, [gameMode, updateStreakAchievements]);
   
+  /**
+   * End the current game
+   * Saves game results and checks for achievements
+   */
   const endGame = useCallback(() => {
     saveGameResult({
       userId: 1,
@@ -59,30 +71,39 @@ export function useGameState({ gameMode, initialScore = 0 }: GameStateProps) {
       timeSpent
     });
     
+    // Check for any achievements that might have been unlocked
     checkProgress();
     setGameEnded(true);
     
+    // Trigger achievement display
     setTimeout(() => {
       window.dispatchEvent(new Event('gameComplete'));
     }, 300);
   }, [gameMode, score, timeSpent, saveGameResult, checkProgress]);
   
+  /**
+   * Check if the current score is a new high score
+   * @param currentScore Optional score to check (defaults to current game score)
+   * @returns Whether the score is a new high score
+   */
   const checkHighScore = useCallback((currentScore = score) => {
     if (currentScore > previousHighScore) {
       setIsNewHighScore(true);
-      const isNewAchievement = handleHighScoreAchievements(currentScore, previousHighScore);
+      handleHighScoreAchievements(currentScore, previousHighScore);
       
-      if (isNewAchievement) {
-        setTimeout(() => {
-          window.dispatchEvent(new Event('gameComplete'));
-        }, 200);
-      }
+      // Trigger achievement display
+      setTimeout(() => {
+        window.dispatchEvent(new Event('gameComplete'));
+      }, 200);
       
       return true;
     }
     return false;
   }, [score, previousHighScore, handleHighScoreAchievements]);
   
+  /**
+   * Reset the game state for a new game
+   */
   const resetGame = useCallback(() => {
     setScore(initialScore);
     setGameEnded(false);

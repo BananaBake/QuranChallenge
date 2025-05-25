@@ -1,12 +1,14 @@
-import { useState, useCallback } from 'react';
-import { useRandomAyahsForGame, useRandomSurahsForGame } from './useQuranData';
+import { useState, useCallback, useEffect } from 'react';
+import { useRandomAyahsForGame, useRandomSurahsForGame, useSurahs } from './useQuranData';
 import { Ayah, Surah } from '@shared/schema';
+import { quranApi } from '../lib/api';
 
 /**
  * Hook for loading and managing Identify Surah game data
  */
 export function useIdentifySurahData() {
-  const { data: ayahs, isLoading, refetch } = useRandomAyahsForGame(5);
+  const { data: allSurahs } = useSurahs();
+  const { data: ayahs, isLoading: isAyahsLoading } = useRandomAyahsForGame(5);
   
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [options, setOptions] = useState<Array<{ name: string, arabicName: string, number: number }>>([]);
@@ -19,11 +21,14 @@ export function useIdentifySurahData() {
   const generateOptionsForAyah = useCallback((ayah: Ayah, surahs: Surah[]) => {
     if (!ayah || !surahs.length) return [];
     
+    // Get surahs other than the current one for incorrect options
     const availableSurahs = surahs.filter(s => s.number !== ayah.surah.number);
     
+    // Create 3 incorrect options
     const incorrectOptions: Array<{ name: string, arabicName: string, number: number }> = [];
     const usedIndices = new Set<number>();
     
+    // Ensure we have unique random surahs for options
     while (incorrectOptions.length < 3 && incorrectOptions.length < availableSurahs.length) {
       const randomIndex = Math.floor(Math.random() * availableSurahs.length);
       
@@ -37,12 +42,14 @@ export function useIdentifySurahData() {
       }
     }
     
+    // Add the correct option
     const correctOption = {
       name: ayah.surah.englishName,
       arabicName: ayah.surah.name,
       number: ayah.surah.number
     };
     
+    // Insert the correct option at a random position
     const position = Math.floor(Math.random() * 4);
     incorrectOptions.splice(position, 0, correctOption);
     
@@ -52,29 +59,36 @@ export function useIdentifySurahData() {
   /**
    * Load the next question
    */
-  const loadNextQuestion = useCallback(async (allSurahs: Surah[]) => {
+  const loadNextQuestion = useCallback(async () => {
+    if (!allSurahs || !allSurahs.length) {
+      setError("Surah data not available. Please try again.");
+      return null;
+    }
+    
     setIsLoadingNext(true);
+    
     try {
-      const response = await fetch('/api/quran/random-ayahs?count=1');
-      const data = await response.json();
+      const data = await quranApi.getRandomAyahs(1);
       
       if (data && data.length > 0) {
-        setCurrentAyah(data[0]);
+        const ayah = data[0];
+        setCurrentAyah(ayah);
         
-        const newOptions = generateOptionsForAyah(data[0], allSurahs);
+        const newOptions = generateOptionsForAyah(ayah, allSurahs);
         setOptions(newOptions);
         
-        return data[0];
+        return ayah;
       }
+      
+      setError("Failed to fetch the next question. Please try again.");
       return null;
     } catch (error) {
-      
       setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
       setIsLoadingNext(false);
     }
-  }, [generateOptionsForAyah]);
+  }, [allSurahs, generateOptionsForAyah]);
   
   /**
    * Initialize the first question
@@ -85,9 +99,16 @@ export function useIdentifySurahData() {
     setOptions(newOptions);
   }, [generateOptionsForAyah]);
   
+  // Initialize when data is available
+  useEffect(() => {
+    if (!isAyahsLoading && ayahs && ayahs.length > 0 && allSurahs && allSurahs.length > 0 && !currentAyah) {
+      initializeQuestion(ayahs[0], allSurahs);
+    }
+  }, [ayahs, allSurahs, isAyahsLoading, currentAyah, initializeQuestion]);
+  
   return {
     ayahs,
-    isLoading,
+    isLoading: isAyahsLoading || !allSurahs,
     currentAyah,
     options,
     isLoadingNext,
@@ -103,7 +124,7 @@ export function useIdentifySurahData() {
  * Hook for loading and managing Surah Ordering game data
  */
 export function useSurahOrderingData() {
-  const { data: originalSurahs, isLoading, refetch } = useRandomSurahsForGame(5);
+  const { data: originalSurahs, isLoading } = useRandomSurahsForGame(5);
   
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [isLoadingNext, setIsLoadingNext] = useState(false);
@@ -114,6 +135,8 @@ export function useSurahOrderingData() {
    */
   const shuffleSurahs = useCallback((surahList: Surah[]) => {
     if (!surahList || surahList.length === 0) return [];
+    
+    // Create a copy to avoid mutating the original
     return [...surahList].sort(() => Math.random() - 0.5);
   }, []);
   
@@ -122,18 +145,19 @@ export function useSurahOrderingData() {
    */
   const loadNextQuestion = useCallback(async () => {
     setIsLoadingNext(true);
+    
     try {
-      const response = await fetch('/api/quran/random-surahs?count=5');
-      const data = await response.json();
+      const data = await quranApi.getRandomSurahs(5);
       
       if (data && data.length > 0) {
         const shuffled = shuffleSurahs(data);
         setSurahs(shuffled);
         return shuffled;
       }
+      
+      setError("Failed to fetch the next question. Please try again.");
       return null;
     } catch (error) {
-      
       setError("Failed to fetch the next question. Please try again.");
       return null;
     } finally {
@@ -147,10 +171,17 @@ export function useSurahOrderingData() {
   const handleMoveSurah = useCallback((dragIndex: number, hoverIndex: number) => {
     if (!surahs.length) return;
     
-    const dragItem = surahs[dragIndex];
+    // Create a copy of the current surahs array
     const newItems = [...surahs];
+    
+    // Remove the dragged item
+    const dragItem = newItems[dragIndex];
     newItems.splice(dragIndex, 1);
+    
+    // Insert it at the new position
     newItems.splice(hoverIndex, 0, dragItem);
+    
+    // Update state
     setSurahs(newItems);
   }, [surahs]);
   
@@ -160,7 +191,8 @@ export function useSurahOrderingData() {
   const checkCorrectOrder = useCallback(() => {
     if (!surahs.length) return false;
     
-    return [...surahs].every((surah, index, array) => 
+    // Check if each surah has a higher number than the previous one
+    return surahs.every((surah, index, array) => 
       index === 0 || surah.number > array[index - 1].number
     );
   }, [surahs]);
@@ -172,6 +204,13 @@ export function useSurahOrderingData() {
     const shuffled = shuffleSurahs(provided);
     setSurahs(shuffled);
   }, [shuffleSurahs]);
+  
+  // Initialize when data is available
+  useEffect(() => {
+    if (!isLoading && originalSurahs && originalSurahs.length > 0 && surahs.length === 0) {
+      initializeSurahs(originalSurahs);
+    }
+  }, [originalSurahs, isLoading, surahs.length, initializeSurahs]);
   
   return {
     originalSurahs,
