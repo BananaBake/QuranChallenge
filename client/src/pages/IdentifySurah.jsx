@@ -27,7 +27,7 @@ export default function IdentifySurah() {
     initializeQuestion
   } = useIdentifySurahData();
   const { checkProgress } = useAchievementNotifications();
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState(null);
   const [revealAnswer, setRevealAnswer] = useState(false);
   useEffect(() => {
     if (allSurahs && allSurahs.length > 0 && currentAyah) {
@@ -39,7 +39,7 @@ export default function IdentifySurah() {
       loadNextQuestion(allSurahs);
     }
   }, [allSurahs, currentAyah, gameEnded, loadNextQuestion]);
-  const handleOptionSelect = (index: number) => {
+  const handleOptionSelect = (index) => {
     if (revealAnswer) return;
     setSelectedOption(index);
   };

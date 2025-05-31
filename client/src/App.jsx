@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import React, { memo, useEffect, useState } from "react";
 import { BottomNavigation } from "@/components";
 import { AchievementNotificationsContainer } from "@/components/achievements";
-import { getNewlyUnlockedAchievements, type Achievement } from "@/lib/trophyService";
+import { getNewlyUnlockedAchievements } from "@/lib/trophyService";
 import { AlertMessagesContainer, useAlertMessage } from "@/components/ui";
 import Home from "@/pages/Home";
 import IdentifySurah from "@/pages/IdentifySurah";
@@ -30,7 +30,7 @@ const AppRoutes = memo(() => {
 });
 AppRoutes.displayName = "AppRoutes";
 function App() {
-  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [newAchievements, setNewAchievements] = useState([]);
   const { messages, showMessage, dismissMessage } = useAlertMessage();
   useEffect(() => {
     const checkForUnlockedAchievements = () => {
@@ -59,7 +59,7 @@ function App() {
   useEffect(() => {
     window.showAlertMessage = showMessage;
     return () => {
-      delete window.showAlertMessage;
+      delete window.showAlertMessage; // No explicit 'delete' type in JS needed here
     };
   }, [showMessage]);
   return (

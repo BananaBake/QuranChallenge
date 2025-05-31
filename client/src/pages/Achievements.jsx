@@ -5,15 +5,14 @@ import { TrophyCabinet, TrophyDetails, AchievementsList } from '@/components/ach
 import { AnimatePresence, motion } from 'framer-motion';
 import { PageContainer } from '@/components/common';
 import { Award, Trophy, Medal } from 'lucide-react';
-import { Achievement } from '@/lib/trophyService';
-interface EmptyStateProps {
-  title?: string;
-  message?: string;
-}
+
+// Achievement type is implicitly handled by the data from useAchievements and component props.
+// No direct import of Achievement needed if it's only for type info.
+
 const EmptyState = memo(({ 
   title = "Achievements", 
   message = "No achievements yet. Keep playing to unlock them!" 
-}: EmptyStateProps) => (
+}) => (
   <div className="bg-white rounded-lg shadow-md p-6 text-center">
     <h2 className="text-2xl font-bold text-primary mb-4">{title}</h2>
     <div className="py-12 text-gray-500">
@@ -23,12 +22,8 @@ const EmptyState = memo(({
   </div>
 ));
 EmptyState.displayName = "EmptyState";
-interface ProgressSummaryProps {
-  unlockedCount: number;
-  totalCount: number;
-  percentComplete: number;
-}
-const ProgressSummary = memo(({ unlockedCount, totalCount, percentComplete }: ProgressSummaryProps) => (
+
+const ProgressSummary = memo(({ unlockedCount, totalCount, percentComplete }) => (
   <div className="bg-primary/5 rounded-lg p-4 mb-6 flex items-center">
     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mr-4">
       <Award className="w-8 h-8 text-primary" />
@@ -42,16 +37,12 @@ const ProgressSummary = memo(({ unlockedCount, totalCount, percentComplete }: Pr
   </div>
 ));
 ProgressSummary.displayName = "ProgressSummary";
-interface AchievementTabsProps {
-  achievements: Achievement[];
-  selectedAchievement: Achievement | null;
-  onSelectAchievement: (achievement: Achievement) => void;
-}
+
 const AchievementTabs = memo(({ 
   achievements, 
   selectedAchievement,
   onSelectAchievement 
-}: AchievementTabsProps) => (
+}) => (
   <Tabs defaultValue="trophies" className="w-full">
     <TabsList className="grid w-full grid-cols-2 mb-6">
       <TabsTrigger value="trophies" className="flex items-center">
@@ -76,11 +67,8 @@ const AchievementTabs = memo(({
   </Tabs>
 ));
 AchievementTabs.displayName = "AchievementTabs";
-interface AchievementModalProps {
-  achievement: Achievement;
-  onClose: () => void;
-}
-const AchievementModal = memo(({ achievement, onClose }: AchievementModalProps) => (
+
+const AchievementModal = memo(({ achievement, onClose }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -102,7 +90,7 @@ const AchievementModal = memo(({ achievement, onClose }: AchievementModalProps) 
 AchievementModal.displayName = "AchievementModal";
 export default function Achievements() {
   const { data: achievements, isLoading, refetch } = useAchievements();
-  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
   const achievementStats = useMemo(() => {
     if (!achievements || achievements.length === 0) {
       return { unlockedCount: 0, totalCount: 0, percentComplete: 0 };
@@ -115,7 +103,7 @@ export default function Achievements() {
   useEffect(() => {
     refetch();
   }, [refetch]);
-  const handleSelectAchievement = useCallback((achievement: Achievement) => {
+  const handleSelectAchievement = useCallback((achievement) => {
     setSelectedAchievement(achievement);
   }, []);
   const handleCloseDetails = useCallback(() => {

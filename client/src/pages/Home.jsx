@@ -5,11 +5,10 @@ import { useRecentGames, useGameStats } from "@/hooks";
 import { BookOpen, Search, ArrowUpDown, Trophy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { GameHistory } from "@shared/schema";
-interface HeroSectionProps {
-  className?: string;
-}
-const HeroSection = memo(({ className }: HeroSectionProps) => (
+// GameHistory type is implicitly handled by the data from hooks and props.
+// No direct import of GameHistory needed if it's only for type info.
+
+const HeroSection = memo(({ className }) => (
   <div className={cn("relative overflow-hidden mb-8 rounded-lg bg-primary/5", className)}>
     <div className="absolute inset-0 opacity-10 islamic-pattern" aria-hidden="true"></div>
     <div className="relative p-6 z-10">
@@ -24,12 +23,8 @@ const HeroSection = memo(({ className }: HeroSectionProps) => (
   </div>
 ));
 HeroSection.displayName = "HeroSection";
-interface StatsOverviewProps {
-  totalGames: number;
-  bestStreak: number;
-  className?: string;
-}
-const StatsOverview = memo(({ totalGames, bestStreak, className }: StatsOverviewProps) => (
+
+const StatsOverview = memo(({ totalGames, bestStreak, className }) => (
   <div className={cn("bg-white rounded-lg shadow-md p-4 mb-6", className)}>
     <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
       <span className="mr-2 text-secondary text-2xl">•</span> Your Statistics
@@ -41,12 +36,8 @@ const StatsOverview = memo(({ totalGames, bestStreak, className }: StatsOverview
   </div>
 ));
 StatsOverview.displayName = "StatsOverview";
-interface GameModeProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-}
-const GameMode = memo(({ icon: Icon, title, description }: GameModeProps) => (
+
+const GameMode = memo(({ icon: Icon, title, description }) => (
   <div className="flex items-center mb-2">
     <div className="bg-primary/10 p-2 rounded-md mr-3">
       <Icon className="w-5 h-5 text-primary" />
@@ -58,10 +49,8 @@ const GameMode = memo(({ icon: Icon, title, description }: GameModeProps) => (
   </div>
 ));
 GameMode.displayName = "GameMode";
-interface GameInstructionsProps {
-  className?: string;
-}
-const GameInstructions = memo(({ className }: GameInstructionsProps) => (
+
+const GameInstructions = memo(({ className }) => (
   <div className={cn("bg-white rounded-lg shadow-md p-4 mb-6", className)}>
     <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
       <span className="mr-2 text-secondary text-2xl">•</span> How to Play
@@ -83,11 +72,8 @@ const GameInstructions = memo(({ className }: GameInstructionsProps) => (
   </div>
 ));
 GameInstructions.displayName = "GameInstructions";
-interface GameHistoryItemProps {
-  game: GameHistory;
-  isNewHighScore: boolean;
-}
-const GameHistoryItem = memo(({ game, isNewHighScore }: GameHistoryItemProps) => {
+
+const GameHistoryItem = memo(({ game, isNewHighScore }) => {
   const gameType = game.gameType === "identify_surah" ? "Identify Surah" : "Surah Ordering";
   const scoreText = `${game.score || game.maxScore || 0}`;
   const timeText = `${Math.floor(game.timeSpent / 60)}:${(game.timeSpent % 60).toString().padStart(2, '0')}`;
@@ -115,13 +101,8 @@ const GameHistoryItem = memo(({ game, isNewHighScore }: GameHistoryItemProps) =>
   );
 });
 GameHistoryItem.displayName = "GameHistoryItem";
-interface RecentActivityProps {
-  games: GameHistory[] | undefined;
-  isLoading: boolean;
-  stats: any;
-  className?: string;
-}
-const RecentActivity = memo(({ games, isLoading, stats, className }: RecentActivityProps) => (
+
+const RecentActivity = memo(({ games, isLoading, stats, className }) => (
   <div className={cn("bg-white rounded-lg shadow-md p-4 mb-6", className)}>
     <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
       <span className="mr-2 text-secondary text-2xl">•</span> Recent Activity
