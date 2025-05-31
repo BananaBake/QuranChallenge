@@ -1,0 +1,84 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useSaveGameResult, useGameStats } from './useGameStats.js';
+import { useAchievementNotifications } from './useAchievements.js';
+import { useGameTimer } from './useGameTimer.js';
+
+export function useGameState({ gameMode, initialScore = 0 }) {
+  const [score, setScore] = useState(initialScore);
+  const [gameEnded, setGameEnded] = useState(false);
+  const [previousHighScore, setPreviousHighScore] = useState(0);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const { data: stats } = useGameStats();
+  const { mutate: saveGameResult } = useSaveGameResult();
+  const { timeSpent, formattedTime, resetTimer } = useGameTimer(!gameEnded);
+  const { 
+    handleHighScoreAchievements,
+    updateStreakAchievements,
+    checkProgress
+  } = useAchievementNotifications();
+
+  useEffect(() => {
+    if (stats?.modePerformance) {
+      const highScore = gameMode === 'identify_surah' 
+        ? stats.modePerformance.identifySurah 
+        : stats.modePerformance.surahOrdering;
+      setPreviousHighScore(highScore || 0);
+    }
+  }, [stats, gameMode]);
+
+  const incrementScore = useCallback(() => {
+    setScore(prevScore => {
+      const newScore = prevScore + 1;
+      updateStreakAchievements(gameMode, newScore);
+      window.dispatchEvent(new Event('gameComplete'));
+      return newScore;
+    });
+  }, [gameMode, updateStreakAchievements]);
+
+  const endGame = useCallback(() => {
+    saveGameResult({
+      userId: 1,
+      gameType: gameMode,
+      score,
+      maxScore: score,
+      timeSpent
+    });
+    checkProgress();
+    setGameEnded(true);
+    setTimeout(() => {
+      window.dispatchEvent(new Event('gameComplete'));
+    }, 300);
+  }, [gameMode, score, timeSpent, saveGameResult, checkProgress]);
+
+  const checkHighScore = useCallback((currentScore = score) => {
+    if (currentScore > previousHighScore) {
+      setIsNewHighScore(true);
+      handleHighScoreAchievements(currentScore, previousHighScore);
+      setTimeout(() => {
+        window.dispatchEvent(new Event('gameComplete'));
+      }, 200);
+      return true;
+    }
+    return false;
+  }, [score, previousHighScore, handleHighScoreAchievements]);
+
+  const resetGame = useCallback(() => {
+    setScore(initialScore);
+    setGameEnded(false);
+    setIsNewHighScore(false);
+    resetTimer();
+  }, [initialScore, resetTimer]);
+
+  return {
+    score,
+    gameEnded,
+    previousHighScore,
+    isNewHighScore,
+    timeSpent,
+    formattedTime,
+    incrementScore,
+    endGame,
+    checkHighScore,
+    resetGame
+  };
+}
